@@ -1,10 +1,9 @@
 [build]
   functions = "netlify/functions"
 
-[[edge_functions]]
-  path = "/__cron"
-  function = "nudge-cron"
+[build.environment]
+  NODE_VERSION = "22"
 
-[scheduled]
-  # Triggers the edge function route /__cron every 30 minutes
-  crons = ["*/30 * * * *"]
+[[functions]]
+  path = "nudge-cron"
+  schedule = "*/30 * * * *"

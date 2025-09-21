@@ -5,5 +5,5 @@
   NODE_VERSION = "22"
 
 [[functions]]
-  path = "nudge-cron"
+  function = "nudge-cron"
   schedule = "*/30 * * * *"

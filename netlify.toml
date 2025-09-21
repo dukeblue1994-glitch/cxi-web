@@ -1,9 +1,6 @@
-[build]
-  functions = "netlify/functions"
-
 [build.environment]
-  NODE_VERSION = "22"
+NODE_VERSION: “22”
 
 [[functions]]
-  function = "nudge-cron"
-  schedule = "*/30 * * * *"
+function: “nudge-cron”
+schedule: “*/30 * * * *”

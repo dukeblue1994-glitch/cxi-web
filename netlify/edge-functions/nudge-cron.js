@@ -32,7 +32,7 @@ export default async () => {
       await jobs.set(b.key, JSON.stringify(job));
     } catch (e) {
       console.error(`Failed to send nudge email for job ${b.key} (${job.email}):`, e);
-      job.tries = (job.tries||0)+1;
+      job.tries = (job.tries || 0) + 1;
       await jobs.set(b.key, JSON.stringify(job));
     }
   }

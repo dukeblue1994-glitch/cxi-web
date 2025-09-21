@@ -6,7 +6,8 @@ export default async () => {
 
   for (const b of list.blobs) {
     if (!b.key.startsWith('job:')) continue;
-    const raw = await jobs.get(b.key); if (!raw) continue;
+    const raw = await jobs.get(b.key);
+    if (!raw) continue;
     const job = JSON.parse(raw);
 
     // Only send when due, has email, and not sent yet

@@ -154,6 +154,19 @@ When reporting bugs or requesting features:
 3. **Provide clear reproduction steps** for bugs
 4. **Include relevant system information**
 
+### Using GitHub Copilot
+
+We encourage using GitHub Copilot to enhance your development experience! Check out our comprehensive guide:
+
+📖 **[GitHub Copilot Usage Guide](COPILOT_GUIDE.md)**
+
+This guide covers:
+- How to use Copilot Chat and Coding Agent effectively
+- Repository-specific prompting strategies
+- Copy-paste templates for common tasks
+- Best practices for the CXI Web project
+- Examples for creating issues and PRs
+
 ## Architecture
 
 ```

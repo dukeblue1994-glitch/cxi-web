@@ -34,8 +34,8 @@ The CXI Project is a comprehensive feedback collection platform that:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/dukeblue1994-glitch/cxi-project.git
-   cd cxi-project
+   git clone https://github.com/dukeblue1994-glitch/cxi-web.git
+   cd cxi-web
    ```
 
 2. **Install dependencies**
@@ -176,7 +176,8 @@ This project is licensed under the ISC License. See the `package.json` file for 
 
 ## Contact
 
-- **Repository**: [https://github.com/dukeblue1994-glitch/cxi-project](https://github.com/dukeblue1994-glitch/cxi-project)
+- **Repository**:[GitHub Repository](https://github.com/dukeblue1994-glitch/cxi-web)
+  
 - **Issues**: [GitHub Issues](https://github.com/dukeblue1994-glitch/cxi-project/issues)
 - **Author**: dukeblue1994-glitch
 

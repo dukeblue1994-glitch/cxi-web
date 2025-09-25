@@ -1,1 +1,69 @@
-{"name":"cxi-demo-v15b","private":true,"type":"module","dependencies":{"@netlify/blobs":"^6.3.0"}}
+{
+  "name": "cxi-demo-v15b",
+  "version": "1.0.0",
+  "description": "Customer Experience Intelligence (CXI) feedback collection and analysis system",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run build && netlify dev",
+    "build": "rm -rf dist && mkdir -p dist && cp -R js dist/ && cp index.html dist/",
+    "deploy": "netlify deploy --prod",
+    "deploy:preview": "netlify deploy",
+  "test": "node test/test-functions.js && node test/test-quality.js && node test/test-reliability.js && node test/test-ats.js",
+    "test:basic": "node test/test-basic.js",
+    "test:comprehensive": "node test/test-comprehensive.js",
+  "test:integration": "node test/test-integration.js",
+  "test:quality": "node test/test-quality.js",
+  "test:reliability": "node test/test-reliability.js",
+  "test:ats": "node test/test-ats.js",
+  "audit:css": "node scripts/audit-css.cjs",
+    "test:quick": "bash test-quick.sh",
+    "test:watch": "nodemon test/test-functions.js",
+    "lint": "eslint netlify/functions/**/*.js",
+    "lint:fix": "eslint netlify/functions/**/*.js --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "env:check": "node scripts/check-env.js",
+    "clean": "rm -rf .netlify dist node_modules/.cache",
+    "functions:list": "netlify functions:list",
+    "functions:invoke": "netlify functions:invoke",
+    "status": "netlify status",
+    "link": "netlify link",
+    "postinstall": "npm run env:check",
+    "test:dlq": "node test/test-dlq-retry.js"
+  },
+  "keywords": [
+    "customer-experience",
+    "feedback",
+    "analytics",
+    "netlify",
+    "serverless",
+    "javascript"
+  ],
+  "author": "Nick Anderson",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^6.3.0",
+    "dotenv": "^17.2.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "netlify-cli": "^17.15.4",
+    "nodemon": "^3.0.3",
+    "prettier": "^3.2.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dukeblue1994-glitch/cxi-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dukeblue1994-glitch/cxi-web/issues"
+  },
+  "homepage": "https://github.com/dukeblue1994-glitch/cxi-web#readme"
+}

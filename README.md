@@ -1,13 +1,18 @@
 #CXI Interactive Demo
 
-Customer Experience Intelligence (CXI) feedback collection and analysis system built with JavaScript and Node.js. This application allows users to provide structured feedback across multiple aspects and calculates meaningful metrics to help organizations understand and improve their customer experience.
+Customer Experience Intelligence (CXI) feedback collection and analysis system
+built with JavaScript and Node.js. This application allows users to provide
+structured feedback across multiple aspects and calculates meaningful metrics to
+help organizations understand and improve their customer experience.
 
 ## Overview
 
 The CXI Project is a comprehensive feedback collection platform that:
 
-- 📊 **Collects structured feedback** across key aspects like Communication, Scheduling, Clarity, Respect, Conduct, and Feedback
-- 📈 **Calculates metrics** including Net Satisfaction Score (NSS) and richness indices
+- 📊 **Collects structured feedback** across key aspects like Communication,
+  Scheduling, Clarity, Respect, Conduct, and Feedback
+- 📈 **Calculates metrics** including Net Satisfaction Score (NSS) and richness
+  indices
 - 💾 **Persists data** via GitHub API integration for seamless storage
 - 🌐 **Deploys easily** on Netlify with serverless functions
 - ✅ **Validates input** with comprehensive word count and content requirements
@@ -33,18 +38,21 @@ The CXI Project is a comprehensive feedback collection platform that:
 ### Local Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/dukeblue1994-glitch/cxi-web.git
    cd cxi-web
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
-3. **Set up environment variables** (for Netlify Functions)
-   Create a `.env` file in the root directory:
+3. **Set up environment variables** (for Netlify Functions) Create a `.env` file
+   in the root directory:
+
    ```env
    GITHUB_TOKEN=your_github_personal_access_token
    REPO=your-username/your-repo
@@ -52,7 +60,8 @@ The CXI Project is a comprehensive feedback collection platform that:
    FEEDBACK_PATH=data/feedbacks.json
    ```
 
-4. **Run linting** (optional - note: current codebase has linting issues that can be fixed)
+4. **Run linting** (optional - note: current codebase has linting issues that
+   can be fixed)
    ```bash
    npm run lint
    ```
@@ -112,7 +121,14 @@ The `/api/feedback` endpoint accepts POST requests with the following structure:
 Customize the feedback aspects by modifying the `ASPECTS` array in `src/app.js`:
 
 ```javascript
-window.ASPECTS = ["Communication", "Scheduling", "Clarity", "Respect", "Conduct", "Feedback"];
+window.ASPECTS = [
+  'Communication',
+  'Scheduling',
+  'Clarity',
+  'Respect',
+  'Conduct',
+  'Feedback',
+];
 ```
 
 ## Contributing
@@ -172,16 +188,18 @@ When reporting bugs or requesting features:
 
 ## License
 
-This project is licensed under the ISC License. See the `package.json` file for details.
+This project is licensed under the ISC License. See the `package.json` file for
+details.
 
 ## Contact
 
 - **Repository**:[GitHub Repository](https://github.com/dukeblue1994-glitch/cxi-web)
-  
-- **Issues**: [GitHub Issues](https://github.com/dukeblue1994-glitch/cxi-project/issues)
+- **Issues**:
+  [GitHub Issues](https://github.com/dukeblue1994-glitch/cxi-project/issues)
 - **Author**: dukeblue1994-glitch
 
-For questions, suggestions, or support, please open an issue on GitHub or contact the maintainers.
+For questions, suggestions, or support, please open an issue on GitHub or
+contact the maintainers.
 
 ---
 

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CXI - Customer Experience Intelligence Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+        }
+
+        .survey-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+
+        .survey-form {
+            display: none;
+        }
+
+        .survey-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .rating-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .rating-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 1rem;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 1rem 0;
+        }
+
+        .feedback-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .progress {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #667eea;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .menu {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .menu-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-btn:hover,
+        .menu-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-20 {
+            width: 20%;
+        }
+
+        .api-results {
+            margin-top: 1rem;
+        }
+
+        .backdrop-blur {
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 CXI Demo</h1>
+            <p>Customer Experience Intelligence Platform</p>
+        </div>
+
+        <div class="menu">
+            <button class="menu-btn active" onclick="showSection('survey')">Take Survey</button>
+            <button class="menu-btn" onclick="showSection('about')">About CXI</button>
+            <button class="menu-btn" onclick="showSection('api')">API Demo</button>
+        </div>
+
+        <!-- Survey Section -->
+        <div id="survey-section" class="survey-card">
+            <h2>📊 Customer Experience Survey</h2>
+            <p>Help us improve by sharing your experience. This demo showcases our multi-aspect feedback collection system.</p>
+
+            <div class="progress">
+                <div class="progress-bar progress-20" id="progressBar"></div>
+            </div>
+
+            <!-- Contact Info Form -->
+            <div class="survey-form active" id="form-contact">
+                <h3>Contact Information</h3>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name (Optional)</label>
+                    <input type="text" id="name">
+                </div>
+                <div class="nav-buttons">
+                    <div></div>
+                    <button class="btn" onclick="nextForm('form-communication')">Next</button>
+                </div>
+            </div>
+
+            <!-- Communication Form -->
+            <div class="survey-form" id="form-communication">
+                <h3>Communication Experience</h3>
+                <div class="form-group">
+                    <label>How would you rate our communication clarity?</label>
+                    <div class="rating-group" data-aspect="communication">
+                        <button class="rating-btn" data-value="1">Poor</button>
+                        <button class="rating-btn" data-value="2">Fair</button>
+                        <button class="rating-btn" data-value="3">Good</button>
+                        <button class="rating-btn" data-value="4">Very Good</button>
+                        <button class="rating-btn" data-value="5">Excellent</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm-feedback">Communication Feedback (Optional)</label>
+                    <textarea id="comm-feedback" rows="3" placeholder="Share your thoughts on our communication..."></textarea>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="prevForm('form-contact')">Previous</button>
+                    <button class="btn" onclick="nextForm('form-service')">Next</button>
+                </div>
+            </div>
+
+            <!-- Service Form -->
+            <div class="survey-form" id="form-service">
+                <h3>Service Experience</h3>
+                <div class="form-group">
+                    <label>How would you rate our service quality?</label>
+                    <div class="rating-group" data-aspect="service">
+                        <button class="rating-btn" data-value="1">Poor</button>
+                        <button class="rating-btn" data-value="2">Fair</button>
+                        <button class="rating-btn" data-value="3">Good</button>
+                        <button class="rating-btn" data-value="4">Very Good</button>
+                        <button class="rating-btn" data-value="5">Excellent</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="service-feedback">Service Feedback (Optional)</label>
+                    <textarea id="service-feedback" rows="3" placeholder="Tell us about your service experience..."></textarea>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="prevForm('form-communication')">Previous</button>
+                    <button class="btn" onclick="nextForm('form-overall')">Next</button>
+                </div>
+            </div>
+
+            <!-- Overall Form -->
+            <div class="survey-form" id="form-overall">
+                <h3>Overall Experience</h3>
+                <div class="form-group">
+                    <label>Overall satisfaction rating?</label>
+                    <div class="rating-group" data-aspect="overall">
+                        <button class="rating-btn" data-value="1">Poor</button>
+                        <button class="rating-btn" data-value="2">Fair</button>
+                        <button class="rating-btn" data-value="3">Good</button>
+                        <button class="rating-btn" data-value="4">Very Good</button>
+                        <button class="rating-btn" data-value="5">Excellent</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="overall-feedback">Additional Comments</label>
+                    <textarea id="overall-feedback" rows="4" placeholder="Any additional feedback or suggestions..."></textarea>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="prevForm('form-service')">Previous</button>
+                    <button class="btn" onclick="submitSurvey()">Submit Survey</button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results" id="results">
+                <h3>🎉 Thank You for Your Feedback!</h3>
+                <div class="score" id="finalScore">--</div>
+                <p><strong>Net Satisfaction Score (NSS)</strong></p>
+                <div id="feedbackSummary"></div>
+                <button class="btn" onclick="scheduleNudge()">Schedule Follow-up</button>
+                <button class="btn btn-secondary" onclick="resetSurvey()">Take Another Survey</button>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div id="about-section" class="survey-card hidden">
+            <h2>About CXI Platform</h2>
+            <div class="feedback-item">
+                <h4>📊 Multi-Aspect Feedback Collection</h4>
+                <p>Our system collects structured feedback across key experience dimensions including communication, service quality, and overall satisfaction.</p>
+            </div>
+            <div class="feedback-item">
+                <h4>🧮 Advanced Analytics</h4>
+                <p>Calculate meaningful metrics like Net Satisfaction Score (NSS) and richness indices to understand customer sentiment.</p>
+            </div>
+            <div class="feedback-item">
+                <h4>🔄 Automated Follow-ups</h4>
+                <p>Smart nudge system with 4-hour and 24-hour follow-ups to improve response rates and engagement.</p>
+            </div>
+            <div class="feedback-item">
+                <h4>⚡ Serverless Architecture</h4>
+                <p>Built on Netlify Functions for scalable, reliable performance with seamless data persistence.</p>
+            </div>
+        </div>
+
+        <!-- API Demo Section -->
+        <div id="api-section" class="survey-card hidden">
+            <h2>API Endpoints Demo</h2>
+            <div class="feedback-item">
+                <h4>Schedule Nudge Function</h4>
+                <p><strong>POST</strong> <code>/.netlify/functions/schedule-nudge</code></p>
+                <p>Schedules follow-up nudges for feedback collection with 4-hour and 24-hour intervals.</p>
+                <button class="btn" onclick="testScheduleNudge()">Test API</button>
+            </div>
+            <div class="feedback-item">
+                <h4>Nudge Cron Function</h4>
+                <p><strong>GET</strong> <code>/.netlify/functions/nudge-cron</code></p>
+                <p>Processes scheduled nudges and sends automated follow-up reminders.</p>
+                <button class="btn" onclick="testNudgeCron()">Test API</button>
+            </div>
+            <div id="api-results" class="api-results"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentForm = 'form-contact';
+        let surveyData = {
+            ratings: {},
+            feedback: {},
+            email: '',
+            name: ''
+        };
+
+        // Menu navigation
+        function showSection(section) {
+            document.querySelectorAll('[id$="-section"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(section + '-section').classList.remove('hidden');
+
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Form navigation
+        function nextForm(formId) {
+            if (currentForm === 'form-contact') {
+                const email = document.getElementById('email').value;
+                const name = document.getElementById('name').value;
+                if (!email) {
+                    alert('Please enter your email address');
+                    return;
+                }
+                surveyData.email = email;
+                surveyData.name = name;
+            }
+
+            document.getElementById(currentForm).classList.remove('active');
+            document.getElementById(formId).classList.add('active');
+            currentForm = formId;
+            updateProgress();
+        }
+
+        function prevForm(formId) {
+            document.getElementById(currentForm).classList.remove('active');
+            document.getElementById(formId).classList.add('active');
+            currentForm = formId;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const forms = ['form-contact', 'form-communication', 'form-service', 'form-overall'];
+            const currentIndex = forms.indexOf(currentForm);
+            const progress = ((currentIndex + 1) / forms.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Rating system
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('rating-btn')) {
+                const group = e.target.parentElement;
+                const aspect = group.dataset.aspect;
+                const value = parseInt(e.target.dataset.value);
+
+                // Clear previous selection
+                group.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+                e.target.classList.add('selected');
+
+                surveyData.ratings[aspect] = value;
+            }
+        });
+
+        // Calculate NSS
+        function calculateNSS() {
+            const ratings = Object.values(surveyData.ratings);
+            if (ratings.length === 0) return 0;
+
+            const sum = ratings.reduce((a, b) => a + b, 0);
+            const average = sum / ratings.length;
+            return Math.round((average / 5) * 100);
+        }
+
+        // Submit survey
+        function submitSurvey() {
+            // Collect text feedback
+            surveyData.feedback.communication = document.getElementById('comm-feedback').value;
+            surveyData.feedback.service = document.getElementById('service-feedback').value;
+            surveyData.feedback.overall = document.getElementById('overall-feedback').value;
+
+            const nss = calculateNSS();
+
+            document.getElementById('finalScore').textContent = nss + '%';
+
+            let summary = '<div class="feedback-item"><h4>Feedback Summary:</h4>';
+            Object.entries(surveyData.ratings).forEach(([aspect, rating]) => {
+                summary += `<p><strong>${aspect.charAt(0).toUpperCase() + aspect.slice(1)}:</strong> ${rating}/5</p>`;
+            });
+            summary += '</div>';
+
+            document.getElementById('feedbackSummary').innerHTML = summary;
+
+            // Hide form, show results
+            document.getElementById(currentForm).classList.remove('active');
+            document.getElementById('results').classList.add('active');
+            document.getElementById('progressBar').style.width = '100%';
+        }
+
+        // Schedule follow-up nudge
+        async function scheduleNudge() {
+            try {
+                const response = await fetch('/.netlify/functions/schedule-nudge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: surveyData.email,
+                        token: 'survey-' + Date.now()
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Follow-up reminders scheduled! Thank you for your participation.');
+                } else {
+                    alert('Follow-up scheduling is currently in demo mode.');
+                }
+            } catch (error) {
+                alert('Follow-up scheduling is currently in demo mode.');
+            }
+        }
+
+        // Reset survey
+        function resetSurvey() {
+            surveyData = { ratings: {}, feedback: {}, email: '', name: '' };
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('form-contact').classList.add('active');
+            currentForm = 'form-contact';
+
+            // Clear form fields
+            document.querySelectorAll('input, textarea').forEach(field => field.value = '');
+            document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+
+            updateProgress();
+        }
+
+        // API Testing functions
+        async function testScheduleNudge() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<p>Testing Schedule Nudge API...</p>';
+
+            try {
+                const response = await fetch('/.netlify/functions/schedule-nudge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        token: 'test-' + Date.now()
+                    })
+                });
+
+                const result = await response.text();
+                resultsDiv.innerHTML = `<div class="feedback-item"><h4>API Response:</h4><pre>${result}</pre></div>`;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="feedback-item"><h4>API Error:</h4><p>${error.message}</p></div>`;
+            }
+        }
+
+        async function testNudgeCron() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<p>Testing Nudge Cron API...</p>';
+
+            try {
+                const response = await fetch('/.netlify/functions/nudge-cron');
+                const result = await response.text();
+                resultsDiv.innerHTML = `<div class="feedback-item"><h4>API Response:</h4><pre>${result}</pre></div>`;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="feedback-item"><h4>API Error:</h4><p>${error.message}</p></div>`;
+            }
+        }
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

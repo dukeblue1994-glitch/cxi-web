@@ -1,0 +1,35 @@
+{
+  "recommendations": [
+    // Essential for JavaScript/Node.js development
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-json",
+    // Netlify specific
+    "netlify.netlify",
+    // Git and version control
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    // Development productivity
+    "ms-vscode.vscode-npm-script",
+    "christian-kohler.npm-intellisense",
+    "ms-vscode.vscode-node-azure-pack",
+    // Code quality and debugging
+    "ms-vscode.vscode-js-debug",
+    "ms-vscode.vscode-js-debug-companion",
+    // Markdown (for README and docs)
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    // Utilities
+    "formulahendry.auto-rename-tag",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    // Environment and secrets
+    "mikestead.dotenv",
+    // API development and testing
+    "humao.rest-client",
+    // Project management
+    "gruntfuggly.todo-tree",
+    // Terminal enhancement
+    "ms-vscode.vscode-terminal-profiles"
+  ]
+}

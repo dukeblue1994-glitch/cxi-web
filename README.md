@@ -33,18 +33,21 @@ The CXI Project is a comprehensive feedback collection platform that:
 ### Local Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/dukeblue1994-glitch/cxi-web.git
    cd cxi-web
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables** (for Netlify Functions)
    Create a `.env` file in the root directory:
+
    ```env
    GITHUB_TOKEN=your_github_personal_access_token
    REPO=your-username/your-repo
@@ -112,7 +115,14 @@ The `/api/feedback` endpoint accepts POST requests with the following structure:
 Customize the feedback aspects by modifying the `ASPECTS` array in `src/app.js`:
 
 ```javascript
-window.ASPECTS = ["Communication", "Scheduling", "Clarity", "Respect", "Conduct", "Feedback"];
+window.ASPECTS = [
+  "Communication",
+  "Scheduling",
+  "Clarity",
+  "Respect",
+  "Conduct",
+  "Feedback",
+];
 ```
 
 ## Contributing
@@ -172,12 +182,62 @@ When reporting bugs or requesting features:
 
 ## License
 
+## Performance & Instrumentation
+
+The demo includes a lightweight in‑browser Performance HUD to help reason about perceived and technical performance during development.
+
+Features displayed (toggle with Alt+P or the HUD button if present):
+
+- FPS: Estimated frames per second updated each second.
+- Heap: Used JS heap vs limit (Chromium only; shows n/a elsewhere).
+- Nav: High‑level navigation timing (DNS, TLS, TTFB, DOM Content Loaded, total Load) captured once.
+- LCP: Largest Contentful Paint time in ms (approx; resets if new larger element paints before user input).
+- CLS: Cumulative Layout Shift value (ignoring shifts after recent user input) to gauge visual stability.
+- LongTasks: Recent long tasks durations (>50ms), colored warning if average >50ms or any >100ms.
+- Net: Recent named network timings recorded manually via `trackNetTiming(name, ms)` utility calls.
+
+Usage:
+
+```js
+import { trackNetTiming } from "./js/overlay.js";
+// After a fetch or async op:
+trackNetTiming("metrics", 123);
+```
+
+Implementation notes:
+
+- Uses `PerformanceObserver` for long tasks, layout shifts, and LCP (with `buffered: true` to capture early entries).
+- Avoids heavy libraries; minimal overhead when hidden (observers attach only after first toggle).
+- Color coding helps quickly spot regressions during local iteration.
+
+Potential future enhancements:
+
+- Add First Contentful Paint (FCP) and Interaction to Next Paint (INP) when broadly stabilized.
+- Persist samples to a lightweight endpoint for trend analysis.
+- Provide threshold badges (Good / Needs Attention) aligned with Core Web Vitals guidance.
+
+### Bundling & Asset Extraction
+
+The large inline `<style>` block has been externalized to `styles.css` to improve:
+
+- Caching across navigations/builds
+- Parallel loading (HTML can stream while CSS downloads)
+- Future size reduction (tree-shaking, PurgeCSS, LightningCSS, etc.)
+
+JavaScript remains unbundled for simplicity, but an optional bundle step exists:
+
+```bash
+npm run build:bundle
+```
+
+This uses `esbuild` to produce a minified ESM bundle in `dist/js/`. Integrate into deploy by chaining after `npm run build` if desired.
+
 This project is licensed under the ISC License. See the `package.json` file for details.
 
 ## Contact
 
 - **Repository**:[GitHub Repository](https://github.com/dukeblue1994-glitch/cxi-web)
-  
+
 - **Issues**: [GitHub Issues](https://github.com/dukeblue1994-glitch/cxi-project/issues)
 - **Author**: dukeblue1994-glitch
 
@@ -185,4 +245,4 @@ For questions, suggestions, or support, please open an issue on GitHub or contac
 
 ---
 
-**Built with ❤️ for better customer experiences**
+### Built with ❤️ for better customer experiences

@@ -1,0 +1,3341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview with Acme</title>
+    <!-- Resource hints: preconnect to Netlify functions origin (same host) typically unnecessary; add dns-prefetch for external analytics/icon CDNs if later added. Placeholder below shows pattern. -->
+    <!-- Example (uncomment if external API domains introduced):
+  <link rel="dns-prefetch" href="//api.example.com" />
+  <link rel="preconnect" href="https://api.example.com" crossorigin />
+  -->
+    <!-- External domains referenced in server functions (future client calls may benefit): -->
+    <link rel="dns-prefetch" href="//api.resend.com" />
+    <link rel="dns-prefetch" href="//harvest.greenhouse.io" />
+  <link rel="dns-prefetch" href="//api.lever.co" />
+  <link rel="stylesheet" href="styles.css" />
+      <style>
+        .cxi-toolbar .ctrl.leave {
+        background: #2a0f14;
+        border-color: #5a1b23;
+        color: #fecaca;
+        font-weight: 700;
+      }
+      .cxi-toolbar .ctrl.leave:hover {
+        background: #3a1218;
+      }
+      .cxi-toolbar .spacer {
+        flex: 1;
+      }
+
+      /* Modal styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal {
+        background: var(--card);
+        border-radius: var(--radius);
+        padding: 2rem;
+        max-width: 560px;
+        width: 90%;
+        box-shadow: var(--shadow);
+        text-align: center;
+        border: 1px solid var(--slate);
+      }
+
+      .chips {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .chip {
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--primary);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 1px solid var(--slate);
+      }
+
+      .modal h2 {
+        color: var(--text);
+        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        line-height: 1.4;
+      }
+
+      .btn-row {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .btn {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        font-size: 1rem;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .btn-ghost {
+        background: #ffffff;
+        color: var(--text);
+        border: 1px solid var(--slate);
+      }
+
+      .btn-ghost:hover {
+        background: #f8f9ff;
+        color: var(--text);
+      }
+
+      .btn-link {
+        background: transparent;
+        color: #6c757d;
+        border: none;
+        text-decoration: underline;
+        font-size: 0.875rem;
+      }
+
+      .btn-link:hover {
+        color: var(--text);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Modal email input styling */
+      .modal input[type="email"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #4b5563;
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+        margin-top: 0.5rem;
+      }
+
+      /* Survey styles */
+      .survey-container {
+        height: 100vh;
+        overflow-y: auto;
+        background: transparent;
+      }
+
+      .survey-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .survey-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .survey-header h1 {
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .survey-header p {
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .survey-card {
+        background: #ffffff;
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--slate);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--slate);
+        border-radius: 6px;
+        background: #ffffff;
+        color: #333;
+        font-size: 1rem;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+      }
+
+      .rating-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .rating-btn {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid var(--slate);
+        background: #ffffff;
+        color: #333;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+
+      .rating-btn:hover {
+        border-color: var(--primary);
+        background: #f8f9ff;
+      }
+
+      .rating-btn.selected {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+      }
+
+      .aspect-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .aspect-btn {
+        padding: 0.75rem;
+        border: 1px solid #4b5563;
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        font-size: 0.875rem;
+      }
+
+      .aspect-btn:hover {
+        border-color: var(--cxi-amber);
+        background: rgba(255, 176, 0, 0.1);
+      }
+
+      .aspect-btn.selected {
+        background: var(--cxi-amber);
+        color: var(--cxi-navy);
+        border-color: var(--cxi-amber);
+      }
+
+      .word-count {
+        text-align: right;
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 0.25rem;
+      }
+
+      .word-count.valid {
+        color: var(--success);
+      }
+
+  .word-count.invalid {
+        color: var(--risk);
+      }
+
+      .survey-navigation {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .progress-bar {
+        height: 8px;
+        background: var(--slate);
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--primary);
+        transition: width 0.3s;
+      }
+
+      /* Results Dashboard Styles */
+      .results-container {
+        height: 100vh;
+        overflow-y: auto;
+        background: transparent;
+        padding: 2rem;
+      }
+
+      .results-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .results-header h1 {
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .results-card {
+        background: #ffffff;
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        border: 1px solid var(--slate);
+        box-shadow: var(--shadow);
+      }
+
+      .score-display {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .score-value {
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 1rem 0;
+      }
+
+      .score-label {
+        color: var(--muted);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .band-indicator {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+      }
+
+      .band-success {
+        background: var(--success);
+        color: white;
+      }
+
+      .band-caution {
+        background: var(--warning);
+        color: var(--cxi-navy);
+      }
+
+      .band-risk {
+        background: var(--risk);
+        color: white;
+      }
+
+      .highlights-section {
+        margin-top: 1rem;
+      }
+
+      .highlight-item {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        margin: 0.25rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+      }
+
+      .highlight-positive {
+        background: rgba(22, 163, 74, 0.2);
+        color: var(--success);
+        border: 1px solid var(--success);
+      }
+
+      .highlight-negative {
+        background: rgba(244, 63, 94, 0.2);
+        color: var(--risk);
+        border: 1px solid var(--risk);
+      }
+
+      .absa-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .absa-tag {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .absa-positive {
+        background: rgba(22, 163, 74, 0.2);
+        color: var(--success);
+        border: 1px solid var(--success);
+      }
+
+      .absa-negative {
+        background: rgba(244, 63, 94, 0.2);
+        color: var(--risk);
+        border: 1px solid var(--risk);
+      }
+
+      /* Heatmap Styles */
+      .heatmap-container {
+        background: #ffffff;
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        border: 1px solid var(--slate);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+      }
+
+      .heatmap-grid {
+        display: grid;
+        grid-template-columns: 150px repeat(7, 1fr);
+        gap: 2px;
+        margin-top: 1rem;
+      }
+
+      .heatmap-header {
+        background: #f1f3f5;
+        color: #333;
+        padding: 0.75rem 0.5rem;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.75rem;
+      }
+
+      .heatmap-row-label {
+        background: #f1f3f5;
+        color: #333;
+        padding: 0.75rem 0.5rem;
+        font-weight: 500;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .heatmap-cell {
+        padding: 0.75rem 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.75rem;
+        font-weight: 600;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .heatmap-cell:hover {
+        transform: scale(1.05);
+        z-index: 10;
+        position: relative;
+      }
+
+      .heatmap-positive {
+        background: rgba(22, 163, 74, 0.8);
+        color: white;
+      }
+
+      .heatmap-neutral {
+        background: #f1f3f5;
+        color: #333;
+      }
+
+      .heatmap-negative {
+        background: rgba(244, 63, 94, 0.8);
+        color: white;
+      }
+
+      /* Recruiter Dashboard Styles */
+      .recruiter-container {
+        height: 100vh;
+        overflow-y: auto;
+        background: transparent;
+        padding: 2rem;
+      }
+
+      .recruiter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .filters-section {
+        background: #ffffff;
+        border-radius: var(--radius);
+        padding: 1rem;
+        border: 1px solid var(--slate);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .task-list {
+        background: #ffffff;
+        border-radius: var(--radius);
+        border: 1px solid var(--slate);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+
+      .task-header {
+        background: #f1f3f5;
+        padding: 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid var(--slate);
+      }
+
+      .task-item {
+        padding: 1rem;
+        border-bottom: 1px solid #374151;
+        transition: background 0.3s;
+      }
+
+      .task-item:hover {
+        background: rgba(255, 176, 0, 0.05);
+      }
+
+      .task-item:last-child {
+        border-bottom: none;
+      }
+
+      .task-priority {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .priority-high {
+        background: var(--risk);
+        color: white;
+      }
+
+      .priority-medium {
+        background: var(--warning);
+        color: var(--cxi-navy);
+      }
+
+      .priority-low {
+        background: var(--success);
+        color: white;
+      }
+
+      .task-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .task-coaching {
+        color: var(--cxi-amber);
+        font-weight: 500;
+        margin: 0.5rem 0;
+      }
+
+      .task-details {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+
+      .navigation-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .nav-tab {
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #4b5563;
+        background: transparent;
+        color: var(--text);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .nav-tab.active {
+        background: var(--cxi-amber);
+        color: var(--cxi-navy);
+        border-color: var(--cxi-amber);
+      }
+
+      .nav-tab:hover {
+        background: rgba(255, 176, 0, 0.1);
+      }
+
+      /* v22 modal + demo helpers */
+      .modal-bg {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 1000;
+      }
+      .hdr {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .title {
+        font-weight: 700;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--slate);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+      .padded {
+        padding: 12px;
+      }
+      .sim-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 10px;
+      }
+      .sim-card {
+        background: #fff;
+        border: 1px solid var(--slate);
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .sim-kpi {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 6px 0;
+      }
+      .sim-note {
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+      .sep {
+        border: none;
+        border-top: 1px solid var(--slate);
+        margin: 10px 0;
+      }
+      .mt-6 {
+        margin-top: 6px;
+      }
+      .mt-8 {
+        margin-top: 8px;
+      }
+      .mt-10 {
+        margin-top: 10px;
+      }
+      .mb-6 {
+        margin-bottom: 6px;
+      }
+      .fs-095 {
+        font-size: 0.95rem;
+      }
+      .minw-220 {
+        min-width: 220px;
+      }
+      .minw-240 {
+        min-width: 240px;
+      }
+      .wrap {
+        flex-wrap: wrap;
+      }
+      .gap-12 {
+        gap: 12px;
+      }
+      .justify-end {
+        justify-content: flex-end;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+      .fw-700 {
+        font-weight: 700;
+      }
+      .minh-56 {
+        min-height: 56px;
+      }
+      .light {
+        background: rgba(0, 0, 0, 0.3);
+      }
+      .block {
+        display: block;
+      }
+      .ai-center {
+        align-items: center;
+      }
+
+      /* Helpers extracted from inline styles */
+      .hint-line {
+        margin-top: 6px;
+      }
+      .helper-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 10px;
+      }
+      .conflict-row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .conflict-col {
+        min-width: 220px;
+        flex: 1;
+      }
+      .conflict-select {
+        width: 100%;
+        padding: 0.6rem;
+        border-radius: 6px;
+        border: 2px solid var(--slate);
+        background: #fff;
+      }
+      .label-spaced {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      /* ATS webhook simulator panel (subtle) */
+      .ats-panel {
+        position: fixed;
+        right: 14px;
+        bottom: 14px;
+        width: min(400px, 92vw);
+        background: rgba(11, 19, 38, 0.85);
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        border: 1px solid #1e345d;
+        border-radius: 10px;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+        color: #bcd1ff;
+        font-size: 0.8rem;
+        z-index: 10000;
+        transition:
+          opacity 0.2s ease,
+          transform 0.25s ease;
+        content-visibility: auto;
+        contain: layout style paint;
+      }
+      .ats-panel .hdr {
+        padding: 8px 10px;
+        border-bottom: 1px solid #223057;
+        font-weight: 700;
+        background: #0e1a35;
+        color: #d9e6ff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .ats-panel .act {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-bottom: 1px solid #203252;
+        background: transparent;
+      }
+      .ats-panel .act .cxi-btn {
+        padding: 8px 10px;
+      }
+      .ats-status {
+        color: #9fb7ff;
+      }
+      #ats-json {
+        margin: 0;
+        padding: 8px 10px 10px;
+        max-height: 200px;
+        overflow: auto;
+        font-size: 0.72rem;
+        line-height: 1.25;
+      }
+
+      /* Recruiter task drawer */
+      .task-drawer {
+        position: fixed;
+        left: 14px;
+        bottom: 14px;
+        width: min(500px, 94vw);
+        background: rgba(11, 19, 38, 0.85);
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        border: 1px solid #1e345d;
+        border-radius: 10px;
+        color: #dbe7ff;
+        z-index: 10000;
+        font-size: 0.8rem;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+        transition:
+          opacity 0.2s ease,
+          transform 0.25s ease;
+        content-visibility: auto;
+        contain: layout style paint;
+      }
+      .task-drawer .hdr {
+        padding: 8px 10px;
+        border-bottom: 1px solid #223057;
+        background: #0e1a35;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .panel-close {
+        background: transparent;
+        border: 0;
+        color: #8ea8d8;
+        font-size: 1rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .panel-close:hover,
+      .panel-close:focus {
+        background: rgba(255, 255, 255, 0.07);
+        outline: none;
+      }
+      .floating-chip {
+        position: fixed;
+        bottom: 14px;
+        padding: 6px 12px;
+        font-size: 0.65rem;
+        letter-spacing: 0.5px;
+        background: rgba(14, 27, 50, 0.85);
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        color: #c4d7f9;
+        border: 1px solid #25416d;
+        border-radius: 999px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        z-index: 9999;
+        transition: background 0.2s ease;
+      }
+      .floating-chip:hover,
+      .floating-chip:focus {
+        background: rgba(25, 46, 82, 0.95);
+        outline: none;
+      }
+      #toggle-ats {
+        right: 14px;
+      }
+      #toggle-tasks {
+        left: 14px;
+      }
+      :focus-visible {
+        outline: 2px solid #38bdf8;
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ats-panel,
+        .task-drawer,
+        .floating-chip {
+          transition: none !important;
+        }
+      }
+  .tasks {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+      }
+      .tasks th,
+      .tasks td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #18264a;
+      }
+    </style>
+      .tasks td .tag {
+        display: inline-block;
+        margin-right: 6px;
+        padding: 3px 6px;
+        border-radius: 8px;
+        background: #112143;
+        color: #cfe0ff;
+        border: 1px solid #20325e;
+      }
+
+      @media (max-width: 768px) {
+        .rating-group {
+          flex-direction: column;
+        }
+
+        .btn-row {
+          gap: 0.75rem;
+        }
+
+        .chips {
+          gap: 0.5rem;
+        }
+
+        .chip {
+          font-size: 0.75rem;
+          padding: 0.375rem 0.75rem;
+        }
+
+        .survey-content {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#survey-section" class="skip-link"> Skip to survey </a>
+    <button
+      id="hud-toggle-btn"
+      type="button"
+      onclick="window.toggleHud && window.toggleHud()"
+      title="Toggle performance HUD (Alt+P)"
+    >
+      Perf
+    </button>
+    <!-- SVG sprite (stub). Add symbols and reference via <svg><use href="#icon-id"/></svg> -->
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      id="sprite-root"
+      hidden
+    >
+      <symbol id="icon-check" viewBox="0 0 16 16">
+        <path
+          fill="currentColor"
+          d="M6.5 11.5 3 8l1.4-1.4 2.1 2.1 5-5L13.9 5z"
+        />
+      </symbol>
+      <symbol id="icon-warn" viewBox="0 0 16 16">
+        <path
+          fill="currentColor"
+          d="M8 1 0 15h16L8 1zm1 11H7v-2h2v2zm0-3H7V6h2v3z"
+        />
+      </symbol>
+      <symbol id="icon-risk" viewBox="0 0 16 16">
+        <path
+          fill="currentColor"
+          d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm1 12H7v-2h2v2Zm0-3H7V4h2v5Z"
+        />
+      </symbol>
+      <symbol id="icon-performance" viewBox="0 0 16 16">
+        <path
+          fill="currentColor"
+          d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm3.7 11.3-1.2.5-.4-1.1-1.1.4.4 1.2-1.2.4-.4-1.2-1.1.4.4 1.2-1.2.4-.7-2 6.2-2.3.7 2ZM8 9a1.5 1.5 0 0 1-1.4-2l3.9-3.9A5 5 0 0 1 13 8h-2a3 3 0 0 0-3-3v4Z"
+        />
+      </symbol>
+      <symbol id="icon-info" viewBox="0 0 16 16">
+        <path
+          fill="currentColor"
+          d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm1 13H7V7h2v6Zm0-8H7V3h2v2Z"
+        />
+      </symbol>
+    </svg>
+    <!-- CSS Purge Note: When introducing a bundler, run a purge (PurgeCSS, lightningcss) against index.html + js/*.js to remove unused selectors. -->
+    <!-- Main Interview Interface (Zoom-style shell) -->
+    <div class="interview-container" id="interview-view">
+      <section class="cxi-meeting" role="group" aria-label="Meeting shell">
+        <!-- Top bar -->
+        <div class="cxi-topbar" role="toolbar" aria-label="Meeting status">
+          <div class="left">
+            <span class="dot live"></span><span class="live-lbl">Live</span>
+            <span class="sep">•</span>
+            <span id="cxi-clock" aria-live="polite">00:18</span>
+            <span class="sep">•</span>
+            <span class="topic">Candidate Screen — SWE (Backend)</span>
+          </div>
+          <div class="right">
+            <span class="chip">🔒 Secured</span>
+            <span class="chip" id="cxi-participants">👥 4</span>
+            <span class="chip">HD</span>
+          </div>
+        </div>
+
+        <!-- Gallery grid (fake tiles) -->
+        <div class="cxi-gallery" aria-label="Video tiles">
+          <div class="tile"><div class="badge">You</div></div>
+          <div class="tile"><div class="badge">Interviewer 1</div></div>
+          <div class="tile"><div class="badge">Interviewer 2</div></div>
+          <div class="tile"><div class="badge">Recruiter</div></div>
+        </div>
+
+        <!-- Bottom toolbar -->
+        <div class="cxi-toolbar" role="toolbar" aria-label="Meeting controls">
+          <button class="ctrl" aria-pressed="true">🎙️ Mute</button>
+          <button class="ctrl">🎥 Stop Video</button>
+          <button class="ctrl">👥 Participants</button>
+          <button class="ctrl">💬 Chat</button>
+          <button class="ctrl">🖥️ Share</button>
+          <button class="ctrl">⏺️ Record</button>
+          <button class="ctrl">🙂 Reactions</button>
+
+          <div class="spacer"></div>
+
+          <!-- This is the trigger -->
+          <button class="ctrl leave" id="leave-btn" data-action="leave-meeting">
+            Leave
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ATS Webhook simulator panel -->
+    <aside id="ats-panel" class="ats-panel" hidden>
+      <div class="hdr">
+        ATS Webhook (simulated)
+        <button class="panel-close" id="close-ats" aria-label="Close ATS panel">
+          ×
+        </button>
+      </div>
+      <div class="act">
+        <button
+          id="btn-seed-retry"
+          class="cxi-btn cxi-btn-ghost"
+          title="Seed a test DLQ item then run DLQ retry"
+        >
+          Seed DLQ + Retry
+        </button>
+        <span
+          id="ats-status"
+          aria-live="polite"
+          class="small ats-status"
+        ></span>
+      </div>
+      <pre id="ats-json" aria-live="polite">{}</pre>
+    </aside>
+
+    <!-- Recruiter task drawer -->
+    <aside id="task-drawer" class="task-drawer" hidden>
+      <div class="hdr">
+        Recruiter Coaching Tasks
+        <button
+          class="panel-close"
+          id="close-tasks"
+          aria-label="Close tasks panel"
+        >
+          ×
+        </button>
+      </div>
+      <table class="tasks">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Stage</th>
+            <th>Aspects</th>
+            <th>Index</th>
+          </tr>
+        </thead>
+        <tbody id="task-rows"></tbody>
+      </table>
+    </aside>
+
+    <!-- Floating toggle chips -->
+    <button
+      id="toggle-ats"
+      class="floating-chip"
+      hidden
+      aria-controls="ats-panel"
+      aria-expanded="false"
+      aria-label="Show ATS panel"
+    >
+      ATS
+    </button>
+    <button
+      id="toggle-tasks"
+      class="floating-chip"
+      hidden
+      aria-controls="task-drawer"
+      aria-expanded="false"
+      aria-label="Show tasks panel"
+    >
+      Tasks
+    </button>
+
+    <!-- CXI Invite Modal (LinkedIn-aware, rotating copy) -->
+    <div id="cxi-invite-backdrop">
+      <div
+        id="cxi-invite-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cxi-invite-headline"
+      >
+        <div class="cxi-invite-header">
+          <span class="cxi-prehead">Wait—before you go…</span>
+          <button class="cxi-close" aria-label="Close" id="cxi-close-x">
+            ×
+          </button>
+        </div>
+
+        <h2 id="cxi-invite-headline" class="cxi-headline">
+          Likes don’t buy lattes. We do.
+        </h2>
+        <p id="cxi-invite-sub" class="cxi-sub">
+          Trade 90 seconds for a $5 eGift. Two quick prompts—kept private.
+        </p>
+
+        <div class="cxi-chips">
+          <span>⏱ 90s</span><span>☕ $5 eGift</span
+          ><span>🔒 Kept private</span>
+        </div>
+
+        <div class="cxi-cta-row">
+          <button id="cxi-cta-accept" class="cxi-btn cxi-btn-primary">
+            ☕ Free coffee & feedback (90s)
+          </button>
+          <button id="cxi-cta-remind" class="cxi-btn cxi-btn-ghost">
+            Remind me later
+          </button>
+          <button id="cxi-cta-decline" class="cxi-btn cxi-btn-link">
+            No thanks — I prefer buying my own coffee
+          </button>
+        </div>
+
+        <p class="cxi-trustline">
+          We de‑identify and analyze answers in aggregate. You can skip any
+          prompt.
+        </p>
+      </div>
+    </div>
+
+    <!-- Welcome banner (shown after starting survey) -->
+    <div id="welcome-banner" class="modal-bg light">
+      <div class="modal">
+        <div class="fw-700 mb-6">Welcome!</div>
+        <div class="muted">
+          Welcome! We hate survey's too (and we are one) but 90 seconds to
+          complete this ↓?! You'll be done before your coffee is even ready to
+          drink ;)
+        </div>
+        <div class="row justify-end mt-10">
+          <button class="btn btn-primary" id="welcome-ok">Let’s do it</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- v22 section removed to simplify UI -->
+
+    <!-- Survey Interface -->
+    <div class="survey-container hidden" id="survey-view">
+      <div class="survey-content">
+        <div class="survey-header">
+          <h1>🎯 CXI Feedback</h1>
+          <p>Your experience matters. Help us improve hiring for everyone.</p>
+          <div class="muted small hint-line">
+            • Tap a number for ratings • Select a few aspects • Write exactly 15
+            words twice • Check the attention item • Then press “Score Now”.
+          </div>
+          <div class="helper-actions" id="demo-helpers">
+            <button type="button" class="btn btn-ghost" id="btn-autofill">
+              Auto‑fill sample
+            </button>
+            <button type="button" class="btn btn-ghost" id="btn-reset">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="survey-card">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+
+          <form id="survey-form">
+            <!-- Stage Selection -->
+            <div class="form-group">
+              <label for="stage">Interview Stage *</label>
+              <select id="stage" name="stage" required>
+                <option value="">Select stage...</option>
+                <option value="phone_screen">Phone Screen</option>
+                <option value="hiring_manager">Hiring Manager Call</option>
+                <option value="panel">Panel</option>
+                <option value="virtual_onsite">Virtual Onsite</option>
+                <option value="offer">Offer</option>
+                <option value="new_hire">New Hire</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <!-- Role Family -->
+            <div class="form-group">
+              <label for="role_family">Role Family *</label>
+              <select id="role_family" name="role_family" required>
+                <option value="">Select role...</option>
+                <option value="software">Software</option>
+                <option value="hardware">Hardware</option>
+                <option value="product">Product</option>
+                <option value="marketing">Marketing</option>
+                <option value="design">Design</option>
+                <option value="data">Data</option>
+                <option value="sales_cs">Sales/Customer Success</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <!-- Overall Rating -->
+            <div class="form-group">
+              <label>Overall Experience *</label>
+              <div class="rating-group" data-field="overall">
+                <button type="button" class="rating-btn" data-value="1">
+                  1 - Poor
+                </button>
+                <button type="button" class="rating-btn" data-value="2">
+                  2 - Fair
+                </button>
+                <button type="button" class="rating-btn" data-value="3">
+                  3 - Good
+                </button>
+                <button type="button" class="rating-btn" data-value="4">
+                  4 - Very Good
+                </button>
+                <button type="button" class="rating-btn" data-value="5">
+                  5 - Excellent
+                </button>
+              </div>
+            </div>
+
+            <!-- Fairness Rating -->
+            <div class="form-group">
+              <label>Fairness of Process *</label>
+              <div class="rating-group" data-field="fairness">
+                <button type="button" class="rating-btn" data-value="1">
+                  1 - Unfair
+                </button>
+                <button type="button" class="rating-btn" data-value="2">
+                  2 - Somewhat Fair
+                </button>
+                <button type="button" class="rating-btn" data-value="3">
+                  3 - Fair
+                </button>
+                <button type="button" class="rating-btn" data-value="4">
+                  4 - Very Fair
+                </button>
+                <button type="button" class="rating-btn" data-value="5">
+                  5 - Completely Fair
+                </button>
+              </div>
+            </div>
+
+            <!-- Aspects -->
+            <div class="form-group">
+              <label>Relevant Aspects (select all that apply)</label>
+              <div class="aspect-grid">
+                <button
+                  type="button"
+                  class="aspect-btn"
+                  data-aspect="communication"
+                >
+                  Communication
+                </button>
+                <button
+                  type="button"
+                  class="aspect-btn"
+                  data-aspect="scheduling"
+                >
+                  Scheduling
+                </button>
+                <button type="button" class="aspect-btn" data-aspect="clarity">
+                  Clarity
+                </button>
+                <button type="button" class="aspect-btn" data-aspect="respect">
+                  Respect
+                </button>
+                <button type="button" class="aspect-btn" data-aspect="conduct">
+                  Interviewer Conduct
+                </button>
+                <button
+                  type="button"
+                  class="aspect-btn"
+                  data-aspect="feedback_timeliness"
+                >
+                  Feedback Timeliness
+                </button>
+                <button
+                  type="button"
+                  class="aspect-btn"
+                  data-aspect="difficulty"
+                >
+                  Difficulty
+                </button>
+                <button
+                  type="button"
+                  class="aspect-btn"
+                  data-aspect="logistics"
+                >
+                  Logistics
+                </button>
+                <button type="button" class="aspect-btn" data-aspect="dei">
+                  DEI Signals
+                </button>
+                <button
+                  type="button"
+                  class="aspect-btn"
+                  data-aspect="compensation"
+                >
+                  Comp Transparency
+                </button>
+              </div>
+            </div>
+
+            <!-- What Went Well (exact 15 words) -->
+            <div class="form-group">
+              <label for="well">What went well? (exactly 15 words) *</label>
+              <textarea
+                id="well"
+                rows="3"
+                placeholder="Write exactly 15 words…"
+                required
+              ></textarea>
+              <div class="word-count" id="well-count">0 / 15 words</div>
+            </div>
+
+            <!-- What Could Be Better (exact 15 words) -->
+            <div class="form-group">
+              <label for="better"
+                >One thing to improve (exactly 15 words) *</label
+              >
+              <textarea
+                id="better"
+                rows="3"
+                placeholder="Write exactly 15 words…"
+                required
+              ></textarea>
+              <div class="word-count" id="better-count">0 / 15 words</div>
+            </div>
+
+            <!-- Rant (120 chars) -->
+            <div class="form-group">
+              <label for="rant">Say it how you'd post it (max 120 chars)</label>
+              <textarea
+                id="rant"
+                rows="2"
+                maxlength="120"
+                placeholder="The 120‑char LinkedIn version…"
+              ></textarea>
+              <div class="word-count" id="rant-count">0 / 120 chars</div>
+            </div>
+
+            <!-- Conflict/Reschedule -->
+            <div class="form-group">
+              <div class="conflict-row">
+                <div class="conflict-col">
+                  <select
+                    id="conflict"
+                    name="conflict"
+                    aria-label="Did you experience a scheduling conflict and was a reschedule offered?"
+                    required
+                    class="conflict-select"
+                  >
+                    <option value="">Choose an option…</option>
+                    <option value="yes_no">
+                      Yes — I had a conflict and no reschedule was offered
+                    </option>
+                    <option value="yes_yes">
+                      Yes — I had a conflict but they offered to reschedule
+                    </option>
+                    <option value="no_conflict">
+                      No — the timing worked fine for me
+                    </option>
+                  </select>
+                </div>
+
+                <div class="conflict-col">
+                  <label for="conflict-impact" class="small"
+                    >How would this affect your experience?</label
+                  >
+                  <select
+                    id="conflict-impact"
+                    name="conflict_impact"
+                    aria-label="Impact on experience"
+                    class="conflict-select"
+                  >
+                    <option value="">Select…</option>
+                    <option value="would_reschedule">
+                      I would have rescheduled
+                    </option>
+                    <option value="no_change">
+                      It wouldn't change anything
+                    </option>
+                    <option value="unsure">I'm not sure</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attention Check -->
+            <div class="form-group">
+              <label
+                >Attention Check: Select "Strongly Agree" to confirm you're
+                paying attention *</label
+              >
+              <div class="rating-group" data-field="attention">
+                <button type="button" class="rating-btn" data-value="1">
+                  Disagree
+                </button>
+                <button type="button" class="rating-btn" data-value="2">
+                  Somewhat
+                </button>
+                <button type="button" class="rating-btn" data-value="3">
+                  Agree
+                </button>
+                <button type="button" class="rating-btn" data-value="4">
+                  Strongly Agree
+                </button>
+                <button type="button" class="rating-btn" data-value="5">
+                  Very Strongly
+                </button>
+              </div>
+            </div>
+
+            <!-- Consent -->
+            <div class="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  id="consent"
+                  required
+                  class="chk-inline"
+                />
+                I consent to analysis of my responses to improve hiring quality
+                *
+              </label>
+            </div>
+
+            <div class="survey-navigation">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                id="submit-btn"
+                autocomplete=""
+              >
+                Score Now
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Dashboard -->
+    <div class="results-container hidden" id="results-view">
+      <div class="results-header">
+        <h1>📊 CXI Results Dashboard</h1>
+        <p>Real-time feedback analysis and insights</p>
+      </div>
+
+      <div class="navigation-tabs">
+        <div role="tablist" aria-label="Result views">
+          <button
+            class="nav-tab active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="summary-tab"
+            id="tab-summary"
+            onclick="showResultsTab('summary')"
+          >
+            Summary
+          </button>
+          <button
+            class="nav-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="heatmap-tab"
+            id="tab-heatmap"
+            onclick="showResultsTab('heatmap')"
+          >
+            Heatmap
+          </button>
+          <button
+            class="nav-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tasks-tab"
+            id="tab-tasks"
+            onclick="showResultsTab('tasks')"
+          >
+            Tasks
+          </button>
+          <button
+            class="nav-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="export-tab"
+            id="tab-export"
+            onclick="showResultsTab('export')"
+          >
+            Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Tab -->
+      <div id="summary-tab">
+        <div class="results-grid">
+          <div class="results-card">
+            <div class="score-display">
+              <div class="score-label">Net Sentiment Score</div>
+              <div class="score-value success" id="nss-display">+0.75</div>
+              <div class="band-indicator band-success" id="nss-band">
+                Positive
+              </div>
+            </div>
+            <div class="highlights-section">
+              <h4>Key Phrases</h4>
+              <div id="highlights-display">
+                <span class="highlight-item highlight-positive"
+                  >clear communication</span
+                >
+                <span class="highlight-item highlight-positive"
+                  >responsive team</span
+                >
+                <span class="highlight-item highlight-negative"
+                  >slow feedback</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="results-card">
+            <div class="score-display">
+              <div class="score-label">Composite Index</div>
+              <div class="score-value success" id="index-display">0.82</div>
+              <div class="band-indicator band-success" id="index-band">
+                Success
+              </div>
+            </div>
+            <div class="highlights-section">
+              <h4>ABSA Analysis</h4>
+              <div class="absa-tags" id="absa-display">
+                <span class="absa-tag absa-positive">Communication</span>
+                <span class="absa-tag absa-positive">Clarity</span>
+                <span class="absa-tag absa-negative">Feedback Timeline</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <h3>📝 Summary & Coaching</h3>
+          <div id="summary-text">
+            <p>
+              <strong>Summary:</strong>
+              <span id="response-summary"
+                >Positive experience at panel stage. Strengths: communication,
+                clarity. Areas for improvement: feedback timeliness.</span
+              >
+            </p>
+            <div class="task-coaching">
+              <strong>Coaching Cue:</strong>
+              <span id="coaching-cue"
+                >Set feedback SLA ≤3 business days for panel stage.</span
+              >
+            </div>
+            <div id="quality-block" class="mt-1" hidden>
+              <div class="small muted" id="quality-flags"></div>
+              <div class="quality-row">
+                <div id="results-live" aria-live="polite" aria-atomic="true">
+                  <span id="quality-badge" class="quality-badge"
+                    ><svg aria-hidden="true" width="14" height="14">
+                      <use href="#icon-info" />
+                    </svg>
+                    <span class="qb-text">Quality: --</span></span
+                  >
+                </div>
+                <span id="incentive-eligibility" class="small ml-1"></span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-1">
+            <button class="btn btn-primary" onclick="pushToDashboard()">
+              Push to Dashboard
+            </button>
+            <button class="btn btn-ghost" onclick="resetDemo()">
+              Reset Sample
+            </button>
+          </div>
+        </div>
+
+        <div class="results-card" id="ctr-card">
+          <div class="ctr-hdr">
+            <h3 class="no-m">📈 Invite CTR</h3>
+            <div>
+              <label class="small" for="ctr-days-select">Range</label>
+              <select id="ctr-days-select" class="small" aria-label="CTR range">
+                <option value="7" selected>Last 7 days</option>
+                <option value="14">Last 14 days</option>
+                <option value="30">Last 30 days</option>
+              </select>
+            </div>
+          </div>
+          <div class="muted small">Views vs Accepts by invite variant</div>
+          <div id="ctr-summary" class="mt-1 muted">Loading…</div>
+          <div id="ctr-breakdown" class="mt-1 small"></div>
+        </div>
+      </div>
+
+      <!-- Heatmap Tab -->
+      <div id="heatmap-tab" class="hidden">
+        <div class="heatmap-container">
+          <h3>🔥 Stage × Aspect Heatmap</h3>
+          <p class="muted-note">
+            Click cells to see detailed insights. Green = positive, Red =
+            negative sentiment.
+          </p>
+
+          <div class="heatmap-grid" id="heatmap-grid">
+            <!-- Headers -->
+            <div class="heatmap-header"></div>
+            <div class="heatmap-header">Applied</div>
+            <div class="heatmap-header">Recruiter</div>
+            <div class="heatmap-header">Hiring Mgr</div>
+            <div class="heatmap-header">Panel</div>
+            <div class="heatmap-header">Assignment</div>
+            <div class="heatmap-header">Offer</div>
+            <div class="heatmap-header">Rejected</div>
+
+            <!-- Communication Row -->
+            <div class="heatmap-row-label">Communication</div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('communication', 'applied')"
+            >
+              +0.8
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('communication', 'recruiter')"
+            >
+              +0.6
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('communication', 'hiring_manager')"
+            >
+              +0.7
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('communication', 'panel')"
+            >
+              +0.5
+            </div>
+            <div
+              class="heatmap-cell heatmap-neutral"
+              onclick="showHeatmapDetail('communication', 'assignment')"
+            >
+              +0.2
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('communication', 'offer')"
+            >
+              +0.9
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('communication', 'rejected')"
+            >
+              -0.3
+            </div>
+
+            <!-- Scheduling Row -->
+            <div class="heatmap-row-label">Scheduling</div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('scheduling', 'applied')"
+            >
+              +0.9
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('scheduling', 'recruiter')"
+            >
+              +0.4
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('scheduling', 'hiring_manager')"
+            >
+              -0.2
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('scheduling', 'panel')"
+            >
+              -0.4
+            </div>
+            <div
+              class="heatmap-cell heatmap-neutral"
+              onclick="showHeatmapDetail('scheduling', 'assignment')"
+            >
+              +0.1
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('scheduling', 'offer')"
+            >
+              +0.7
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('scheduling', 'rejected')"
+            >
+              -0.6
+            </div>
+
+            <!-- Clarity Row -->
+            <div class="heatmap-row-label">Clarity</div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('clarity', 'applied')"
+            >
+              +0.6
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('clarity', 'recruiter')"
+            >
+              +0.8
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('clarity', 'hiring_manager')"
+            >
+              +0.3
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('clarity', 'panel')"
+            >
+              -0.1
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('clarity', 'assignment')"
+            >
+              -0.3
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('clarity', 'offer')"
+            >
+              +0.8
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('clarity', 'rejected')"
+            >
+              -0.5
+            </div>
+
+            <!-- Respect Row -->
+            <div class="heatmap-row-label">Respect</div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('respect', 'applied')"
+            >
+              +0.9
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('respect', 'recruiter')"
+            >
+              +0.7
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('respect', 'hiring_manager')"
+            >
+              +0.8
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('respect', 'panel')"
+            >
+              +0.6
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('respect', 'assignment')"
+            >
+              +0.4
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('respect', 'offer')"
+            >
+              +0.9
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('respect', 'rejected')"
+            >
+              -0.2
+            </div>
+
+            <!-- Feedback Timeline Row -->
+            <div class="heatmap-row-label">Feedback</div>
+            <div
+              class="heatmap-cell heatmap-neutral"
+              onclick="showHeatmapDetail('feedback', 'applied')"
+            >
+              +0.1
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('feedback', 'recruiter')"
+            >
+              -0.2
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('feedback', 'hiring_manager')"
+            >
+              -0.4
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('feedback', 'panel')"
+            >
+              -0.6
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('feedback', 'assignment')"
+            >
+              -0.8
+            </div>
+            <div
+              class="heatmap-cell heatmap-positive"
+              onclick="showHeatmapDetail('feedback', 'offer')"
+            >
+              +0.5
+            </div>
+            <div
+              class="heatmap-cell heatmap-negative"
+              onclick="showHeatmapDetail('feedback', 'rejected')"
+            >
+              -0.9
+            </div>
+          </div>
+        </div>
+
+        <div id="heatmap-detail" class="results-card hidden">
+          <h4 id="detail-title">Cell Details</h4>
+          <div id="detail-content">
+            <p>
+              Click a heatmap cell to see detailed insights and sample evidence.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks Tab -->
+      <div id="tasks-tab" class="hidden">
+        <div class="filters-section">
+          <h3>📋 Recruiter Tasks</h3>
+          <div class="filters-grid">
+            <div class="form-group">
+              <label for="stage-filter">Stage</label>
+              <select id="stage-filter" onchange="filterTasks()">
+                <option value="">All Stages</option>
+                <option value="recruiter">Recruiter Screen</option>
+                <option value="panel">Panel/Onsite</option>
+                <option value="offer">Offer</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="priority-filter">Priority</label>
+              <select id="priority-filter" onchange="filterTasks()">
+                <option value="">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="timeframe-filter">Timeframe</label>
+              <select id="timeframe-filter" onchange="filterTasks()">
+                <option value="7d">Last 7 days</option>
+                <option value="30d" selected>Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="task-list" id="task-list">
+          <div class="task-header">Active Tasks (3)</div>
+
+          <div class="task-item" data-stage="panel" data-priority="high">
+            <div class="task-meta">
+              <div>
+                <span class="task-priority priority-high">High</span>
+                <span class="muted ml-1">Panel • SWE • 2 hours ago</span>
+              </div>
+              <div class="muted small">NSS: -0.4</div>
+            </div>
+            <div class="task-coaching">
+              Provide interviewer training on professional conduct for panel
+              stage
+            </div>
+            <div class="task-details">
+              Aspects: respect, conduct • Index: 0.35 • Token: hash_abc123
+            </div>
+          </div>
+
+          <div class="task-item" data-stage="recruiter" data-priority="medium">
+            <div class="task-meta">
+              <div>
+                <span class="task-priority priority-medium">Medium</span>
+                <span class="muted ml-1">Recruiter • PM • 5 hours ago</span>
+              </div>
+              <div class="muted small">NSS: +0.2</div>
+            </div>
+            <div class="task-coaching">
+              Set feedback SLA ≤3 business days for recruiter stage
+            </div>
+            <div class="task-details">
+              Aspects: feedback_timeliness • Index: 0.58 • Token: hash_def456
+            </div>
+          </div>
+
+          <div class="task-item" data-stage="offer" data-priority="low">
+            <div class="task-meta">
+              <div>
+                <span class="task-priority priority-low">Low</span>
+                <span class="muted ml-1">Offer • Design • 1 day ago</span>
+              </div>
+              <div class="muted small">NSS: +0.7</div>
+            </div>
+            <div class="task-coaching">
+              Maintain current standards for offer stage; process working well
+            </div>
+            <div class="task-details">
+              Aspects: communication, clarity • Index: 0.85 • Token: hash_ghi789
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Tab -->
+      <div id="export-tab" class="hidden">
+        <div class="results-card">
+          <h3>📤 Export & Print</h3>
+          <p class="muted-note">
+            Export your CXI analysis data in various formats.
+          </p>
+
+          <div class="export-grid">
+            <button class="btn btn-primary" onclick="exportData('json')">
+              📋 Export JSON
+            </button>
+            <button class="btn btn-primary" onclick="exportData('summary')">
+              📄 Print Summary
+            </button>
+            <button class="btn btn-primary" onclick="exportData('csv')">
+              📊 Export CSV
+            </button>
+            <button class="btn btn-primary" onclick="exportData('pdf')">
+              📑 Generate PDF
+            </button>
+          </div>
+
+          <div id="export-preview" class="results-card mt-1" hidden>
+            <h4>Export Preview</h4>
+            <pre id="export-content" class="export-pre"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentStage = "call";
+      let isRecording = false;
+      let callStartTime = null;
+      let callTimer = null;
+      // Stable candidate token for this session
+      window.CANDIDATE_TOKEN =
+        window.CANDIDATE_TOKEN || "demo_" + Math.random().toString(36).slice(2);
+
+      // Global state
+      window.CXI_FLAGS = {
+        DEMO_MODE: true,
+        LLM_ENRICHMENT: false,
+        LI_AWARE_AUTO: true,
+      };
+
+      const state = {
+        ratings: {},
+        aspects: [],
+        surveyData: {},
+      };
+
+      // Legacy invite modal logic and copy variants removed; replaced by the new CXI Invite modal and copy logic at the end of this file.
+
+      // Zoom Call Functions
+      function showStage(stage) {
+        currentStage = stage;
+        // Hide all major views
+        ["interview-view", "survey-view", "results-view"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("hidden");
+        });
+
+        // Map stage key to actual container id
+        const map = {
+          call: "interview-view",
+          survey: "survey-view",
+          results: "results-view",
+        };
+        const targetId = map[stage] || "interview-view";
+        const targetContainer = document.getElementById(targetId);
+        if (targetContainer) targetContainer.classList.remove("hidden");
+
+        // Auto-load summary metrics when landing on results
+        if (stage === "results" && typeof loadCtrMetrics === "function") {
+          loadCtrMetrics();
+        }
+
+        // Update hash
+        window.location.hash = stage;
+      }
+
+      function leaveCall() {
+        if (callTimer) {
+          clearInterval(callTimer);
+          callTimer = null;
+        }
+
+        // Create visual exit animation
+        const callInterface = document.querySelector(".call-interface");
+        callInterface.style.opacity = "0.5";
+
+        setTimeout(() => {
+          if (typeof openInvite === "function") {
+            openInvite(window.CANDIDATE_TOKEN || "", 0);
+          }
+        }, 800);
+      }
+
+      function startCall() {
+        isRecording = true;
+        callStartTime = Date.now();
+        document.getElementById("call-status").textContent = "Recording...";
+        document.getElementById("call-status").style.color = "#ef4444";
+
+        // Start timer
+        callTimer = setInterval(updateCallTimer, 1000);
+
+        // Show leave button after 3 seconds
+        setTimeout(() => {
+          document.getElementById("leave-btn").classList.remove("hidden");
+        }, 3000);
+      }
+
+      function updateCallTimer() {
+        if (!callStartTime) return;
+
+        const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+
+        document.getElementById("call-timer").textContent =
+          `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      // (Legacy incentive modal flow removed)
+
+      // Survey Functions
+      async function submitSurvey() {
+        const form = document.getElementById("survey-form");
+        const formData = new FormData(form);
+
+        // Validate required fields
+        const stage = formData.get("stage");
+        const feedback = formData.get("feedback");
+
+        if (!stage || !feedback) {
+          alert("Please complete all required fields.");
+          return;
+        }
+
+        // Show loading
+        const submitBtn = document.querySelector(".btn-primary");
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Processing...";
+        submitBtn.disabled = true;
+
+        // Legacy submission path removed – handled by modular app.js now.
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+
+      /* displayResults now provided by modules (removed inline stub) */
+
+      // Results Dashboard Functions
+      function showResultsTab(tabName) {
+        // Update nav tabs robustly (no implicit event)
+        const tabsBtns = Array.from(document.querySelectorAll(".nav-tab"));
+        tabsBtns.forEach((btn) => btn.classList.remove("active"));
+        const match = tabsBtns.find((b) =>
+          (b.textContent || "").toLowerCase().includes(tabName)
+        );
+        if (match) match.classList.add("active");
+
+        // Show/hide tab content
+        const tabs = ["summary", "heatmap", "tasks", "export"];
+        tabs.forEach((tab) => {
+          const tabEl = document.getElementById(`${tab}-tab`);
+          if (tabEl) tabEl.classList.toggle("hidden", tab !== tabName);
+        });
+
+        // Lazy-load CTR metrics when viewing Summary
+        if (tabName === "summary") {
+          if (typeof loadCtrMetrics === "function") loadCtrMetrics();
+        }
+      }
+
+      async function loadCtrMetrics() {
+        const sumEl = document.getElementById("ctr-summary");
+        const bdEl = document.getElementById("ctr-breakdown");
+        if (!sumEl || !bdEl) return;
+        sumEl.textContent = "Loading…";
+        bdEl.textContent = "";
+        const run = async () => {
+          try {
+            performance.mark?.("ctr_fetch_start");
+            const dSel = document.getElementById("ctr-days-select");
+            const days = dSel ? Number(dSel.value) || 7 : 7;
+            const res = await fetch(`/api/metrics?days=${days}`);
+            if (!res.ok) throw new Error("metrics_error");
+            const { metrics } = await res.json();
+            performance.mark?.("ctr_fetch_end");
+            const v = metrics?.totals?.view || 0;
+            const a = metrics?.totals?.accept || 0;
+            const ctr = v ? (a / v) * 100 : 0;
+            sumEl.innerHTML = `${a} accepts / ${v} views <span class="ml-1">(${ctr.toFixed(1)}% CTR)</span>`;
+            const by = metrics?.byVariant || {};
+            const rows = Object.entries(by).map(([variant, m]) => {
+              const vv = m.view || 0;
+              const aa = m.accept || 0;
+              const cc = vv ? (aa / vv) * 100 : 0;
+              const label = variant.replace(/^li-|^std-/, (s) =>
+                s === "li-" ? "LI " : "Std "
+              );
+              return `<div class="mt-025">• <b>${label}${variant.replace(/^(li-|std-)/, "")}</b> — ${aa}/${vv} (${cc.toFixed(1)}%)</div>`;
+            });
+            bdEl.innerHTML =
+              rows.join("") || '<div class="mt-025">No data yet.</div>';
+            performance.measure?.(
+              "ctr_fetch_total",
+              "ctr_fetch_start",
+              "ctr_fetch_end"
+            );
+          } catch (e) {
+            sumEl.textContent = "Metrics unavailable.";
+            bdEl.textContent = "";
+          }
+        };
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(run, { timeout: 2000 });
+        } else {
+          setTimeout(run, 60);
+        }
+      }
+
+      function showHeatmapDetail(aspect, stage) {
+        const detailEl = document.getElementById("heatmap-detail");
+        const titleEl = document.getElementById("detail-title");
+        const contentEl = document.getElementById("detail-content");
+
+        titleEl.textContent = `${aspect.charAt(0).toUpperCase() + aspect.slice(1)} × ${stage.charAt(0).toUpperCase() + stage.slice(1)}`;
+
+        // Sample data for demo
+        const sampleData = {
+          "communication-panel": {
+            score: "+0.5",
+            summary:
+              "Generally positive communication during panel interviews.",
+            evidence: [
+              "clear explanations",
+              "responsive to questions",
+              "professional tone",
+            ],
+            improvement:
+              "Some candidates noted brief responses from panel members.",
+          },
+          "scheduling-panel": {
+            score: "-0.4",
+            summary: "Scheduling challenges identified for panel stage.",
+            evidence: [
+              "short notice changes",
+              "conflicting calendars",
+              "unclear timing",
+            ],
+            improvement:
+              "Implement 48-hour minimum notice for schedule changes.",
+          },
+        };
+
+        const key = `${aspect}-${stage}`;
+        const data = sampleData[key] || {
+          score: "N/A",
+          summary: `Analysis for ${aspect} at ${stage} stage.`,
+          evidence: ["Sample evidence point"],
+          improvement: "Continue monitoring this combination.",
+        };
+
+        contentEl.innerHTML = `
+        <div><strong>Score:</strong> ${data.score}</div>
+        <div class="mt-6"><strong>Summary:</strong> ${data.summary}</div>
+        <div class="mt-6"><strong>Evidence:</strong></div>
+        <ul class="mt-025 ml-1">
+          ${data.evidence.map((e) => `<li>"${e}"</li>`).join("")}
+        </ul>
+        <div class="mt-6"><strong>Recommendation:</strong> ${data.improvement}</div>
+      `;
+
+        detailEl.classList.remove("hidden");
+        // Add inline push-to-dashboard action when viewing details
+        const pushBtnId = "push-from-heatmap";
+        const existing = document.getElementById(pushBtnId);
+        const band = window.cxiColorBand
+          ? window.cxiColorBand(window.CXI_LAST_INDEX || 0.58)
+          : "good";
+        const cta = document.createElement("div");
+        cta.className = "mt-8";
+        cta.innerHTML = `<button id="${pushBtnId}" class="btn btn-primary" data-action="push-dashboard">Push to dashboard</button> <span class="small muted ml-1">Adds a coaching task for ${stage} → ${aspect}</span>`;
+        contentEl.appendChild(cta);
+        if (!existing) {
+          setTimeout(() => {
+            const btn = document.getElementById(pushBtnId);
+            if (btn)
+              btn.addEventListener("click", () => {
+                const aspects = [aspect];
+                const idx = window.CXI_LAST_INDEX || 0.58;
+                pushTaskRow({ stage, aspects, index: idx });
+              });
+          }, 0);
+        }
+      }
+
+      function filterTasks() {
+        const stageFilter = document.getElementById("stage-filter").value;
+        const priorityFilter = document.getElementById("priority-filter").value;
+
+        const tasks = document.querySelectorAll(".task-item");
+        let visibleCount = 0;
+
+        tasks.forEach((task) => {
+          const taskStage = task.getAttribute("data-stage");
+          const taskPriority = task.getAttribute("data-priority");
+
+          const stageMatch = !stageFilter || taskStage === stageFilter;
+          const priorityMatch =
+            !priorityFilter || taskPriority === priorityFilter;
+
+          if (stageMatch && priorityMatch) {
+            task.style.display = "block";
+            visibleCount++;
+          } else {
+            task.style.display = "none";
+          }
+        });
+
+        document.querySelector(".task-header").textContent =
+          `Active Tasks (${visibleCount})`;
+      }
+
+      async function pushToDashboard() {
+        try {
+          const response = await fetch("/api/pushTask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              stage: window.__lastSubmission?.stage || "panel",
+              aspects: window.__lastSubmission?.aspects || [
+                "communication",
+                "clarity",
+              ],
+              nss: window.__lastResult?.nss || 0.75,
+              index: window.__lastResult?.composite_index || 0.82,
+              coaching_cue: document.getElementById("coaching-cue").textContent,
+            }),
+          });
+
+          if (response.ok) {
+            alert("✅ Results pushed to recruiter dashboard!");
+            // Also add to local drawer immediately
+            pushTaskRow({
+              stage: window.__lastSubmission?.stage || "panel",
+              aspects: (
+                window.__lastSubmission?.aspects || ["communication", "clarity"]
+              ).slice(0, 3),
+              index: window.__lastResult?.composite_index || 0.82,
+            });
+          } else {
+            alert("⚠️ Error pushing to dashboard. Please try again.");
+          }
+        } catch (error) {
+          console.error("Push error:", error);
+          alert("⚠️ Error pushing to dashboard. Please try again.");
+        }
+      }
+
+      function resetDemo() {
+        // Reset form
+        document.getElementById("survey-form").reset();
+
+        // Reset displays to defaults
+        document.getElementById("nss-display").textContent = "+0.75";
+        document.getElementById("index-display").textContent = "0.82";
+        document.getElementById("response-summary").textContent =
+          "Positive experience at panel stage. Strengths: communication, clarity. Areas for improvement: feedback timeliness.";
+        document.getElementById("coaching-cue").textContent =
+          "Set feedback SLA ≤3 business days for panel stage.";
+
+        // Clear drawer/panels
+        const tb = document.getElementById("task-rows");
+        if (tb) tb.innerHTML = "";
+        const taskWrap = document.getElementById("task-drawer");
+        if (taskWrap) taskWrap.hidden = true;
+        const ats = document.getElementById("ats-panel");
+        if (ats) ats.hidden = true;
+
+        // Go back to call stage
+        showStage("call");
+      }
+
+      function exportData(format) {
+        const last = window.__lastResult || {};
+        const nssText =
+          document.getElementById("nss-display").textContent || "";
+        const nssParsed = parseFloat(nssText.replace("+", ""));
+        const idxText =
+          document.getElementById("index-display").textContent || "";
+        const idxParsed = parseFloat(idxText);
+        const data = {
+          timestamp: new Date().toISOString(),
+          nss: Number.isFinite(last.nss)
+            ? last.nss
+            : Number.isFinite(nssParsed)
+              ? nssParsed
+              : 0.75,
+          composite_index: Number.isFinite(last.composite_index)
+            ? last.composite_index
+            : Number.isFinite(idxParsed)
+              ? idxParsed
+              : 0.82,
+          summary:
+            last.summary ||
+            document.getElementById("response-summary").textContent,
+          coaching_cue:
+            last.coaching_cue ||
+            document.getElementById("coaching-cue").textContent,
+          format: format,
+        };
+
+        const previewEl = document.getElementById("export-preview");
+        const contentEl = document.getElementById("export-content");
+
+        switch (format) {
+          case "json":
+            contentEl.textContent = JSON.stringify(data, null, 2);
+            break;
+          case "summary":
+            contentEl.textContent = `CXI Analysis Summary\n\nNSS: ${data.nss}\nIndex: ${data.composite_index}\nSummary: ${data.summary}\nCoaching: ${data.coaching_cue}`;
+            break;
+          case "csv":
+            contentEl.textContent = `timestamp,nss,index,summary,coaching\n"${data.timestamp}",${data.nss},${data.composite_index},"${data.summary}","${data.coaching_cue}"`;
+            break;
+          case "pdf":
+            contentEl.textContent =
+              "PDF generation would be implemented with a library like jsPDF or server-side generation.";
+            break;
+        }
+
+        previewEl.style.display = "block";
+      }
+
+      // Utility Functions
+      function pick(array) {
+        return array[Math.floor(Math.random() * array.length)];
+      }
+
+      function isLinkedIn() {
+        const url = new URL(location.href);
+        const checkParam = (param) =>
+          ["li", "linkedin"].includes(
+            (url.searchParams.get(param) || "").toLowerCase()
+          );
+        return (
+          checkParam("src") ||
+          checkParam("utm_source") ||
+          document.referrer.toLowerCase().includes("linkedin.com")
+        );
+      }
+
+      // (Old invite variant/override utilities removed; superseded by CXI Invite module)
+
+      function updateTimer() {
+        const timer = document.getElementById("timer");
+        let minutes = 25;
+        let seconds = 42;
+
+        setInterval(() => {
+          seconds++;
+          if (seconds >= 60) {
+            seconds = 0;
+            minutes++;
+          }
+          timer.textContent = `${minutes}:${seconds.toString().padStart(2, "0")} elapsed`;
+        }, 1000);
+      }
+
+      /* updateProgress / enforceExactWords / countWords now provided by survey.js (inline duplicates removed) */
+
+      function updateWordCount(textareaId, countId) {
+        const textarea = document.getElementById(textareaId);
+        const countDiv = document.getElementById(countId);
+        const words = countWords(textarea.value);
+
+        countDiv.textContent = `${words} words (minimum 15)`;
+        countDiv.className =
+          "word-count " + (words >= 15 ? "valid" : "invalid");
+
+        updateProgress();
+      }
+
+      // Event handlers
+      function track(action, extra = {}) {
+        try {
+          fetch("/api/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action,
+              candidate_token: window.CANDIDATE_TOKEN,
+              variant_id: window.__cxiVariantKey || "default",
+              stage: "invite",
+              ...extra,
+            }),
+          }).catch(() => {});
+        } catch (_) {
+          /* noop */
+        }
+      }
+
+      function startSurvey() {
+        const oldInvite = document.getElementById("invite-modal");
+        if (oldInvite) oldInvite.classList.add("hidden");
+        document.getElementById("interview-view").classList.add("hidden");
+        document.getElementById("survey-view").classList.remove("hidden");
+        document.body.style.overflow = "auto";
+        updateProgress();
+      }
+
+      // (Old invite scheduling/countdown/close handlers removed)
+
+      async function trackEvent(event, data) {
+        try {
+          await fetch("/api/track", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              event: event,
+              data: data,
+              timestamp: new Date().toISOString(),
+              referrer: document.referrer,
+            }),
+          });
+        } catch (error) {
+          console.error("Tracking error:", error);
+        }
+      }
+
+      // Initialize
+      function init() {
+        // Check URL hash
+        const hash = window.location.hash.substring(1);
+        if (["call", "survey", "results"].includes(hash)) {
+          showStage(hash);
+        } else {
+          showStage("call");
+        }
+        // Start meeting clock for realism
+        (function meetingClock() {
+          const el = document.getElementById("cxi-clock");
+          if (!el) return;
+          let s = 18; // start at 18s for realism
+          setInterval(() => {
+            s++;
+            const m = Math.floor(s / 60)
+              .toString()
+              .padStart(2, "0");
+            const ss = (s % 60).toString().padStart(2, "0");
+            el.textContent = `${m}:${ss}`;
+          }, 1000);
+        })();
+      }
+
+      // Start app when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        init();
+        // updateTimer no longer used with new chrome
+
+        // Leave button handler (opens CXI invite)
+        document.getElementById("leave-btn").addEventListener("click", (e) => {
+          e.preventDefault();
+          if (typeof openInvite === "function") {
+            openInvite(window.CANDIDATE_TOKEN || "", 0);
+          }
+        });
+
+        // (Old v22 modal removed)
+
+        // Email opt-in toggle
+        const emailToggle = document.getElementById("opt-email-toggle");
+        const emailInput = document.getElementById("opt-email");
+        if (emailToggle && emailInput) {
+          emailToggle.addEventListener("change", (e) => {
+            emailInput.disabled = !e.target.checked;
+            if (!e.target.checked) emailInput.value = "";
+          });
+        }
+
+        // Rating button handlers
+        document.addEventListener("click", (e) => {
+          if (e.target.classList.contains("rating-btn")) {
+            const group = e.target.parentElement;
+            const field = group.dataset.field;
+            const value = parseInt(e.target.dataset.value);
+
+            // Clear previous selection
+            group
+              .querySelectorAll(".rating-btn")
+              .forEach((btn) => btn.classList.remove("selected"));
+            e.target.classList.add("selected");
+
+            state.ratings[field] = value;
+            updateProgress();
+          }
+        });
+
+        // CTR range change handler
+        const ctrSel = document.getElementById("ctr-days-select");
+        if (ctrSel)
+          ctrSel.addEventListener("change", () => {
+            if (
+              !document
+                .getElementById("summary-tab")
+                .classList.contains("hidden")
+            ) {
+              loadCtrMetrics();
+            }
+          });
+
+        /* Panel management moved to panels.js (block removed) */
+
+        // Seed DLQ + Retry demo button
+        const seedBtn = document.getElementById("btn-seed-retry");
+        const atsStatus = document.getElementById("ats-status");
+        if (seedBtn) {
+          seedBtn.addEventListener("click", async () => {
+            try {
+              seedBtn.disabled = true;
+              if (atsStatus)
+                atsStatus.textContent = "Seeding dead-letter with a test item…";
+              // Seed DLQ with a sample payload
+              await fetch("/api/seed-dlq", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+              });
+
+              if (atsStatus) atsStatus.textContent = "Retrying DLQ forward…";
+              const r = await fetch("/api/dlq-retry", { method: "POST" });
+              const json = await r.json().catch(() => ({}));
+              if (json && json.skipped) {
+                if (atsStatus)
+                  atsStatus.textContent =
+                    "Skipped retry: no ATS webhook configured (set ATS_WEBHOOK_URL).";
+              } else if (json && json.ok) {
+                const { retried = 0, succeeded = 0, failed = 0 } = json;
+                if (atsStatus)
+                  atsStatus.textContent = `Retried ${retried} • Succeeded ${succeeded} • Failed ${failed}`;
+              } else {
+                if (atsStatus)
+                  atsStatus.textContent =
+                    "Retry finished with an unknown status.";
+              }
+            } catch (e) {
+              if (atsStatus) atsStatus.textContent = `Error: ${String(e)}`;
+            } finally {
+              seedBtn.disabled = false;
+            }
+          });
+        }
+
+        // Aspect button handlers
+        document.addEventListener("click", (e) => {
+          if (e.target.classList.contains("aspect-btn")) {
+            const aspect = e.target.dataset.aspect;
+
+            if (e.target.classList.contains("selected")) {
+              e.target.classList.remove("selected");
+              state.aspects = state.aspects.filter((a) => a !== aspect);
+            } else {
+              e.target.classList.add("selected");
+              state.aspects.push(aspect);
+            }
+
+            updateProgress();
+          }
+        });
+
+        // Word count handlers
+        document
+          .getElementById("well")
+          .addEventListener("input", () =>
+            enforceExactWords("well", "well-count", 15)
+          );
+        document
+          .getElementById("better")
+          .addEventListener("input", () =>
+            enforceExactWords("better", "better-count", 15)
+          );
+        document.getElementById("rant").addEventListener("input", () => {
+          const ta = document.getElementById("rant");
+          const n = ta.value.length;
+          const c = document.getElementById("rant-count");
+          c.textContent = `${n} / 120 chars`;
+        });
+
+        // Form change handlers
+        document
+          .getElementById("survey-form")
+          .addEventListener("change", updateProgress);
+        document
+          .getElementById("consent")
+          .addEventListener("change", updateProgress);
+
+        // Form submit handler
+        document
+          .getElementById("survey-form")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const payload = {
+              candidate_token: "demo_" + Date.now(),
+              stage: formData.get("stage"),
+              role_family: formData.get("role_family"),
+              overall: state.ratings.overall,
+              fairness: state.ratings.fairness,
+              aspects: state.aspects,
+              well: document.getElementById("well").value,
+              better: document.getElementById("better").value,
+              rant: document.getElementById("rant").value,
+              conflict_reschedule: formData.get("conflict") || "na",
+              consent: document.getElementById("consent").checked,
+            };
+
+            // Validate attention check
+            if ((state.ratings.attention || 0) < 4) {
+              alert("Please complete the attention check correctly.");
+              return;
+            }
+
+            // Enforce exact word counts
+            if (
+              countWords(payload.well) !== 15 ||
+              countWords(payload.better) !== 15
+            ) {
+              alert(
+                "Please write exactly 15 words for each of the first two answers."
+              );
+              return;
+            }
+
+            // Legacy submission path removed – modular submission now central in app.js
+          });
+      });
+
+      // Demo: Auto-fill and Reset wiring
+      const AUTO_WELL = [
+        "Panel started on time with clear introductions and respectful tone throughout.",
+        "Interviewers listened actively asked fair questions and explained expectations clearly.",
+        "Great pacing transparent process and thoughtful follow ups sharing space for depth.",
+        "Communication was crisp logistics smooth and panel created space managing time well.",
+        "Friendly panel relevant scenarios constructive feedback and professional coordination throughout.",
+      ];
+      const AUTO_BETTER = [
+        "Provide faster feedback reduce overlap in questions clarify decision timelines earlier please.",
+        "More time for system design plus rubric shared in advance to set expectations fairly.",
+        "Avoid back to back slots send prep materials and tighten scoring criteria transparency widely.",
+        "Smoother handoffs between interviewers confirm breaks and outline clear next steps after.",
+        "Improve calendar accuracy reduce context switching publish predictable feedback window commitments widely.",
+      ];
+      let autoSeed = 0;
+      function ensureExactWords(text, n) {
+        const words = (text || "").trim().split(/\s+/).filter(Boolean);
+        if (words.length === n) return words.join(" ");
+        if (words.length > n) return words.slice(0, n).join(" ");
+        const filler = [
+          "and",
+          "the",
+          "overall",
+          "very",
+          "really",
+          "quite",
+          "helpful",
+          "clear",
+          "timely",
+          "friendly",
+        ];
+        while (words.length < n)
+          words.push(filler[words.length % filler.length]);
+        return words.join(" ");
+      }
+      function setSelect(id, val) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.value = val;
+          el.dispatchEvent(new Event("change"));
+        }
+      }
+      function selectRating(field, val) {
+        const group = document.querySelector(
+          `.rating-group[data-field="${field}"]`
+        );
+        if (!group) return;
+        group
+          .querySelectorAll(".rating-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        const btn = group.querySelector(`.rating-btn[data-value="${val}"]`);
+        if (btn) btn.classList.add("selected");
+        state.ratings[field] = val;
+      }
+      function setAspect(aspect, on) {
+        const btn = document.querySelector(
+          `.aspect-btn[data-aspect="${aspect}"]`
+        );
+        if (!btn) return;
+        if (on) {
+          if (!btn.classList.contains("selected")) {
+            btn.classList.add("selected");
+            state.aspects.push(aspect);
+          }
+        } else {
+          if (btn.classList.contains("selected")) {
+            btn.classList.remove("selected");
+            state.aspects = state.aspects.filter((a) => a !== aspect);
+          }
+        }
+      }
+      function autofill() {
+        autoSeed++;
+        setSelect(
+          "stage",
+          ["phone_screen", "hiring_manager", "panel", "virtual_onsite"][
+            autoSeed % 4
+          ]
+        );
+        setSelect(
+          "role_family",
+          ["software", "product", "design", "data", "marketing"][autoSeed % 5]
+        );
+        selectRating("overall", 3 + (autoSeed % 3));
+        selectRating("fairness", 3 + ((autoSeed + 1) % 3));
+        selectRating("attention", 4);
+        [
+          "communication",
+          "clarity",
+          "scheduling",
+          "feedback_timeliness",
+          "respect",
+        ].forEach((a, i) =>
+          setAspect(a, i < 3 || (i === 3 && autoSeed % 2 === 0))
+        );
+        const w = document.getElementById("well");
+        const b = document.getElementById("better");
+        const r = document.getElementById("rant");
+        w.value = ensureExactWords(AUTO_WELL[autoSeed % AUTO_WELL.length], 15);
+        b.value = ensureExactWords(
+          AUTO_BETTER[autoSeed % AUTO_BETTER.length],
+          15
+        );
+        r.value =
+          "Overall solid experience; minor delays on feedback. Would recommend interviewing here.";
+        enforceExactWords("well", "well-count", 15);
+        enforceExactWords("better", "better-count", 15);
+        const rc = document.getElementById("rant-count");
+        rc.textContent = `${r.value.length} / 120 chars`;
+        setSelect("conflict", "no_conflict");
+        setSelect("conflict-impact", "no_change");
+        const consent = document.getElementById("consent");
+        consent.checked = true;
+        consent.dispatchEvent(new Event("change"));
+        updateProgress();
+      }
+      function resetAll() {
+        document.getElementById("survey-form").reset();
+        state.ratings = {};
+        state.aspects = [];
+        document
+          .querySelectorAll(".rating-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelectorAll(".aspect-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document.getElementById("well-count").textContent = "0 / 15 words";
+        document.getElementById("better-count").textContent = "0 / 15 words";
+        document.getElementById("rant-count").textContent = "0 / 120 chars";
+        updateProgress();
+      }
+      const btnAuto = document.getElementById("btn-autofill");
+      if (btnAuto) btnAuto.addEventListener("click", autofill);
+      const btnReset = document.getElementById("btn-reset");
+      if (btnReset) btnReset.addEventListener("click", resetAll);
+    </script>
+
+    <!-- CXI Invite JS (LinkedIn-aware, 3-touch nudge, variant logging hooks) -->
+    <style>
+      /* Backdrop */
+      #cxi-invite-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(13, 18, 28, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+      /* Modal */
+      #cxi-invite-modal {
+        width: min(560px, 92vw);
+        background: #0f1420;
+        color: #eef2ff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+        padding: 20px 20px 16px;
+        animation: cxi-pop 0.16s ease-out;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+      }
+      @keyframes cxi-pop {
+        from {
+          transform: scale(0.98);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .cxi-invite-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .cxi-prehead {
+        font-size: 0.85rem;
+        color: #a8b3cf;
+      }
+      .cxi-close {
+        border: 0;
+        background: transparent;
+        color: #a8b3cf;
+        font-size: 1.25rem;
+        cursor: pointer;
+      }
+      .cxi-headline {
+        margin: 8px 0 6px;
+        font-size: 1.35rem;
+        line-height: 1.25;
+      }
+      .cxi-sub {
+        margin: 0 0 10px;
+        color: #cbd5e1;
+      }
+      .cxi-chips {
+        display: flex;
+        gap: 8px;
+        margin: 8px 0 16px;
+        flex-wrap: wrap;
+      }
+      .cxi-chips span {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #cbd5e1;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .cxi-cta-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cxi-btn {
+        cursor: pointer;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-weight: 600;
+        border: 1px solid transparent;
+      }
+      .cxi-btn-primary {
+        background: #0ea5e9;
+        color: #031019;
+      }
+      .cxi-btn-primary:hover {
+        background: #38bdf8;
+      }
+      .cxi-btn-ghost {
+        background: transparent;
+        color: #e2e8f0;
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+      .cxi-btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .cxi-btn-link {
+        background: transparent;
+        color: #94a3b8;
+        text-decoration: underline;
+        border: 0;
+      }
+      .cxi-btn-link:hover {
+        color: #cbd5e1;
+      }
+      .cxi-trustline {
+        margin: 12px 2px 0;
+        font-size: 0.78rem;
+        color: #8fa0bd;
+      }
+      /* CTR card header helpers */
+      .ctr-hdr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .no-m {
+        margin: 0;
+      }
+      /* Optional score pill */
+      #cxi-index-pill {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+      #cxi-index-pill.good {
+        background: #052e1b;
+        color: #34d399;
+        border: 1px solid #065f46;
+      }
+      #cxi-index-pill.warning {
+        background: #3a2d03;
+        color: #fbbf24;
+        border: 1px solid #92400e;
+      }
+      #cxi-index-pill.bad {
+        background: #3a0d0f;
+        color: #f87171;
+        border: 1px solid #7f1d1d;
+      }
+      .quality-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #1e293b;
+        color: #a5f3fc;
+        border: 1px solid #334155;
+      }
+      .quality-badge.warn {
+        background: #3a2d03;
+        color: #fbbf24;
+        border-color: #92400e;
+      }
+      .quality-badge.risk {
+        background: #3a0d0f;
+        color: #f87171;
+        border-color: #7f1d1d;
+      }
+      .quality-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+      }
+    </style>
+    <script>
+      // Copy banks
+      const COPIES_LI = [
+        [
+          "Likes don’t buy lattes. We do.",
+          "Trade 90 seconds for a $5 eGift. Two quick prompts—kept private.",
+        ],
+        [
+          "Ranting on LinkedIn pays $0. This pays $5.",
+          "Tell us what worked and what didn’t (90s). Coffee’s on us.",
+        ],
+        [
+          "Skip the post. Get the coffee.",
+          "Two prompts → $5 thank‑you. Your notes route to the right owner.",
+        ],
+      ];
+      const COPIES_STD = [
+        [
+          "90 seconds for a $5 latte. That’s the deal.",
+          "One thing we nailed, one we need to fix. Kept private.",
+        ],
+        [
+          "Your truth, our treat.",
+          "Candid notes, kept private → $5 eGift after submit.",
+        ],
+        [
+          "Tell it straight. We’ll caffeinate.",
+          "Two quick prompts (90s). Coffee on us.",
+        ],
+      ];
+      const urlCXI = new URL(window.location.href);
+      const hintedLI =
+        ["li", "linkedin"].includes(
+          (urlCXI.searchParams.get("src") || "").toLowerCase()
+        ) || (document.referrer || "").toLowerCase().includes("linkedin.com");
+      function seededIndex(seed, len) {
+        let x = 0;
+        for (let i = 0; i < seed.length; i++)
+          x = (x << 5) - x + seed.charCodeAt(i);
+        return Math.abs(x) % len;
+      }
+      function pickCopy(candidateToken = null, li = false, nudgeRound = 0) {
+        const bank = li ? COPIES_LI : COPIES_STD;
+        const baseIdx = candidateToken
+          ? seededIndex(candidateToken, bank.length)
+          : Math.floor(Math.random() * bank.length);
+        const idx = (baseIdx + (nudgeRound || 0)) % bank.length;
+        const [h, s] = bank[idx];
+        const variantKey = `${li ? "li" : "std"}-${idx}`;
+        return { h, s, idx, bank: li ? "li" : "std", variantKey };
+      }
+      const CXI_NUDGE_KEY = "cxi_invite_nudge";
+      function scheduleNudge(hours) {
+        const now = Date.now();
+        const st = getNudgeState();
+        localStorage.setItem(
+          CXI_NUDGE_KEY,
+          JSON.stringify({ count: st.count, nextAt: now + hours * 3600 * 1000 })
+        );
+      }
+      function getNudgeState() {
+        try {
+          return (
+            JSON.parse(localStorage.getItem(CXI_NUDGE_KEY)) || {
+              count: 0,
+              nextAt: 0,
+            }
+          );
+        } catch {
+          return { count: 0, nextAt: 0 };
+        }
+      }
+      function incrementNudgeCount() {
+        const st = getNudgeState();
+        localStorage.setItem(
+          CXI_NUDGE_KEY,
+          JSON.stringify({ count: Math.min(st.count + 1, 3), nextAt: 0 })
+        );
+      }
+      function shouldShowNudgeNow() {
+        const st = getNudgeState();
+        return (
+          st.count < 3 && Date.now() >= (st.nextAt || 0) && st.nextAt !== 0
+        );
+      }
+
+      const $bd = document.getElementById("cxi-invite-backdrop");
+      const $headline = document.getElementById("cxi-invite-headline");
+      const $sub = document.getElementById("cxi-invite-sub");
+      function openInvite(candidateToken = null, nudgeRound = 0) {
+        const picked = pickCopy(candidateToken, hintedLI, nudgeRound);
+        window.__cxiVariantKey = picked.variantKey;
+        $headline.textContent = picked.h;
+        $sub.textContent = picked.s;
+        $bd.style.display = "flex";
+        document.body.style.overflow = "hidden";
+        // accessibility: set initial focus and trap
+        const focusable = Array.from(
+          $bd.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          )
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (first) first.focus();
+        function trap(e) {
+          if (e.key === "Escape") {
+            closeInvite();
+          }
+          if (e.key !== "Tab") return;
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+        $bd.addEventListener("keydown", trap);
+        $bd.__trapHandler = trap;
+        // Log view event
+        if (typeof track === "function") {
+          track("view", { bank: picked.bank, idx: picked.idx, nudgeRound });
+        }
+      }
+      function closeInvite() {
+        $bd.style.display = "none";
+        document.body.style.overflow = "";
+        // remove trap
+        if ($bd.__trapHandler)
+          $bd.removeEventListener("keydown", $bd.__trapHandler);
+      }
+      window.openInvite = openInvite; // expose
+
+      // Button wiring
+      document.getElementById("cxi-close-x").addEventListener("click", () => {
+        if (typeof track === "function")
+          track("decline", { ui: "close-x", variant: window.__cxiVariantKey });
+        closeInvite();
+      });
+      document
+        .getElementById("cxi-cta-decline")
+        .addEventListener("click", () => {
+          if (typeof track === "function")
+            track("decline", {
+              ui: "decline-btn",
+              variant: window.__cxiVariantKey,
+            });
+          closeInvite();
+        });
+      document
+        .getElementById("cxi-cta-remind")
+        .addEventListener("click", () => {
+          const st = getNudgeState();
+          const plan = [4, 24, 72];
+          const nextIdx = Math.min(st.count, plan.length - 1);
+          if (typeof track === "function")
+            track("remind", {
+              count: st.count,
+              nextHours: plan[nextIdx],
+              variant: window.__cxiVariantKey,
+            });
+          scheduleNudge(plan[nextIdx]);
+          closeInvite();
+        });
+      document
+        .getElementById("cxi-cta-accept")
+        .addEventListener("click", () => {
+          if (typeof track === "function")
+            track("accept", { variant: window.__cxiVariantKey });
+          closeInvite();
+          if (typeof startSurvey === "function") startSurvey();
+          // Optional: fire atsWebhook stub for observability
+          try {
+            const stage = document.querySelector("#stage")?.value || "screen";
+            const role =
+              document.querySelector("#role_family")?.value || "engineering";
+            const token = window.CANDIDATE_TOKEN || null;
+            fetch("/api/atsWebhook", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                event: "candidate_feedback_invite",
+                stage,
+                role_family: role,
+                candidate_token: token,
+                sent_at: new Date().toISOString(),
+                source: new URL(location.href).searchParams.get("src") || null,
+              }),
+            }).catch(() => {});
+          } catch {}
+        });
+
+      // Leave button is wired in DOMContentLoaded above
+
+      // Auto-nudge on revisit
+      (function maybeNudge() {
+        if (shouldShowNudgeNow()) {
+          incrementNudgeCount();
+          openInvite(window.CANDIDATE_TOKEN || "", getNudgeState().count - 1);
+        }
+      })();
+
+      // Optional color band util
+      window.cxiColorBand = function (idx) {
+        if (idx >= 0.6) return "good";
+        if (idx >= 0.4) return "warning";
+        return "bad";
+      };
+
+      // ATS webhook simulator
+      function showATSWebhook(stage, role, token) {
+        const payload = {
+          event: "candidate_feedback_invite",
+          stage,
+          role_family: role,
+          candidate_token:
+            token || "anon_" + Math.random().toString(36).slice(2, 7),
+          sent_at: new Date().toISOString(),
+          source: new URL(location.href).searchParams.get("src") || null,
+        };
+        const el = document.getElementById("ats-json");
+        const panel = document.getElementById("ats-panel");
+        if (el && panel) {
+          el.textContent = JSON.stringify(payload, null, 2);
+          panel.hidden = false;
+        }
+        // Optionally post to function: fetch('/.netlify/functions/atsWebhook', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      }
+
+      // Recruiter task drawer logic
+      function pushTaskRow({ stage, aspects, index }) {
+        const tb = document.getElementById("task-rows");
+        const wrap = document.getElementById("task-drawer");
+        if (!tb || !wrap) return;
+        const tr = document.createElement("tr");
+        const date = new Date().toLocaleString();
+        const band = window.cxiColorBand
+          ? window.cxiColorBand(index)
+          : index >= 0.6
+            ? "good"
+            : index >= 0.4
+              ? "warning"
+              : "bad";
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${stage}</td>
+          <td>${(aspects || []).map((a) => `<span class="tag">${a}</span>`).join("")}</td>
+          <td><span id="cxi-index-pill" class="${band}">${(index * 100).toFixed(0)}</span></td>`;
+        tb.prepend(tr);
+        wrap.hidden = false;
+      }
+      window.pushTaskRow = pushTaskRow;
+
+      // Wire ATS webhook on invite accept
+      document.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t && t.id === "cxi-cta-accept") {
+          const stage = document.querySelector("#stage")?.value || "screen";
+          const role =
+            document.querySelector("#role_family")?.value || "engineering";
+          const token = window.CANDIDATE_TOKEN || null;
+          showATSWebhook(stage, role, token);
+        }
+        if (t && t.matches('[data-action="push-dashboard"]')) {
+          const stage = window.__lastSubmission?.stage || "panel";
+          const aspects = (window.__lastSubmission?.aspects || []).slice(0, 3);
+          const index = window.__lastResult?.composite_index || 0.58;
+          pushTaskRow({ stage, aspects, index });
+        }
+      });
+    </script>
+    <!-- ES Module bundle (incremental migration) -->
+    <link rel="modulepreload" href="./js/utils.js" />
+    <link rel="modulepreload" href="./js/survey.js" />
+    <link rel="modulepreload" href="./js/invite.js" />
+    <link rel="modulepreload" href="./js/panels.js" />
+    <link rel="modulepreload" href="./js/metrics.js" />
+    <link rel="modulepreload" href="./js/overlay.js" />
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

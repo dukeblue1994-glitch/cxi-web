@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "copilot/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: CSS Audit
+        run: npm run audit:css || true
+
+      - name: Start Netlify Dev
+        run: |
+          npx netlify dev --port 8888 &
+          echo $! > netlify_dev.pid
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8888 >/dev/null; then echo up; break; fi
+            sleep 1
+          done
+
+      - name: Tests
+        run: npm test
+
+      - name: Stop Netlify Dev
+        if: always()
+        run: |
+          if [ -f netlify_dev.pid ]; then kill $(cat netlify_dev.pid) || true; fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo 'Node version:' $(node -v)
+          echo 'Done.'

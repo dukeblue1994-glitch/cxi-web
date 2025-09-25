@@ -1,0 +1,97 @@
+{
+  // Editor settings
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.wordWrap": "on",
+  "editor.rulers": [
+    100,
+    120
+  ],
+  // JavaScript/TypeScript settings
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.suggest.autoImports": true,
+  "javascript.format.semicolons": "always",
+  "javascript.preferences.quoteStyle": "single",
+  // ESLint configuration
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact"
+  ],
+  "eslint.workingDirectories": [
+    "."
+  ],
+  // Files settings
+  "files.autoSave": "onFocusChange",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/npm-debug.log*": true,
+    "**/.netlify": true,
+    "**/dist": true
+  },
+  // Terminal settings
+  "terminal.integrated.shell.osx": "/bin/zsh",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.env.osx": {
+    "NODE_ENV": "development"
+  },
+  // Git settings
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.postCommitCommand": "none",
+  // Search settings
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.netlify": true,
+    "**/dist": true,
+    "**/.git": true
+  },
+  // Extensions settings
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  // Netlify specific settings
+  "netlify.enabled": true,
+  // JSON settings
+  "json.format.enable": true,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  // JavaScript settings
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // Markdown settings
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "netlify/edge-functions"
+  ],
+  "deno.unstable": true,
+  "deno.importMap": ".netlify/edge-functions-import-map.json",
+  "deno.path": "/Users/nickanderson/Library/Preferences/netlify/deno-cli/deno",
+  "editor.linkedEditing": true
+}

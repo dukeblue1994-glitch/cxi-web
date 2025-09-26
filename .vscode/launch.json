@@ -43,7 +43,9 @@
       "args": [
         "${workspaceFolder}/test/test-quality.js"
       ],
-      "env": { "BASE_URL": "http://localhost:8888" },
+      "env": {
+        "BASE_URL": "http://localhost:8888"
+      },
       "console": "integratedTerminal"
     },
     {
@@ -54,7 +56,9 @@
       "args": [
         "${workspaceFolder}/test/test-reliability.js"
       ],
-      "env": { "BASE_URL": "http://localhost:8888" },
+      "env": {
+        "BASE_URL": "http://localhost:8888"
+      },
       "console": "integratedTerminal"
     },
     {
@@ -65,7 +69,9 @@
       "args": [
         "${workspaceFolder}/test/test-ats.js"
       ],
-      "env": { "BASE_URL": "http://localhost:8888" },
+      "env": {
+        "BASE_URL": "http://localhost:8888"
+      },
       "console": "integratedTerminal"
     }
   ]

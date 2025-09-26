@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "CI status (GitHub Actions)",
+			"type": "shell",
+			"command": "gh run list --limit 1 | cat",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}

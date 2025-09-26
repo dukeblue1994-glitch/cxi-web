@@ -1,6 +1,6 @@
 import { getStore } from "@netlify/blobs";
 
-export default async (_event, _context) => {
+export default async () => {
   console.log("Starting nudge-cron execution");
 
   try {
@@ -13,17 +13,23 @@ export default async (_event, _context) => {
     let errorCount = 0;
 
     for (const b of list.blobs) {
-      if (!b.key.startsWith("job:")) continue;
+      if (!b.key.startsWith("job:")) {
+        continue;
+      }
 
       try {
         const raw = await jobs.get(b.key);
-        if (!raw) continue;
+        if (!raw) {
+          continue;
+        }
 
         const job = JSON.parse(raw);
         processedCount++;
 
         // Only send when due, has email, and not sent yet
-        if (job.sentAt || !job.email || job.dueAt > now) continue;
+        if (job.sentAt || !job.email || job.dueAt > now) {
+          continue;
+        }
 
         // Skip if too many tries (max 3 attempts)
         if (job.tries >= 3) {

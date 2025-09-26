@@ -23,7 +23,7 @@ export default async (request) => {
       const existing = (await dlq.get(key)) || "";
       const line = JSON.stringify({ error: "seed", payload }) + "\n";
       await dlq.set(key, existing + line);
-    } catch (e) {
+    } catch {
       // fallback: set directly
       await dlq.set(key, JSON.stringify({ error: "seed", payload }) + "\n");
     }

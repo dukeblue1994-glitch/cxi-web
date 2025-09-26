@@ -18,9 +18,7 @@ export default async () => {
         // clear dlq
         await dlq.set(key, "");
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch {}
     return new Response(JSON.stringify({ ok: true, processed }), {
       status: 200,
       headers: {

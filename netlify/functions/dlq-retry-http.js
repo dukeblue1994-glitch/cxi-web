@@ -16,9 +16,7 @@ export default async () => {
         await archive.set(key, existing + data);
         await dlq.set(key, "");
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch {}
     return new Response(JSON.stringify({ ok: true, processed, via: "http" }), {
       status: 200,
       headers: {

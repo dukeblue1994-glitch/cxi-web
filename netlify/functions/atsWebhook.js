@@ -24,7 +24,9 @@ async function forwardWithRetry(url, data, headers, attempts = 3) {
         headers,
         body: JSON.stringify(data),
       });
-      if (res.ok) return true;
+      if (res.ok) {
+        return true;
+      }
       lastErr = new Error(`status_${res.status}`);
     } catch (e) {
       lastErr = e;
@@ -39,8 +41,9 @@ async function greenhouseAdapter(data) {
   const base = process.env.GH_BASE_URL || "https://harvest.greenhouse.io/v1";
   const apiKey = process.env.GH_API_KEY; // Harvest API key
   const applicationId = process.env.GH_APPLICATION_ID; // or map by email if available
-  if (!apiKey || !applicationId)
+  if (!apiKey || !applicationId) {
     return { forwarded: false, reason: "missing_env" };
+  }
   const note = {
     body: `[CXI] ${data.event} at ${data.stage} (${data.role_family}) — token=${data.candidate_token}`,
   };
@@ -58,8 +61,9 @@ async function leverAdapter(data) {
   const base = process.env.LEVER_BASE_URL || "https://api.lever.co/v1";
   const apiKey = process.env.LEVER_API_KEY;
   const opportunityId = process.env.LEVER_OPPORTUNITY_ID; // or map via email
-  if (!apiKey || !opportunityId)
+  if (!apiKey || !opportunityId) {
     return { forwarded: false, reason: "missing_env" };
+  }
   const note = {
     text: `[CXI] ${data.event} at ${data.stage} (${data.role_family}) — token=${data.candidate_token}`,
   };
@@ -76,7 +80,9 @@ async function leverAdapter(data) {
 async function workdayAdapter(data) {
   // Placeholder: Workday often requires OAuth/SOAP; integrate via iPaaS webhook preferred
   const url = process.env.WORKDAY_WEBHOOK_URL; // Use an integration bridge endpoint
-  if (!url) return { forwarded: false, reason: "missing_env" };
+  if (!url) {
+    return { forwarded: false, reason: "missing_env" };
+  }
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -150,7 +156,9 @@ export default async (request) => {
         ? await hmacHex(HMAC_SECRET, bodyStr)
         : null;
       try {
-        if (simulateFail) throw new Error("simulated_test_failure");
+        if (simulateFail) {
+          throw new Error("simulated_test_failure");
+        }
         await forwardWithRetry(ATS_WEBHOOK_URL, payload, {
           "Content-Type": "application/json",
           "X-Idempotency-Key": idempotency_key,

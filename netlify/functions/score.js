@@ -14,13 +14,17 @@ function tokenize15(s) {
 }
 
 function diversityScore(words) {
-  if (!words.length) return 0;
+  if (!words.length) {
+    return 0;
+  }
   var uniq = new Set(words).size;
   return uniq / words.length; // 0..1
 }
 
 function repetitionPenalty(words) {
-  if (!words.length) return 0;
+  if (!words.length) {
+    return 0;
+  }
   var freq = new Map();
   for (var i = 0; i < words.length; i++) {
     var w = words[i];
@@ -53,7 +57,7 @@ export default async function handler(request) {
     var aspects = Array.isArray(body.aspects) ? body.aspects : [];
     var well = body.well || "";
     var better = body.better || "";
-    var rant = body.rant || "";
+    var _rant = body.rant || "";
     var consent = Boolean(body.consent);
 
     var wellQ = textQualityBlock(well);
@@ -82,11 +86,21 @@ export default async function handler(request) {
 
     // Flags
     var quality_flags = [];
-    if (wellQ.rep > 0.25) quality_flags.push("repetition_well");
-    if (betterQ.rep > 0.25) quality_flags.push("repetition_better");
-    if (wellQ.div < 0.5) quality_flags.push("low_diversity_well");
-    if (betterQ.div < 0.5) quality_flags.push("low_diversity_better");
-    if (!consent) quality_flags.push("no_consent");
+    if (wellQ.rep > 0.25) {
+      quality_flags.push("repetition_well");
+    }
+    if (betterQ.rep > 0.25) {
+      quality_flags.push("repetition_better");
+    }
+    if (wellQ.div < 0.5) {
+      quality_flags.push("low_diversity_well");
+    }
+    if (betterQ.div < 0.5) {
+      quality_flags.push("low_diversity_better");
+    }
+    if (!consent) {
+      quality_flags.push("no_consent");
+    }
 
     // Gating: must have consent, decent text variety, and composite threshold
     var textGate = textScore >= 0.35;

@@ -1,4 +1,4 @@
-#CXI Interactive Demo
+# CXI Interactive Demo
 
 Customer Experience Intelligence (CXI) feedback collection and analysis system built with JavaScript and Node.js. This application allows users to provide structured feedback across multiple aspects and calculates meaningful metrics to help organizations understand and improve their customer experience.
 
@@ -133,9 +133,11 @@ We welcome contributions to improve the CXI Project! Here's how you can help:
 
 1. **Fork the repository** on GitHub
 2. **Create a feature branch** from `main`
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
+
 3. **Make your changes** following our coding standards
 4. **Write or update tests** for your changes
 5. **Run the test suite** to ensure everything works
@@ -166,7 +168,7 @@ When reporting bugs or requesting features:
 
 ## Architecture
 
-```
+```text
 ├── src/
 │   ├── app.js          # Main application logic
 │   └── app.test.js     # Application tests
@@ -181,6 +183,8 @@ When reporting bugs or requesting features:
 ```
 
 ## License
+
+This project is licensed under the ISC License. See the `package.json` file for details.
 
 ## Performance & Instrumentation
 
@@ -232,11 +236,9 @@ npm run build:bundle
 
 This uses `esbuild` to produce a minified ESM bundle in `dist/js/`. Integrate into deploy by chaining after `npm run build` if desired.
 
-This project is licensed under the ISC License. See the `package.json` file for details.
-
 ## Contact
 
-- **Repository**:[GitHub Repository](https://github.com/dukeblue1994-glitch/cxi-web)
+- **Repository**: [GitHub Repository](https://github.com/dukeblue1994-glitch/cxi-web)
 
 - **Issues**: [GitHub Issues](https://github.com/dukeblue1994-glitch/cxi-project/issues)
 - **Author**: dukeblue1994-glitch

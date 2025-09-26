@@ -44,6 +44,16 @@ function textQualityBlock(text) {
 
 export default async function handler(request) {
   try {
+    function bandFor(x) {
+      var v = Number(x) || 0;
+      if (v >= 0.75) {
+        return "Success";
+      }
+      if (v >= 0.55) {
+        return "Caution";
+      }
+      return "Risk";
+    }
     var body =
       (await request.json().catch(function () {
         return {};
@@ -79,7 +89,7 @@ export default async function handler(request) {
     // Text composite
     var textScore = (wellQ.score + betterQ.score) / 2; // 0..1
 
-    // Overall quality (weights tuned for tests)
+  // Overall quality (weights tuned for tests)
     var quality_score = Number(
       (0.35 * textScore + 0.45 * ratingScore + 0.2 * aspectScore).toFixed(3)
     );
@@ -107,12 +117,31 @@ export default async function handler(request) {
     var compositeGate = quality_score >= 0.5;
     var incentive_eligible = Boolean(consent && textGate && compositeGate);
 
+    // Provide stable fields for UI: composite_index and bands
+    // Composite index mirrors quality notions; keep simple and stable 0..1
+    var composite_index = Number(
+      (0.6 * quality_score + 0.4 * textScore).toFixed(3)
+    );
+
+    // Derive bands with sane defaults so UI never sees nulls
+    var bands = {
+      overall: bandFor(composite_index),
+      fairness: bandFor(fairness / 5),
+      sentiment: bandFor(textScore), // proxy using text quality
+      rigor: bandFor(1 - Math.max(wellQ.rep, betterQ.rep)),
+      speed: bandFor(attention / 5), // proxy using attention rating
+      clarity: bandFor((wellQ.div + betterQ.div) / 2),
+      trust: bandFor(consent ? 1 : 0),
+    };
+
     var resp = {
       candidate_token: candidate_token,
       stage: stage,
       role_family: role_family,
       quality_score: quality_score,
       incentive_eligible: incentive_eligible,
+      composite_index: composite_index,
+      bands: bands,
       quality_flags: quality_flags,
       diagnostics: {
         well: wellQ,

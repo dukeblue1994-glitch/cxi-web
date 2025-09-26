@@ -1,3 +1,7 @@
 # Local Netlify folder
 .netlify
 node_modules
+
+# Local dev artifacts
+netlify_dev.pid
+netlify-dev.log

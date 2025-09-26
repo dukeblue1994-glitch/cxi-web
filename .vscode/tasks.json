@@ -7,6 +7,56 @@
 			"command": "gh run list --limit 1 | cat",
 			"isBackground": false,
 			"group": "build"
+		},
+		{
+			"label": "Build",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Dev: Start Netlify",
+			"type": "shell",
+			"command": "npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open & echo $! > netlify_dev.pid; sleep 2; echo 'PID:' $(cat netlify_dev.pid)",
+			"group": "build",
+			"isBackground": true
+		},
+		{
+			"label": "Dev: Stop Netlify",
+			"type": "shell",
+			"command": "kill -9 $(cat netlify_dev.pid) 2>/dev/null || true; rm -f netlify_dev.pid",
+			"group": "build"
+		},
+		{
+			"label": "Test: All",
+			"type": "shell",
+			"command": "BASE_URL=http://localhost:8888 npm test",
+			"group": "test"
+		},
+		{
+			"label": "Test: Quality",
+			"type": "shell",
+			"command": "BASE_URL=http://localhost:8888 npm run test:quality",
+			"group": "test"
+		},
+		{
+			"label": "Test: Reliability",
+			"type": "shell",
+			"command": "BASE_URL=http://localhost:8888 npm run test:reliability",
+			"group": "test"
+		},
+		{
+			"label": "Test: ATS",
+			"type": "shell",
+			"command": "BASE_URL=http://localhost:8888 npm run test:ats",
+			"group": "test"
+		},
+		{
+			"label": "Lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
 		}
 	]
 }

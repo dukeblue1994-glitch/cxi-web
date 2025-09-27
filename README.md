@@ -58,7 +58,7 @@ The CXI Project is a comprehensive feedback collection platform that:
    ```
 
 4. **Run linting** (optional - note: current codebase has linting issues that can be fixed)
-   
+
    ```bash
    npm run lint
    ```

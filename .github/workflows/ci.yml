@@ -38,7 +38,9 @@ jobs:
           echo $! > netlify_dev.pid
 
       - name: Wait for server
-        run: npx -y wait-on http://localhost:8888/.netlify/functions/score
+        run: |
+          npx -y wait-on -t 60000 http://localhost:8888/.netlify/functions/score \
+            || (echo "::group::Netlify Dev Log (wait failure)"; sed -n '1,200p' netlify-dev.log || true; echo "::endgroup::"; exit 1)
 
       - name: Tests
         run: npm test

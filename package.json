@@ -58,7 +58,7 @@
     "@netlify/edge-functions": "^2.18.1",
     "esbuild": "^0.25.10",
     "eslint": "^9.36.0",
-    "netlify-cli": "^17.34.2",
+    "netlify-cli": "^23.8.0",
     "nodemon": "^3.0.3",
     "prettier": "^3.2.5",
     "wait-on": "^9.0.1"

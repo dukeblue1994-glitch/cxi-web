@@ -32,22 +32,25 @@ jobs:
       - name: CSS Audit
         run: npm run audit:css || true
 
-      - name: Start Netlify Dev
+      - name: Start Netlify Dev (background)
         run: |
-          npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open &
+          npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
           echo $! > netlify_dev.pid
-          for i in {1..30}; do
-            if curl -sSf http://localhost:8888 >/dev/null; then echo up; break; fi
-            sleep 1
-          done
+
+      - name: Wait for server
+        run: npx -y wait-on http://localhost:8888/.netlify/functions/score
 
       - name: Tests
         run: npm test
 
-      - name: Stop Netlify Dev
+      - name: Stop Netlify Dev (always)
         if: always()
         run: |
           if [ -f netlify_dev.pid ]; then kill $(cat netlify_dev.pid) || true; fi
+          sleep 1
+          echo "::group::Netlify Dev Log"
+          sed -n '1,200p' netlify-dev.log || true
+          echo "::endgroup::"
 
       - name: Security audit (non-blocking)
         if: always()

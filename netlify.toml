@@ -6,8 +6,8 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "8"
+  NODE_VERSION = "22"
+  NPM_VERSION = "10"
 
 [dev]
   framework = "#static"

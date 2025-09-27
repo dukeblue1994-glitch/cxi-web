@@ -24,9 +24,6 @@ jobs:
           node-version: "22"
           cache: "npm"
 
-      - name: Install Netlify CLI + wait-on
-        run: npm i -D netlify-cli@latest wait-on@latest
-
       - name: Install
         run: npm ci
 
@@ -45,7 +42,7 @@ jobs:
 
       - name: Wait for server
         run: |
-          npx wait-on --timeout 240000 \
+          npx -y wait-on --timeout 240000 \
             http-get://localhost:8888 \
             http-get://localhost:8888/api/score \
             http-get://localhost:8888/.netlify/functions/score \

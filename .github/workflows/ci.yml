@@ -2,14 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [main, "copilot/**"]
+    branches:
+      - main
+      - "copilot/**"
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build-test:
+  dev_and_test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,8 +21,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: "20"
+          cache: "npm"
 
       - name: Install
         run: npm ci
@@ -29,30 +33,25 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: CSS Audit
-        run: npm run audit:css || true
-
-      - name: Install Netlify CLI + wait-on
-        run: npm i -D netlify-cli@latest wait-on
-
       - name: Start Netlify Dev (background)
         run: |
           npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
           echo $! > netlify_dev.pid
+        env:
+          NODE_ENV: test
 
       - name: Wait for server
-        run: |
-          npx -y wait-on -t 120000 http://localhost:8888 \
-            && npx -y wait-on -t 60000 http://localhost:8888/.netlify/functions/score \
-            || (echo "::group::Netlify Dev Log (wait failure)"; sed -n '1,200p' netlify-dev.log || true; echo "::endgroup::"; exit 1)
+        run: npx -y wait-on --timeout 180000 http-get://localhost:8888 http-get://localhost:8888/.netlify/functions/score
 
       - name: Tests
+        env:
+          BASE_URL: http://localhost:8888
         run: npm test
 
       - name: Stop Netlify Dev (always)
         if: always()
         run: |
-          if [ -f netlify_dev.pid ]; then kill $(cat netlify_dev.pid) || true; fi
+          if [ -f netlify_dev.pid ]; then kill -9 "$(cat netlify_dev.pid)" 2>/dev/null || true; fi
           sleep 1
           echo "::group::Netlify Dev Log"
           sed -n '1,200p' netlify-dev.log || true
@@ -64,6 +63,10 @@ jobs:
         with:
           name: netlify-dev-log
           path: netlify-dev.log
+
+      - name: CSS Audit (non-blocking)
+        if: always()
+        run: npm run audit:css || true
 
       - name: Security audit (non-blocking)
         if: always()

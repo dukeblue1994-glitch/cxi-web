@@ -31,10 +31,20 @@ jobs:
           npx netlify dev --dir dist --functions netlify/functions \
             --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
           echo $! > netlify_dev.pid
+          SERVER_UP=0
           for i in {1..30}; do
-            if curl -sSf http://localhost:8888 >/dev/null; then echo up; break; fi
+            if curl -sSf http://localhost:8888 >/dev/null; then
+              echo up
+              SERVER_UP=1
+              break
+            fi
             sleep 1
           done
+          if [ "$SERVER_UP" -ne 1 ]; then
+            echo "Error: Netlify Dev server did not start within 30 seconds."
+            cat netlify-dev.log || true
+            exit 1
+          fi
         env:
           # Add any function env vars here if needed
           NODE_ENV: test

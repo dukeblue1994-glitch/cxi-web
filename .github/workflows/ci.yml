@@ -32,6 +32,9 @@ jobs:
       - name: CSS Audit
         run: npm run audit:css || true
 
+      - name: Install Netlify CLI + wait-on
+        run: npm i -D netlify-cli@latest wait-on
+
       - name: Start Netlify Dev (background)
         run: |
           npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
@@ -39,7 +42,8 @@ jobs:
 
       - name: Wait for server
         run: |
-          npx -y wait-on -t 60000 http://localhost:8888/.netlify/functions/score \
+          npx -y wait-on -t 120000 http://localhost:8888 \
+            && npx -y wait-on -t 60000 http://localhost:8888/.netlify/functions/score \
             || (echo "::group::Netlify Dev Log (wait failure)"; sed -n '1,200p' netlify-dev.log || true; echo "::endgroup::"; exit 1)
 
       - name: Tests
@@ -53,6 +57,13 @@ jobs:
           echo "::group::Netlify Dev Log"
           sed -n '1,200p' netlify-dev.log || true
           echo "::endgroup::"
+
+      - name: Upload logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-dev-log
+          path: netlify-dev.log
 
       - name: Security audit (non-blocking)
         if: always()

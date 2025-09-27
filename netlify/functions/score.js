@@ -89,7 +89,7 @@ export default async function handler(request) {
     // Text composite
     var textScore = (wellQ.score + betterQ.score) / 2; // 0..1
 
-  // Overall quality (weights tuned for tests)
+    // Overall quality (weights tuned for tests)
     var quality_score = Number(
       (0.35 * textScore + 0.45 * ratingScore + 0.2 * aspectScore).toFixed(3)
     );

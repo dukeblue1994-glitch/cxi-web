@@ -1,5 +1,7 @@
 # CXI Interactive Demo
 
+[![CI](https://github.com/dukeblue1994-glitch/cxi-web/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dukeblue1994-glitch/cxi-web/actions/workflows/ci.yml)
+
 Customer Experience Intelligence (CXI) feedback collection and analysis system built with JavaScript and Node.js. This application allows users to provide structured feedback across multiple aspects and calculates meaningful metrics to help organizations understand and improve their customer experience.
 
 ## Overview
@@ -56,6 +58,7 @@ The CXI Project is a comprehensive feedback collection platform that:
    ```
 
 4. **Run linting** (optional - note: current codebase has linting issues that can be fixed)
+   
    ```bash
    npm run lint
    ```

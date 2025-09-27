@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
 
       - name: Install
         run: npm ci
@@ -51,11 +51,10 @@ jobs:
 
       - name: Security audit (non-blocking)
         if: always()
-        run: |
-          npm audit --omit=dev || true
+        run: npm audit --omit=dev || true
 
       - name: Summary
         if: always()
         run: |
-          echo 'Node version:' $(node -v)
-          echo 'Done.'
+          echo "Node version: $(node -v)"
+          echo "Done."

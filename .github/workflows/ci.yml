@@ -5,9 +5,12 @@ on:
     branches:
       - main
       - "copilot/**"
+      - "chore/**"
   pull_request:
     branches:
       - main
+      - "copilot/**"
+      - "chore/**"
   workflow_dispatch:
 
 jobs:

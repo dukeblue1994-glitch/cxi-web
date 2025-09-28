@@ -4,7 +4,11 @@
 
 import assert from "assert";
 
-const BASE = (globalThis.process && globalThis.process.env && globalThis.process.env.BASE_URL) || "http://localhost:8888";
+const BASE =
+  (globalThis.process &&
+    globalThis.process.env &&
+    globalThis.process.env.BASE_URL) ||
+  "http://localhost:8888";
 const ENDPOINT = BASE + "/.netlify/functions/score";
 
 async function post(body) {
@@ -34,21 +38,21 @@ function fifteen(words) {
     attention: 5,
     aspects: ["clarity", "communication"],
     well: fifteen(
-      "panel was engaging transparent respectful thoughtful inclusive collaborative pacing strong role clarity"
+      "panel was engaging transparent respectful thoughtful inclusive collaborative pacing strong role clarity",
     ),
     better: fifteen(
-      "faster follow up timeline compensation transparency feedback turnaround scheduling coordination more context"
+      "faster follow up timeline compensation transparency feedback turnaround scheduling coordination more context",
     ),
     rant: "Great experience overall. Learned a lot.",
     consent: true,
   });
   assert.ok(
     good.incentive_eligible === true,
-    "Expected good submission to be incentive eligible"
+    "Expected good submission to be incentive eligible",
   );
   assert.ok(
     good.quality_score > 0.6,
-    "Quality score should be > 0.6 for good sample"
+    "Quality score should be > 0.6 for good sample",
   );
 
   // Low quality payload (heavy repetition + gibberish-like tokens)
@@ -61,21 +65,21 @@ function fifteen(words) {
     attention: 5,
     aspects: ["clarity"],
     well: fifteen(
-      "good good good good good good good good good good good good good good good"
+      "good good good good good good good good good good good good good good good",
     ),
     better: fifteen(
-      "asdf qwer zxcv asdf qwer zxcv asdf qwer zxcv asdf qwer zxcv asdf qwer qqqq"
+      "asdf qwer zxcv asdf qwer zxcv asdf qwer zxcv asdf qwer zxcv asdf qwer qqqq",
     ),
     rant: "meh",
     consent: true,
   });
   assert.ok(
     bad.incentive_eligible === false,
-    "Expected bad submission to be ineligible"
+    "Expected bad submission to be ineligible",
   );
   assert.ok(
     bad.quality_flags && bad.quality_flags.length > 0,
-    "Bad submission should have flags"
+    "Bad submission should have flags",
   );
 
   // Borderline case: some repetition but should remain eligible (diversity moderate)
@@ -88,21 +92,23 @@ function fifteen(words) {
     attention: 5,
     aspects: ["clarity"],
     well: fifteen(
-      "interview process generally clear clear timing reasonable panel respectful focused conversations"
+      "interview process generally clear clear timing reasonable panel respectful focused conversations",
     ),
     better: fifteen(
-      "could improve faster feedback cycle and add clearer outline of next steps"
+      "could improve faster feedback cycle and add clearer outline of next steps",
     ),
     rant: "Decent overall",
     consent: true,
   });
   if (borderline.incentive_eligible === false) {
     console.warn(
-      "Borderline case flagged ineligible; review heuristics thresholds"
+      "Borderline case flagged ineligible; review heuristics thresholds",
     );
   }
 
-  globalThis.console && globalThis.console.log && globalThis.console.log("Quality tests passed.");
+  globalThis.console &&
+    globalThis.console.log &&
+    globalThis.console.log("Quality tests passed.");
 })().catch((e) => {
   if (globalThis.console && globalThis.console.error) {
     globalThis.console.error("Quality tests failed:", e);

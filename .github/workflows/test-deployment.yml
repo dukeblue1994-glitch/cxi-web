@@ -27,8 +27,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v5
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install
         run: npm ci
@@ -53,7 +53,7 @@ jobs:
         run: |
           set -e
           echo "Waiting for http://localhost:8888 ..."
-          deadline=$((SECONDS+120))
+          deadline=$((SECONDS+180))
           until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
             if [ $SECONDS -gt $deadline ]; then
               echo "Timeout waiting for root.";
@@ -62,7 +62,7 @@ jobs:
             sleep 2
           done
           echo "Root is up. Waiting for function endpoint..."
-          deadline=$((SECONDS+120))
+          deadline=$((SECONDS+180))
           until curl -sf http://localhost:8888/.netlify/functions/score >/dev/null 2>&1; do
             if [ $SECONDS -gt $deadline ]; then
               echo "Timeout waiting for function endpoint.";

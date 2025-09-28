@@ -20,3 +20,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .cxi-topbar .dot{width:8px;height:8px;border-radius:999px;display:inline-block;} .cxi-topbar .dot.live{background:#f43f5e;box-shadow:0 0 0 6px rgba(244,63,94,0.15);} .cxi-topbar .chip{font-size:.78rem;padding:4px 8px;border-radius:999px;background:#0b1329;border:1px solid #243356;color:#aac0ee;} .cxi-topbar .topic{color:#b9c7ea;} .cxi-topbar .sep{color:#5b6c93;}
 .cxi-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px;background:#0b1220;} .cxi-gallery .tile{background:radial-gradient(120% 120% at 0% 0%,#19233c,#0e1528 70%);border:1px solid #1b2440;border-radius:12px;aspect-ratio:16/9;position:relative;} .cxi-gallery .badge{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,0.45);color:#e6edff;padding:4px 8px;border-radius:8px;font-size:.8rem;border:1px solid rgba(255,255,255,0.15);}
 .cxi-toolbar{display:flex;align-items:center;gap:8px;padding:10px;background:#0f172a;border-top:1px solid #1f2840;} .cxi-toolbar .ctrl{background:#101a33;color:#dbe3f8;border:1px solid #243356;padding:8px 12px;border-radius:10px;cursor:pointer;} .cxi-toolbar .ctrl:hover{background:#132040;}
+
+/* Button hover/press affordance */
+.btn, .cxi-btn, .rating-btn, .aspect-btn, .ctrl { transition: transform .08s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease; }
+.btn:hover, .cxi-btn:hover, .rating-btn:hover, .aspect-btn:hover, .ctrl:hover { transform: translateY(-1px); }
+.btn:active, .cxi-btn:active, .rating-btn:active, .aspect-btn:active, .ctrl:active,
+.btn.pressed, .cxi-btn.pressed, .rating-btn.pressed, .aspect-btn.pressed, .ctrl.pressed { transform: translateY(0); box-shadow: inset 0 2px 0 rgba(0,0,0,.12); }
+
+/* Compact results spacing */
+#results-view .results-card { padding: 1rem; }
+#results-view .results-grid { gap: 1rem; }
+#results-view .score-value { font-size: 2.4rem; }

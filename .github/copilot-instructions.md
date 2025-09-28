@@ -13,10 +13,10 @@ runs-on: ubuntu-latest
 timeout-minutes: 15
 steps: - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install
         run: npm ci
@@ -24,19 +24,35 @@ steps: - uses: actions/checkout@v4
       - name: Build
         run: npm run build
 
-      - name: Install Netlify CLI + wait-on
-        run: npm i -D netlify-cli@latest wait-on
-
       - name: Start Netlify Dev (background)
         run: |
-          npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
+          NETLIFY_LOG=debug npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
           echo $! > netlify_dev.pid
         env:
-          # Add any function env vars here if needed
           NODE_ENV: test
 
       - name: Wait for server
-        run: npx wait-on http://localhost:8888
+        run: |
+          set -e
+          echo "Waiting for http://localhost:8888 ..."
+          deadline=$((SECONDS+240))
+          until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
+            if [ $SECONDS -gt $deadline ]; then
+              echo "Timeout waiting for root.";
+              echo "::group::Netlify Dev Log (wait failure root)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1;
+            fi
+            sleep 2
+          done
+          echo "Root is up. Waiting for function endpoint..."
+          deadline=$((SECONDS+180))
+          until curl -sf http://localhost:8888/.netlify/functions/score >/dev/null 2>&1; do
+            if [ $SECONDS -gt $deadline ]; then
+              echo "Timeout waiting for function endpoint.";
+              echo "::group::Netlify Dev Log (wait failure fn)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1;
+            fi
+            sleep 2
+          done
+          echo "Function endpoint is up."
 
       - name: Run tests
         env:
@@ -49,7 +65,7 @@ steps: - uses: actions/checkout@v4
       - name: Stop Netlify Dev (always)
         if: always()
         run: |
-          kill -9 $(cat netlify_dev.pid) 2>/dev/null || true
+          if [ -f netlify_dev.pid ]; then kill -9 $(cat netlify_dev.pid) 2>/dev/null || true; fi
           sleep 1
           echo "::group::Netlify Dev Log"
           sed -n '1,200p' netlify-dev.log || true

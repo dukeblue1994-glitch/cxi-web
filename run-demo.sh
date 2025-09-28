@@ -21,7 +21,7 @@ echo $! > netlify_dev.pid
 
 # Wait for server readiness (root + function)
 echo "⏳ Waiting for server to be ready..."
-deadline=$((SECONDS+90))
+deadline=$((SECONDS+180))
 until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
   if [ $SECONDS -gt $deadline ]; then
     echo "Timeout waiting for root"; head -n 120 netlify-dev.log || true; exit 1;
@@ -30,7 +30,7 @@ until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
   done
 
 echo "Root is up. Waiting for function endpoint..."
-deadline=$((SECONDS+90))
+deadline=$((SECONDS+180))
 until curl -sf http://localhost:8888/.netlify/functions/score >/dev/null 2>&1; do
   if [ $SECONDS -gt $deadline ]; then
     echo "Timeout waiting for function endpoint"; head -n 200 netlify-dev.log || true; exit 1;
@@ -52,5 +52,6 @@ if [ -f netlify_dev.pid ]; then
   rm -f netlify_dev.pid
 fi
 
-echo "📋 Log excerpt:"
+echo "📋 Log tail (last 120 lines):"
+tail -n 120 netlify-dev.log || true
 head -n 200 netlify-dev.log || true

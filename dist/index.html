@@ -2594,8 +2594,7 @@
         }, 1000);
       }
 
-      /* updateProgress / enforceExactWords / countWords now provided by survey.js (inline duplicates removed) */
-
+      /* Inline fallback functions for when modules don't load properly */
       function updateWordCount(textareaId, countId) {
         const textarea = document.getElementById(textareaId);
         const countDiv = document.getElementById(countId);
@@ -2683,6 +2682,40 @@
       }
 
       // Start app when page loads
+      
+      /* Inline fallback functions for when modules don't load properly */
+      function updateProgress() {
+        console.log('updateProgress called (fallback)');
+        // Basic progress update without full validation
+        const submitBtn = document.getElementById("submit-btn");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.title = "Ready to score";
+        }
+      }
+
+      function enforceExactWords(textareaId, countId, exact) {
+        console.log('enforceExactWords called (fallback)');
+        const ta = document.getElementById(textareaId);
+        if (!ta) return;
+        const words = ta.value.trim().match(/\S+/g) || [];
+        if (words.length > exact) {
+          ta.value = words.slice(0, exact).join(" ");
+        }
+        const n = (ta.value.trim().match(/\S+/g) || []).length;
+        const countDiv = document.getElementById(countId);
+        if (countDiv) {
+          countDiv.textContent = `${n} / ${exact} words`;
+          countDiv.className = "word-count " + (n === exact ? "valid" : "invalid");
+        }
+      }
+
+      function countWords(text) {
+        if (!text || typeof text !== 'string') return 0;
+        const words = text.trim().match(/\S+/g);
+        return words ? words.length : 0;
+      }
+      
       document.addEventListener("DOMContentLoaded", function () {
         init();
         // Show HUD toggle only when ?debug=1

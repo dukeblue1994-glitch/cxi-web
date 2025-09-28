@@ -951,6 +951,48 @@
           padding: 1rem;
         }
       }
+      /* Inline demo CTA overlay (keeps instructions visible without scrolling) */
+      .demo-inline-cta {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 50;
+        display: grid;
+        gap: 10px;
+        min-width: min(720px, 92vw);
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: linear-gradient(0deg, rgba(15,20,34,.92), rgba(15,20,34,.92));
+        box-shadow: 0 12px 36px rgba(0,0,0,.45);
+        color: #e6efff;
+        text-align: center;
+      }
+      .demo-inline-cta .copy { font-size: 1rem; opacity: .95; }
+      .demo-inline-cta .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+      /* Compact results to reduce scroll */
+      .results-container { padding: 1rem; }
+      .results-grid { gap: 1rem; }
+      .results-card { padding: 1rem; }
+      .score-value { font-size: 2.4rem; }
+      /* Button press/hover states for all primary UI buttons */
+      .btn, .cxi-btn, .rating-btn, .aspect-btn, .ctrl {
+        transition: transform .08s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease;
+      }
+      .btn:hover, .cxi-btn:hover, .rating-btn:hover, .aspect-btn:hover, .ctrl:hover { transform: translateY(-1px); }
+      .btn:active, .cxi-btn:active, .rating-btn:active, .aspect-btn:active, .ctrl:active,
+      .btn.pressed, .cxi-btn.pressed, .rating-btn.pressed, .aspect-btn.pressed, .ctrl.pressed { transform: translateY(0); box-shadow: inset 0 2px 0 rgba(0,0,0,.12); }
+      /* Toolbar buttons visual affordance */
+      .cxi-toolbar .ctrl { border: 1px solid #20325e; background: #0f1a33; color: #cfe0ff; border-radius: 8px; padding: 8px 10px; }
+      .cxi-toolbar .ctrl:hover { background: #142346; }
+      .cxi-toolbar .ctrl.leave { background: #2a0f14; border-color: #5a1b23; color: #fecaca; font-weight: 700; }
+      .cxi-toolbar .ctrl.leave:hover { background: #3a1218; }
+      /* Hide HUD toggle unless debug=1 */
+      #hud-toggle-btn { display: none; }
+      @media (max-width: 680px) {
+        .demo-inline-cta { bottom: 14px; top: auto; transform: translateX(-50%); padding: 12px; }
+      }
     </style>
   </head>
   <body>
@@ -1005,6 +1047,14 @@
     <!-- Main Interview Interface (Zoom-style shell) -->
     <div class="interview-container" id="interview-view">
       <section class="cxi-meeting" role="group" aria-label="Meeting shell">
+        <!-- Inline demo CTA overlay -->
+        <div class="demo-inline-cta" id="inline-cta" role="region" aria-label="Start demo">
+          <div class="copy"><strong>Candidate Experience Demo</strong> — Click “Leave” to start the survey or use quick actions below.</div>
+          <div class="actions">
+            <button id="inline-start" class="btn btn-primary">Leave feedback</button>
+            <button id="inline-prefill" class="btn btn-ghost">Prefill & start</button>
+          </div>
+        </div>
         <!-- Top bar -->
         <div class="cxi-topbar" role="toolbar" aria-label="Meeting status">
           <div class="left">
@@ -2556,6 +2606,29 @@
       // Start app when page loads
       document.addEventListener("DOMContentLoaded", function () {
         init();
+        // Show HUD toggle only when ?debug=1
+        try {
+          const debug = new URL(location.href).searchParams.get("debug");
+          const hud = document.getElementById("hud-toggle-btn");
+          if (hud && debug === "1") hud.style.display = "inline-block";
+        } catch {}
+
+        // Button press visual feedback for fake/real buttons
+        document.addEventListener("mousedown", (e) => {
+          const t = e.target;
+          if (t && (t.classList?.contains("btn") || t.classList?.contains("cxi-btn") || t.classList?.contains("ctrl") || t.classList?.contains("rating-btn") || t.classList?.contains("aspect-btn"))) t.classList.add("pressed");
+        });
+        document.addEventListener("mouseup", (e) => e.target?.classList?.remove("pressed"));
+        document.addEventListener("mouseleave", (e) => e.target?.classList?.remove("pressed"));
+
+        // Inline CTA wiring
+        document.getElementById("inline-start")?.addEventListener("click", () => {
+          if (typeof openInvite === "function") openInvite(window.CANDIDATE_TOKEN || "", 0);
+        });
+        document.getElementById("inline-prefill")?.addEventListener("click", () => {
+          try { typeof autofill === "function" && autofill(); } catch {}
+          if (typeof openInvite === "function") openInvite(window.CANDIDATE_TOKEN || "", 0);
+        });
         // updateTimer no longer used with new chrome
 
         // Leave button handler (opens CXI invite)

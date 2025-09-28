@@ -49,9 +49,8 @@
     "npm": ">=8.0.0"
   },
   "dependencies": {
-    "@netlify/blobs": "^6.3.0",
-    "dotenv": "^17.2.2",
-    "node-fetch": "^2.7.0"
+  "@netlify/blobs": "^6.3.0",
+  "dotenv": "^17.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

@@ -3,9 +3,8 @@
  */
 
 import assert from "assert";
-import fetch from "node-fetch";
 
-const BASE = process.env.BASE_URL || "http://localhost:8888";
+const BASE = (globalThis.process && globalThis.process.env && globalThis.process.env.BASE_URL) || "http://localhost:8888";
 const ENDPOINT = BASE + "/.netlify/functions/score";
 
 async function post(body) {
@@ -103,8 +102,12 @@ function fifteen(words) {
     );
   }
 
-  console.log("Quality tests passed.");
+  globalThis.console && globalThis.console.log && globalThis.console.log("Quality tests passed.");
 })().catch((e) => {
-  console.error("Quality tests failed:", e);
-  process.exit(1);
+  if (globalThis.console && globalThis.console.error) {
+    globalThis.console.error("Quality tests failed:", e);
+  }
+  if (globalThis.process && globalThis.process.exit) {
+    globalThis.process.exit(1);
+  }
 });

@@ -1,58 +1,56 @@
 #!/bin/bash
-# Netlify Dev + Tests Script
-# Based on GitHub workflow from customer instructions
+# Netlify Dev + Tests Script (modern)
+# Uses curl-based readiness and relies on installed netlify-cli
 
-set -e
+set -euo pipefail
 
 echo "🚀 Starting Netlify Dev + Tests workflow"
 
-# Install dependencies if needed
+# Install deps
 echo "📦 Installing dependencies..."
 npm ci
 
-# Build the project
+# Build
 echo "🔨 Building project..."
 npm run build
 
-# Install testing dependencies
-echo "🧪 Installing test dependencies..."
-npm install -D netlify-cli@17.34.2 wait-on
-
 # Start Netlify Dev in background
 echo "🌐 Starting Netlify Dev server..."
-npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
+NETLIFY_LOG=debug npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
 echo $! > netlify_dev.pid
 
-# Wait for server to be ready
+# Wait for server readiness (root + function)
 echo "⏳ Waiting for server to be ready..."
-npx wait-on http://localhost:8888 --timeout 60000
+deadline=$((SECONDS+90))
+until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
+  if [ $SECONDS -gt $deadline ]; then
+    echo "Timeout waiting for root"; head -n 120 netlify-dev.log || true; exit 1;
+  fi
+  sleep 2
+  done
 
-# Set base URL for tests
+echo "Root is up. Waiting for function endpoint..."
+deadline=$((SECONDS+90))
+until curl -sf http://localhost:8888/.netlify/functions/score >/dev/null 2>&1; do
+  if [ $SECONDS -gt $deadline ]; then
+    echo "Timeout waiting for function endpoint"; head -n 200 netlify-dev.log || true; exit 1;
+  fi
+  sleep 2
+  done
+
+echo "✅ Server ready. Running tests..."
 export BASE_URL=http://localhost:8888
-
-# Run tests
-echo "🧪 Running tests..."
-echo "  → Running quality tests..."
 node test/test-quality.js
-
-echo "  → Running ATS tests..."
 node test/test-ats.js
-
-echo "  → Running reliability tests..."
 node test/test-reliability.js
 
 echo "✅ All tests passed!"
 
 # Cleanup
-echo "🧹 Cleaning up..."
 if [ -f netlify_dev.pid ]; then
-    kill -9 $(cat netlify_dev.pid) 2>/dev/null || true
-    rm netlify_dev.pid
+  kill -9 "$(cat netlify_dev.pid)" 2>/dev/null || true
+  rm -f netlify_dev.pid
 fi
 
-echo "📋 Test logs:"
-echo "::group::Netlify Dev Log"
-head -n 50 netlify-dev.log || true
-echo "::endgroup::"
-
-echo "🎉 Netlify deployment test completed successfully!"
+echo "📋 Log excerpt:"
+head -n 200 netlify-dev.log || true

@@ -42,11 +42,26 @@ jobs:
 
       - name: Wait for server
         run: |
-          npx -y wait-on --timeout 240000 \
-            http-get://localhost:8888 \
-            http-get://localhost:8888/api/score \
-            http-get://localhost:8888/.netlify/functions/score \
-            || (echo "::group::Netlify Dev Log (wait failure)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1)
+          set -e
+          echo "Waiting for http://localhost:8888 ..."
+          deadline=$((SECONDS+240))
+          until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
+            if [ $SECONDS -gt $deadline ]; then
+              echo "Timeout waiting for root.";
+              echo "::group::Netlify Dev Log (wait failure root)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1;
+            fi
+            sleep 2
+          done
+          echo "Root is up. Waiting for function endpoint..."
+          deadline=$((SECONDS+180))
+          until curl -sf http://localhost:8888/.netlify/functions/score >/dev/null 2>&1; do
+            if [ $SECONDS -gt $deadline ]; then
+              echo "Timeout waiting for function endpoint.";
+              echo "::group::Netlify Dev Log (wait failure fn)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1;
+            fi
+            sleep 2
+          done
+          echo "Function endpoint is up."
 
       - name: Tests
         env:

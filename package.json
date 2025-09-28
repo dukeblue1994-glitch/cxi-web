@@ -49,7 +49,7 @@
     "npm": ">=8.0.0"
   },
   "dependencies": {
-    "@netlify/blobs": "^6.3.0",
+    "@netlify/blobs": "^10.0.11",
     "dotenv": "^17.2.2"
   },
   "devDependencies": {

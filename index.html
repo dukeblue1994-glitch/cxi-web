@@ -963,35 +963,102 @@
         min-width: min(720px, 92vw);
         padding: 14px 16px;
         border-radius: 12px;
-        border: 1px solid rgba(255,255,255,.12);
-        background: linear-gradient(0deg, rgba(15,20,34,.92), rgba(15,20,34,.92));
-        box-shadow: 0 12px 36px rgba(0,0,0,.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(
+          0deg,
+          rgba(15, 20, 34, 0.92),
+          rgba(15, 20, 34, 0.92)
+        );
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
         color: #e6efff;
         text-align: center;
       }
-      .demo-inline-cta .copy { font-size: 1rem; opacity: .95; }
-      .demo-inline-cta .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-      /* Compact results to reduce scroll */
-      .results-container { padding: 1rem; }
-      .results-grid { gap: 1rem; }
-      .results-card { padding: 1rem; }
-      .score-value { font-size: 2.4rem; }
-      /* Button press/hover states for all primary UI buttons */
-      .btn, .cxi-btn, .rating-btn, .aspect-btn, .ctrl {
-        transition: transform .08s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease;
+      .demo-inline-cta .copy {
+        font-size: 1rem;
+        opacity: 0.95;
       }
-      .btn:hover, .cxi-btn:hover, .rating-btn:hover, .aspect-btn:hover, .ctrl:hover { transform: translateY(-1px); }
-      .btn:active, .cxi-btn:active, .rating-btn:active, .aspect-btn:active, .ctrl:active,
-      .btn.pressed, .cxi-btn.pressed, .rating-btn.pressed, .aspect-btn.pressed, .ctrl.pressed { transform: translateY(0); box-shadow: inset 0 2px 0 rgba(0,0,0,.12); }
+      .demo-inline-cta .actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      /* Compact results to reduce scroll */
+      .results-container {
+        padding: 1rem;
+      }
+      .results-grid {
+        gap: 1rem;
+      }
+      .results-card {
+        padding: 1rem;
+      }
+      .score-value {
+        font-size: 2.4rem;
+      }
+      /* Button press/hover states for all primary UI buttons */
+      .btn,
+      .cxi-btn,
+      .rating-btn,
+      .aspect-btn,
+      .ctrl {
+        transition:
+          transform 0.08s ease,
+          box-shadow 0.12s ease,
+          background-color 0.12s ease,
+          border-color 0.12s ease;
+      }
+      .btn:hover,
+      .cxi-btn:hover,
+      .rating-btn:hover,
+      .aspect-btn:hover,
+      .ctrl:hover {
+        transform: translateY(-1px);
+      }
+      .btn:active,
+      .cxi-btn:active,
+      .rating-btn:active,
+      .aspect-btn:active,
+      .ctrl:active,
+      .btn.pressed,
+      .cxi-btn.pressed,
+      .rating-btn.pressed,
+      .aspect-btn.pressed,
+      .ctrl.pressed {
+        transform: translateY(0);
+        box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.12);
+      }
       /* Toolbar buttons visual affordance */
-      .cxi-toolbar .ctrl { border: 1px solid #20325e; background: #0f1a33; color: #cfe0ff; border-radius: 8px; padding: 8px 10px; }
-      .cxi-toolbar .ctrl:hover { background: #142346; }
-      .cxi-toolbar .ctrl.leave { background: #2a0f14; border-color: #5a1b23; color: #fecaca; font-weight: 700; }
-      .cxi-toolbar .ctrl.leave:hover { background: #3a1218; }
+      .cxi-toolbar .ctrl {
+        border: 1px solid #20325e;
+        background: #0f1a33;
+        color: #cfe0ff;
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+      .cxi-toolbar .ctrl:hover {
+        background: #142346;
+      }
+      .cxi-toolbar .ctrl.leave {
+        background: #2a0f14;
+        border-color: #5a1b23;
+        color: #fecaca;
+        font-weight: 700;
+      }
+      .cxi-toolbar .ctrl.leave:hover {
+        background: #3a1218;
+      }
       /* Hide HUD toggle unless debug=1 */
-      #hud-toggle-btn { display: none; }
+      #hud-toggle-btn {
+        display: none;
+      }
       @media (max-width: 680px) {
-        .demo-inline-cta { bottom: 14px; top: auto; transform: translateX(-50%); padding: 12px; }
+        .demo-inline-cta {
+          bottom: 14px;
+          top: auto;
+          transform: translateX(-50%);
+          padding: 12px;
+        }
       }
     </style>
   </head>
@@ -1048,11 +1115,23 @@
     <div class="interview-container" id="interview-view">
       <section class="cxi-meeting" role="group" aria-label="Meeting shell">
         <!-- Inline demo CTA overlay -->
-        <div class="demo-inline-cta" id="inline-cta" role="region" aria-label="Start demo">
-          <div class="copy"><strong>Candidate Experience Demo</strong> — Click “Leave” to start the survey or use quick actions below.</div>
+        <div
+          class="demo-inline-cta"
+          id="inline-cta"
+          role="region"
+          aria-label="Start demo"
+        >
+          <div class="copy">
+            <strong>Candidate Experience Demo</strong> — Click “Leave” to start
+            the survey or use quick actions below.
+          </div>
           <div class="actions">
-            <button id="inline-start" class="btn btn-primary">Leave feedback</button>
-            <button id="inline-prefill" class="btn btn-ghost">Prefill & start</button>
+            <button id="inline-start" class="btn btn-primary">
+              Leave feedback
+            </button>
+            <button id="inline-prefill" class="btn btn-ghost">
+              Prefill & start
+            </button>
           </div>
         </div>
         <!-- Top bar -->
@@ -2199,7 +2278,7 @@
         const tabsBtns = Array.from(document.querySelectorAll(".nav-tab"));
         tabsBtns.forEach((btn) => btn.classList.remove("active"));
         const match = tabsBtns.find((b) =>
-          (b.textContent || "").toLowerCase().includes(tabName)
+          (b.textContent || "").toLowerCase().includes(tabName),
         );
         if (match) match.classList.add("active");
 
@@ -2241,7 +2320,7 @@
               const aa = m.accept || 0;
               const cc = vv ? (aa / vv) * 100 : 0;
               const label = variant.replace(/^li-|^std-/, (s) =>
-                s === "li-" ? "LI " : "Std "
+                s === "li-" ? "LI " : "Std ",
               );
               return `<div class="mt-025">• <b>${label}${variant.replace(/^(li-|std-)/, "")}</b> — ${aa}/${vv} (${cc.toFixed(1)}%)</div>`;
             });
@@ -2250,7 +2329,7 @@
             performance.measure?.(
               "ctr_fetch_total",
               "ctr_fetch_start",
-              "ctr_fetch_end"
+              "ctr_fetch_end",
             );
           } catch (e) {
             sumEl.textContent = "Metrics unavailable.";
@@ -2489,7 +2568,7 @@
         const url = new URL(location.href);
         const checkParam = (param) =>
           ["li", "linkedin"].includes(
-            (url.searchParams.get(param) || "").toLowerCase()
+            (url.searchParams.get(param) || "").toLowerCase(),
           );
         return (
           checkParam("src") ||
@@ -2616,19 +2695,39 @@
         // Button press visual feedback for fake/real buttons
         document.addEventListener("mousedown", (e) => {
           const t = e.target;
-          if (t && (t.classList?.contains("btn") || t.classList?.contains("cxi-btn") || t.classList?.contains("ctrl") || t.classList?.contains("rating-btn") || t.classList?.contains("aspect-btn"))) t.classList.add("pressed");
+          if (
+            t &&
+            (t.classList?.contains("btn") ||
+              t.classList?.contains("cxi-btn") ||
+              t.classList?.contains("ctrl") ||
+              t.classList?.contains("rating-btn") ||
+              t.classList?.contains("aspect-btn"))
+          )
+            t.classList.add("pressed");
         });
-        document.addEventListener("mouseup", (e) => e.target?.classList?.remove("pressed"));
-        document.addEventListener("mouseleave", (e) => e.target?.classList?.remove("pressed"));
+        document.addEventListener("mouseup", (e) =>
+          e.target?.classList?.remove("pressed"),
+        );
+        document.addEventListener("mouseleave", (e) =>
+          e.target?.classList?.remove("pressed"),
+        );
 
         // Inline CTA wiring
-        document.getElementById("inline-start")?.addEventListener("click", () => {
-          if (typeof openInvite === "function") openInvite(window.CANDIDATE_TOKEN || "", 0);
-        });
-        document.getElementById("inline-prefill")?.addEventListener("click", () => {
-          try { typeof autofill === "function" && autofill(); } catch {}
-          if (typeof openInvite === "function") openInvite(window.CANDIDATE_TOKEN || "", 0);
-        });
+        document
+          .getElementById("inline-start")
+          ?.addEventListener("click", () => {
+            if (typeof openInvite === "function")
+              openInvite(window.CANDIDATE_TOKEN || "", 0);
+          });
+        document
+          .getElementById("inline-prefill")
+          ?.addEventListener("click", () => {
+            try {
+              typeof autofill === "function" && autofill();
+            } catch {}
+            if (typeof openInvite === "function")
+              openInvite(window.CANDIDATE_TOKEN || "", 0);
+          });
         // updateTimer no longer used with new chrome
 
         // Leave button handler (opens CXI invite)
@@ -2745,12 +2844,12 @@
         document
           .getElementById("well")
           .addEventListener("input", () =>
-            enforceExactWords("well", "well-count", 15)
+            enforceExactWords("well", "well-count", 15),
           );
         document
           .getElementById("better")
           .addEventListener("input", () =>
-            enforceExactWords("better", "better-count", 15)
+            enforceExactWords("better", "better-count", 15),
           );
         document.getElementById("rant").addEventListener("input", () => {
           const ta = document.getElementById("rant");
@@ -2800,7 +2899,7 @@
               countWords(payload.better) !== 15
             ) {
               alert(
-                "Please write exactly 15 words for each of the first two answers."
+                "Please write exactly 15 words for each of the first two answers.",
               );
               return;
             }
@@ -2854,7 +2953,7 @@
       }
       function selectRating(field, val) {
         const group = document.querySelector(
-          `.rating-group[data-field="${field}"]`
+          `.rating-group[data-field="${field}"]`,
         );
         if (!group) return;
         group
@@ -2866,7 +2965,7 @@
       }
       function setAspect(aspect, on) {
         const btn = document.querySelector(
-          `.aspect-btn[data-aspect="${aspect}"]`
+          `.aspect-btn[data-aspect="${aspect}"]`,
         );
         if (!btn) return;
         if (on) {
@@ -2887,11 +2986,11 @@
           "stage",
           ["phone_screen", "hiring_manager", "panel", "virtual_onsite"][
             autoSeed % 4
-          ]
+          ],
         );
         setSelect(
           "role_family",
-          ["software", "product", "design", "data", "marketing"][autoSeed % 5]
+          ["software", "product", "design", "data", "marketing"][autoSeed % 5],
         );
         selectRating("overall", 3 + (autoSeed % 3));
         selectRating("fairness", 3 + ((autoSeed + 1) % 3));
@@ -2903,7 +3002,7 @@
           "feedback_timeliness",
           "respect",
         ].forEach((a, i) =>
-          setAspect(a, i < 3 || (i === 3 && autoSeed % 2 === 0))
+          setAspect(a, i < 3 || (i === 3 && autoSeed % 2 === 0)),
         );
         const w = document.getElementById("well");
         const b = document.getElementById("better");
@@ -2911,7 +3010,7 @@
         w.value = ensureExactWords(AUTO_WELL[autoSeed % AUTO_WELL.length], 15);
         b.value = ensureExactWords(
           AUTO_BETTER[autoSeed % AUTO_BETTER.length],
-          15
+          15,
         );
         r.value =
           "Overall solid experience; minor delays on feedback. Would recommend interviewing here.";
@@ -3162,7 +3261,7 @@
       const urlCXI = new URL(window.location.href);
       const hintedLI =
         ["li", "linkedin"].includes(
-          (urlCXI.searchParams.get("src") || "").toLowerCase()
+          (urlCXI.searchParams.get("src") || "").toLowerCase(),
         ) || (document.referrer || "").toLowerCase().includes("linkedin.com");
       function seededIndex(seed, len) {
         let x = 0;
@@ -3186,7 +3285,10 @@
         const st = getNudgeState();
         localStorage.setItem(
           CXI_NUDGE_KEY,
-          JSON.stringify({ count: st.count, nextAt: now + hours * 3600 * 1000 })
+          JSON.stringify({
+            count: st.count,
+            nextAt: now + hours * 3600 * 1000,
+          }),
         );
       }
       function getNudgeState() {
@@ -3205,7 +3307,7 @@
         const st = getNudgeState();
         localStorage.setItem(
           CXI_NUDGE_KEY,
-          JSON.stringify({ count: Math.min(st.count + 1, 3), nextAt: 0 })
+          JSON.stringify({ count: Math.min(st.count + 1, 3), nextAt: 0 }),
         );
       }
       function shouldShowNudgeNow() {
@@ -3228,8 +3330,8 @@
         // accessibility: set initial focus and trap
         const focusable = Array.from(
           $bd.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          )
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          ),
         );
         const first = focusable[0];
         const last = focusable[focusable.length - 1];

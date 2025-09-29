@@ -1,6 +1,5 @@
 // Naive CSS usage auditor: scans index.html + js files for class names and reports selectors in <style> not referenced.
 // Using CommonJS for broader compatibility with basic node invocations.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 
 const html = fs.readFileSync('index.html', 'utf8');

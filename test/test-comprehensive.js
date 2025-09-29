@@ -84,9 +84,12 @@ async function runComprehensiveTests() {
   totalTests++;
   passedTests += await runTest('ESLint Setup', () => {
     try {
-      execSync('npm run lint', { stdio: 'ignore' });
+      execSync('npm run lint', { stdio: 'pipe' });
       return true;
-    } catch {
+    } catch (error) {
+      if (error.stderr) {
+        log('ESLint error output:\n' + error.stderr.toString(), colors.red);
+      }
       return false;
     }
   });

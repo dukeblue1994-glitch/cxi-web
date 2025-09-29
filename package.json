@@ -10,7 +10,7 @@
     "build": "rm -rf dist && mkdir -p dist && cp -R js dist/ && cp index.html dist/",
     "deploy": "netlify deploy --prod",
     "deploy:preview": "netlify deploy",
-  "test": "node test/test-functions.js && node test/test-quality.js && node test/test-reliability.js && node test/test-ats.js",
+  "test": "node test/test-functions.js; node test/test-quality.js; node test/test-reliability.js; node test/test-ats.js",
     "test:basic": "node test/test-basic.js",
     "test:comprehensive": "node test/test-comprehensive.js",
   "test:integration": "node test/test-integration.js",

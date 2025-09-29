@@ -1,5 +1,7 @@
 ---
 name: Run Demo (Netlify Dev + Tests)
+permissions:
+  contents: read
 
 on:
   workflow_dispatch: {}

@@ -67,14 +67,27 @@ export function renderMetrics(metrics) {
     return;
   }
 
+  const fragment =
+    typeof document !== "undefined" &&
+    typeof document.createDocumentFragment === "function"
+      ? document.createDocumentFragment()
+      : null;
+
   for (const [variant, variantMetrics] of entries) {
     const view = Number(variantMetrics?.view) || 0;
     const accept = Number(variantMetrics?.accept) || 0;
     const ctr = view ? (accept / view) * 100 : 0;
     const label = formatVariantLabel(variant);
-    breakdownEl.appendChild(
-      createBreakdownRow(label, { view, accept, ctr }),
-    );
+    const row = createBreakdownRow(label, { view, accept, ctr });
+    if (fragment) {
+      fragment.appendChild(row);
+    } else {
+      breakdownEl.appendChild(row);
+    }
+  }
+
+  if (fragment) {
+    breakdownEl.appendChild(fragment);
   }
 }
 

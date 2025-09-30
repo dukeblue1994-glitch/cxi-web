@@ -13,10 +13,14 @@ function getMetricsRoot() {
 }
 
 function formatVariantLabel(variant) {
-  if (typeof variant !== "string") return "Unknown";
-  const prefixed = variant.replace(/^li-|^std-/, (s) => (s === "li-" ? "LI " : "Std "));
-  const suffix = variant.replace(/^(li-|std-)/, "");
-  return `${prefixed}${suffix}`;
+  if (typeof variant !== "string" || variant.trim() === "") return "Unknown";
+  const normalized = variant.replace(/^(li-|std-)/, "");
+  const prefix = variant.startsWith("li-")
+    ? "LI "
+    : variant.startsWith("std-")
+      ? "Std "
+      : "";
+  return `${prefix}${normalized}`;
 }
 
 function createBreakdownRow(label, metrics) {

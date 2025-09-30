@@ -951,37 +951,59 @@
           padding: 1rem;
         }
       }
-      /* Inline demo CTA overlay (keeps instructions visible without scrolling) */
-      .demo-inline-cta {
+      /* Inline demo instructions (top-left placard) */
+      .call-instructions {
         position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 50;
-        display: grid;
-        gap: 10px;
-        min-width: min(720px, 92vw);
-        padding: 14px 16px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: linear-gradient(
-          0deg,
-          rgba(15, 20, 34, 0.92),
-          rgba(15, 20, 34, 0.92)
-        );
-        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+        top: 16px;
+        left: 16px;
+        width: min(260px, 92%);
+        padding: 16px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(15, 23, 42, 0.9);
         color: #e6efff;
-        text-align: center;
+        box-shadow: 0 18px 36px rgba(2, 6, 23, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 20;
       }
-      .demo-inline-cta .copy {
+      .call-instructions .eyebrow {
+        display: block;
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        color: #60a5fa;
+      }
+      .call-instructions h2 {
         font-size: 1rem;
-        opacity: 0.95;
+        line-height: 1.35;
+        margin-bottom: 0.75rem;
+        color: #f8fafc;
       }
-      .demo-inline-cta .actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        flex-wrap: wrap;
+      .call-instructions p {
+        font-size: 0.84rem;
+        line-height: 1.4;
+        color: rgba(226, 232, 255, 0.92);
+        margin-bottom: 0.5rem;
+      }
+      .call-instructions ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        display: grid;
+        gap: 0.45rem;
+        font-size: 0.78rem;
+        color: rgba(226, 232, 255, 0.82);
+        text-align: left;
+      }
+      .call-instructions li strong {
+        color: #facc15;
+        font-weight: 700;
+      }
+      .call-instructions footer {
+        margin-top: 0.75rem;
+        font-size: 0.72rem;
+        color: rgba(148, 163, 184, 0.9);
       }
       /* Compact results to reduce scroll */
       .results-container {
@@ -1035,9 +1057,28 @@
         color: #cfe0ff;
         border-radius: 8px;
         padding: 8px 10px;
+        cursor: pointer;
+        position: relative;
+      }
+      .cxi-toolbar .ctrl::after {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        pointer-events: none;
+        transition: border-color 0.12s ease, box-shadow 0.12s ease;
       }
       .cxi-toolbar .ctrl:hover {
         background: #142346;
+      }
+      .cxi-toolbar .ctrl:hover::after {
+        border-color: rgba(96, 165, 250, 0.35);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+      .cxi-toolbar .ctrl:focus-visible::after {
+        border-color: rgba(96, 165, 250, 0.75);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
       }
       .cxi-toolbar .ctrl.leave {
         background: #2a0f14;
@@ -1047,17 +1088,26 @@
       }
       .cxi-toolbar .ctrl.leave:hover {
         background: #3a1218;
+        box-shadow: 0 12px 22px rgba(127, 29, 29, 0.4);
+      }
+      .cxi-toolbar .ctrl.leave:hover::after,
+      .cxi-toolbar .ctrl.leave:focus-visible::after {
+        border-color: rgba(248, 113, 113, 0.55);
+        box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.32);
       }
       /* Hide HUD toggle unless debug=1 */
       #hud-toggle-btn {
         display: none;
       }
       @media (max-width: 680px) {
-        .demo-inline-cta {
-          bottom: 14px;
+        .call-instructions {
+          position: fixed;
           top: auto;
+          bottom: 18px;
+          left: 50%;
           transform: translateX(-50%);
-          padding: 12px;
+          width: min(320px, 94vw);
+          padding: 14px 16px;
         }
       }
     </style>
@@ -1113,27 +1163,37 @@
     <!-- CSS Purge Note: When introducing a bundler, run a purge (PurgeCSS, lightningcss) against index.html + js/*.js to remove unused selectors. -->
     <!-- Main Interview Interface (Zoom-style shell) -->
     <div class="interview-container" id="interview-view">
-      <section class="cxi-meeting" role="group" aria-label="Meeting shell">
-        <!-- Inline demo CTA overlay -->
-        <div
-          class="demo-inline-cta"
+      <section
+        class="cxi-meeting call-interface"
+        role="group"
+        aria-label="Meeting shell"
+      >
+        <!-- Inline demo instructions placard -->
+        <aside
+          class="call-instructions"
           id="inline-cta"
-          role="region"
-          aria-label="Start demo"
+          role="complementary"
+          aria-label="Demo instructions"
         >
-          <div class="copy">
-            <strong>Candidate Experience Demo</strong> — Click “Leave” to start
-            the survey or use quick actions below.
-          </div>
-          <div class="actions">
-            <button id="inline-start" class="btn btn-primary">
-              Leave feedback
-            </button>
-            <button id="inline-prefill" class="btn btn-ghost">
-              Prefill & start
-            </button>
-          </div>
-        </div>
+          <span class="eyebrow">Instructions</span>
+          <h2>CXI Survey Demonstration</h2>
+          <p>
+            Click the <strong>Leave</strong> button in the call controls to launch
+            the coffee invite and feedback survey.
+          </p>
+          <ul>
+            <li><strong>Stay in character:</strong> the shell mimics a live Zoom.</li>
+            <li>
+              <strong>Accept:</strong> “Free coffee? Sure!” starts the survey with
+              $5 treat framing.
+            </li>
+            <li>
+              <strong>Later:</strong> “Remind me in an hour” queues a nudge email
+              (demo stateful).
+            </li>
+          </ul>
+          <footer>Need a shortcut? Prefill via console: <code>autofill()</code>.</footer>
+        </aside>
         <!-- Top bar -->
         <div class="cxi-topbar" role="toolbar" aria-label="Meeting status">
           <div class="left">

@@ -1,10 +1,13 @@
 // Survey invitation and modal functionality
 
-export function openInvite(candidateToken = '', nudgeRound = 0) {
-  // This function is implemented inline in index.html
-  // Keeping this as a stub for module compatibility
-  if (window.openInvite && typeof window.openInvite === 'function') {
-    return window.openInvite(candidateToken, nudgeRound);
+const inlineOpenInvite =
+  typeof window !== "undefined" && typeof window.openInvite === "function"
+    ? window.openInvite
+    : null;
+
+export function openInvite(candidateToken = "", nudgeRound = 0) {
+  if (typeof inlineOpenInvite === "function") {
+    return inlineOpenInvite(candidateToken, nudgeRound);
   }
 }
 

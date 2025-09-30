@@ -81,6 +81,26 @@ This project is designed to deploy on Netlify with zero configuration:
    - Netlify will automatically build and deploy from the main branch
    - Functions will be available at `/.netlify/functions/`
 
+#### Local Netlify CLI
+
+The repository is preconfigured to target the production site **`cxis.today`**, so running any
+Netlify CLI command (for example `npm run deploy`) will automatically use the correct project.
+
+```
+# Build the static assets
+npm run build
+
+# Deploy to the linked production site (requires `netlify login` or `NETLIFY_AUTH_TOKEN`)
+npm run deploy
+
+# Trigger a preview deploy instead of production
+npm run deploy:preview
+```
+
+If you prefer to link the folder manually, `npm run link` now executes `netlify link --name
+cxis.today`, which binds the workspace to the existing Netlify project without having to walk
+through the interactive prompt.
+
 ## Usage
 
 ### Basic Feedback Collection

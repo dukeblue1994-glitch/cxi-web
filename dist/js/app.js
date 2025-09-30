@@ -11,7 +11,9 @@ import {
 import { performanceMark } from "./utils.js";
 
 window.showResultsTab = showResultsTab;
-window.openInvite = openInvite;
+if (typeof window.openInvite !== "function") {
+  window.openInvite = (...args) => openInvite(...args);
+}
 window.showATSWebhook = showATSWebhook;
 window.pushTaskRow = pushTaskRow;
 window.toggleHud = toggleHud;
@@ -49,10 +51,16 @@ function wireSurvey() {
   setupSurveyInteractions();
   window.startSurvey = function startSurvey() {
     performanceMark("survey_start");
-    document.getElementById("survey-section").hidden = false;
-    document.getElementById("invite-trigger").hidden = true;
+    if (typeof window.showStage === "function") {
+      window.showStage("survey");
+    } else {
+      document.getElementById("interview-view")?.classList.add("hidden");
+      document.getElementById("survey-view")?.classList.remove("hidden");
+    }
+    const inviteTrigger = document.getElementById("invite-trigger");
+    if (inviteTrigger) inviteTrigger.hidden = true;
     updateProgress();
-    document.getElementById("well").focus();
+    document.getElementById("well")?.focus();
   };
 }
 
@@ -111,8 +119,14 @@ function wireSubmission() {
 
 function displayResults(data) {
   performanceMark("results_display");
-  qs("results-section").hidden = false;
-  qs("survey-section").hidden = true;
+  if (typeof window.showStage === "function") {
+    window.showStage("results");
+  } else {
+    const surveyView = document.getElementById("survey-view");
+    if (surveyView) surveyView.classList.add("hidden");
+    const resultsView = document.getElementById("results-view");
+    if (resultsView) resultsView.classList.remove("hidden");
+  }
   const { bands = {}, composite_index = 0 } = data;
   const overallEl = qs("overall-score");
   if (overallEl)

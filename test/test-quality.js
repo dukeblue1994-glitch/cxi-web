@@ -3,6 +3,7 @@
  */
 
 import assert from "assert";
+import { renderMetrics } from "../js/metrics.js";
 
 const BASE =
   (globalThis.process &&
@@ -106,6 +107,9 @@ function fifteen(words) {
     );
   }
 
+  // Verify CTR metrics renderer escapes variant labels
+  runMetricsSanitizationSmokeTest();
+
   globalThis.console &&
     globalThis.console.log &&
     globalThis.console.log("Quality tests passed.");
@@ -117,3 +121,106 @@ function fifteen(words) {
     globalThis.process.exit(1);
   }
 });
+
+function runMetricsSanitizationSmokeTest() {
+  class FakeTextNode {
+    constructor(text) {
+      this._text = text;
+    }
+    get textContent() {
+      return this._text;
+    }
+    set textContent(val) {
+      this._text = val;
+    }
+    toString() {
+      return this._text;
+    }
+  }
+
+  class FakeElement {
+    constructor(tag) {
+      this.tag = tag;
+      this.children = [];
+      this.className = "";
+    }
+    append(...nodes) {
+      for (const node of nodes) {
+        this.appendChild(node);
+      }
+    }
+    appendChild(node) {
+      this.children.push(node);
+      return node;
+    }
+    set textContent(val) {
+      this.children = [new FakeTextNode(val)];
+    }
+    get textContent() {
+      if (
+        this.children.length === 1 &&
+        this.children[0] instanceof FakeTextNode
+      ) {
+        return this.children[0].textContent;
+      }
+      return this.children.map(String).join("");
+    }
+  }
+
+  const summaryEl = new FakeElement("div");
+  const breakdownEl = new FakeElement("div");
+  const elements = {
+    "ctr-summary": summaryEl,
+    "ctr-breakdown": breakdownEl,
+  };
+
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+
+  globalThis.document = {
+    getElementById(id) {
+      return elements[id] || null;
+    },
+    createElement(tag) {
+      return new FakeElement(tag);
+    },
+    createTextNode(text) {
+      return new FakeTextNode(text);
+    },
+  };
+
+  globalThis.window = originalWindow || {};
+
+  try {
+    renderMetrics({
+      totals: { view: 10, accept: 5 },
+      byVariant: {
+        "<img src=x onerror=alert('xss')>": { view: 10, accept: 5 },
+      },
+    });
+
+    const rows = breakdownEl.children.filter(
+      (child) => child instanceof FakeElement,
+    );
+    assert.strictEqual(rows.length, 1, "Expected a single breakdown row");
+
+    const [row] = rows;
+    const boldNode = row.children.find(
+      (child) => child instanceof FakeElement && child.tag === "b",
+    );
+
+    assert.ok(boldNode, "Variant label should render inside a <b> tag");
+    assert.ok(
+      boldNode.textContent.includes("<img src=x onerror=alert('xss')>"),
+      "Variant label should be treated as literal text",
+    );
+
+    const hasImgChild = row.children.some(
+      (child) => child instanceof FakeElement && child.tag === "img",
+    );
+    assert.ok(!hasImgChild, "Variant label must not create DOM nodes");
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+  }
+}

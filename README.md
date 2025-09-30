@@ -81,6 +81,26 @@ This project is designed to deploy on Netlify with zero configuration:
    - Netlify will automatically build and deploy from the main branch
    - Functions will be available at `/.netlify/functions/`
 
+#### Local Netlify CLI
+
+The repository is preconfigured to target the production site **`cxis.today`**, so running any
+Netlify CLI command (for example `npm run deploy`) will automatically use the correct project.
+
+```
+# Build the static assets
+npm run build
+
+# Deploy to the linked production site (requires `netlify login` or `NETLIFY_AUTH_TOKEN`)
+npm run deploy
+
+# Trigger a preview deploy instead of production
+npm run deploy:preview
+```
+
+If you prefer to link the folder manually, `npm run link` now executes `netlify link --name
+cxis.today`, which binds the workspace to the existing Netlify project without having to walk
+through the interactive prompt.
+
 ## Usage
 
 ### Basic Feedback Collection
@@ -157,6 +177,38 @@ We welcome contributions to improve the CXI Project! Here's how you can help:
 - **Testing**: Add tests for new features and bug fixes
 - **Documentation**: Update relevant documentation for any changes
 - **Commit Messages**: Use clear, descriptive commit messages
+
+#### CTR metrics sanitization check
+
+Sanity check the CTR dashboard before shipping any metrics-related changes:
+
+1. Start the local test server in one shell:
+
+   ```bash
+   node server.js
+   ```
+
+2. In another shell, rebuild the static assets and run the automated suite which
+   includes an escape-hatch smoke test for variant labels:
+
+   ```bash
+   npm run build
+   npm run test
+   ```
+
+3. With the server still running, post a sample event that contains HTML in the
+   variant name and verify the dashboard renders the label literally (no HTML
+   execution):
+
+   ```bash
+   curl -X POST http://localhost:8888/.netlify/functions/metrics \
+     -H 'Content-Type: application/json' \
+     -d '{"variant":"<b>li-alert</b>","view":120,"accept":54}'
+   ```
+
+4. Refresh the Invite CTR panel at `http://localhost:8888` to confirm the
+   breakdown row shows the raw tag text. The renderer uses DOM APIs (instead of
+   `innerHTML`), so untrusted input remains safely escaped.
 
 ### Code Quality
 

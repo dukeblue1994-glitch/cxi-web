@@ -2,8 +2,27 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "pwa-node",
+      "name": "vscode-jest-tests.v2",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--watchAll=false",
+        "--testNamePattern"        "${jest.testNamePattern}",
+        "--runTestsByPath",
+        "${jest.testFile}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      }
+    },
+    {
       "name": "Dev: Start Netlify (background)",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/netlify",
       "args": [
@@ -17,14 +36,11 @@
         "--offline",
         "--no-open"
       ],
-      "console": "integratedTerminal",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "console": "integratedTerminal"
     },
     {
       "name": "Tests: All (BASE_URL=8888)",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/npm",
       "args": [
@@ -37,20 +53,7 @@
     },
     {
       "name": "Tests: Quality",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/node",
-      "args": [
-        "${workspaceFolder}/test/test-quality.js"
-      ],
-      "env": {
-        "BASE_URL": "http://localhost:8888"
-      },
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "Tests: Reliability",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/node",
       "args": [
@@ -63,7 +66,7 @@
     },
     {
       "name": "Tests: ATS",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/node",
       "args": [

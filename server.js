@@ -23,7 +23,7 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10) + ".ndjson";
 }
 
-const server = createServer(async (req, res) => {
+async function requestHandler(req, res) {
   // Enable CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -238,9 +238,71 @@ const server = createServer(async (req, res) => {
     res.writeHead(404);
     res.end("Not found");
   }
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log("Score function loaded:", !!scoreFunction);
-});
+let serverInstance = null;
+let serverPromise = null;
+
+export function createHttpServer() {
+  return createServer((req, res) => {
+    requestHandler(req, res).catch((err) => {
+      console.error("Unhandled server error", err);
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+      }
+      if (!res.writableEnded) {
+        res.end(JSON.stringify({ error: "Internal server error" }));
+      }
+    });
+  });
+}
+
+export async function startServer(port = PORT) {
+  if (serverInstance && serverInstance.listening) {
+    return serverInstance;
+  }
+  if (serverPromise) {
+    return serverPromise;
+  }
+
+  serverInstance = createHttpServer();
+  serverPromise = new Promise((resolve, reject) => {
+    serverInstance.once("error", (err) => {
+      console.error("Server failed to start", err);
+      serverPromise = null;
+      serverInstance = null;
+      reject(err);
+    });
+
+    serverInstance.listen(port, () => {
+      console.log(`Server running at http://localhost:${port}`);
+      console.log("Score function loaded:", !!scoreFunction);
+      resolve(serverInstance);
+    });
+  });
+
+  return serverPromise;
+}
+
+export async function stopServer() {
+  if (!serverInstance) return;
+  const instance = serverInstance;
+  serverInstance = null;
+  serverPromise = null;
+
+  await new Promise((resolve, reject) => {
+    instance.close((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  startServer();
+}
+
+export { PORT };

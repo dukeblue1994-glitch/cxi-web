@@ -4,6 +4,7 @@
 
 import assert from "assert";
 import { renderMetrics } from "../js/metrics.js";
+import { startServer, stopServer } from "../server.js";
 
 const BASE =
   (globalThis.process &&
@@ -29,8 +30,10 @@ function fifteen(words) {
 }
 
 (async () => {
-  // High quality payload (varied words, no repetition)
-  const good = await post({
+  await startServer();
+  try {
+    // High quality payload (varied words, no repetition)
+    const good = await post({
     candidate_token: "test_good",
     stage: "panel",
     role_family: "engineering",
@@ -56,8 +59,8 @@ function fifteen(words) {
     "Quality score should be > 0.6 for good sample",
   );
 
-  // Low quality payload (heavy repetition + gibberish-like tokens)
-  const bad = await post({
+    // Low quality payload (heavy repetition + gibberish-like tokens)
+    const bad = await post({
     candidate_token: "test_bad",
     stage: "panel",
     role_family: "engineering",
@@ -83,8 +86,8 @@ function fifteen(words) {
     "Bad submission should have flags",
   );
 
-  // Borderline case: some repetition but should remain eligible (diversity moderate)
-  const borderline = await post({
+    // Borderline case: some repetition but should remain eligible (diversity moderate)
+    const borderline = await post({
     candidate_token: "test_borderline",
     stage: "panel",
     role_family: "engineering",
@@ -107,12 +110,15 @@ function fifteen(words) {
     );
   }
 
-  // Verify CTR metrics renderer escapes variant labels
-  runMetricsSanitizationSmokeTest();
+    // Verify CTR metrics renderer escapes variant labels
+    runMetricsSanitizationSmokeTest();
 
-  globalThis.console &&
-    globalThis.console.log &&
-    globalThis.console.log("Quality tests passed.");
+    globalThis.console &&
+      globalThis.console.log &&
+      globalThis.console.log("Quality tests passed.");
+  } finally {
+    await stopServer();
+  }
 })().catch((e) => {
   if (globalThis.console && globalThis.console.error) {
     globalThis.console.error("Quality tests failed:", e);

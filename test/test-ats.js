@@ -1,5 +1,7 @@
 // ATS webhook & DLQ behavior tests (uses global fetch in Node 22)
 
+import { startServer, stopServer } from "../server.js";
+
 const BASE =
   (globalThis.process &&
     globalThis.process.env &&
@@ -24,6 +26,7 @@ async function post(path, body = {}, headers = {}) {
 }
 
 async function run() {
+  await startServer();
   if (globalThis.console && globalThis.console.log)
     globalThis.console.log("ATS tests start");
   // Baseline DLQ count
@@ -64,10 +67,13 @@ async function run() {
 
   if (globalThis.console && globalThis.console.log)
     globalThis.console.log("ATS tests complete");
+  await stopServer();
 }
 
 run().catch((e) => {
   if (globalThis.console && globalThis.console.error)
     globalThis.console.error("ATS tests failed", e);
-  if (globalThis.process && globalThis.process.exit) globalThis.process.exit(1);
+  stopServer().finally(() => {
+    if (globalThis.process && globalThis.process.exit) globalThis.process.exit(1);
+  });
 });

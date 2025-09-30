@@ -119,8 +119,9 @@ const server = createServer(async (req, res) => {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(response));
       } catch (error) {
+        console.error("Error in /api/seed-dlq handler:", error);
         res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ ok: false, error: String(error) }));
+        res.end(JSON.stringify({ ok: false, error: "Internal server error" }));
       }
     });
     return;

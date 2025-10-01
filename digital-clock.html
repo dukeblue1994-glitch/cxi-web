@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital Clock - Multiple Time Zones</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      justify-content: center;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    .clock-container {
+      display: flex;
+      gap: 40px;
+    }
+    .clock {
+      background: #222;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .timezone {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+    }
+    .time {
+      font-size: 2em;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Digital Clock - Multiple Time Zones</h1>
+  <div class="clock-container" id="clockContainer">
+    <!-- Clocks will be inserted here -->
+  </div>
+  <script src="digital-clock.js"></script>
+</body>
+</html>

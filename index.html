@@ -1112,7 +1112,7 @@
       }
     </style>
   </head>
-  <body>
+  <body data-stage="call">
     <a href="#survey-section" class="skip-link"> Skip to survey </a>
     <button
       id="hud-toggle-btn"
@@ -1175,24 +1175,35 @@
           role="complementary"
           aria-label="Demo instructions"
         >
-          <span class="eyebrow">Instructions</span>
-          <h2>CXI Survey Demonstration</h2>
+          <button
+            type="button"
+            class="dismiss"
+            aria-label="Hide instructions"
+            data-dismiss-instructions
+          >
+            ×
+          </button>
+          <span class="eyebrow">Run of show</span>
+          <h2>Guide your buyer through the “magic minute”</h2>
           <p>
-            Click the <strong>Leave</strong> button in the call controls to launch
-            the coffee invite and feedback survey.
+            Press <strong>Leave</strong> when you’re ready—the invite, scoring
+            ritual and dashboard reveal all fire in under 60 seconds.
           </p>
           <ul>
-            <li><strong>Stay in character:</strong> the shell mimics a live Zoom.</li>
+            <li><strong>Stage the scene:</strong> point out the live-call chrome.</li>
             <li>
-              <strong>Accept:</strong> “Free coffee? Sure!” starts the survey with
-              $5 treat framing.
+              <strong>Accept</strong> for the latte hook and instant survey
+              handoff.
             </li>
             <li>
-              <strong>Later:</strong> “Remind me in an hour” queues a nudge email
-              (demo stateful).
+              <strong>Remind me</strong> to queue a smart nudge (watch for the
+              toast).
             </li>
           </ul>
-          <footer>Need a shortcut? Prefill via console: <code>autofill()</code>.</footer>
+          <footer>
+            Need a shortcut? Prefill via console: <code>autofill()</code> or
+            <code>scoreDemo()</code>.
+          </footer>
         </aside>
         <!-- Top bar -->
         <div class="cxi-topbar" role="toolbar" aria-label="Meeting status">
@@ -1259,6 +1270,20 @@
           aria-live="polite"
           class="small ats-status"
         ></span>
+      </div>
+      <div class="payload-preview">
+        <div class="row">
+          <span>Stage</span>
+          <span id="ats-stage">Panel</span>
+        </div>
+        <div class="row">
+          <span>Role</span>
+          <span id="ats-role">Backend SWE</span>
+        </div>
+        <div class="row">
+          <span>Token</span>
+          <span id="ats-token">cand_demo</span>
+        </div>
       </div>
       <pre id="ats-json" aria-live="polite">{}</pre>
     </aside>
@@ -1729,105 +1754,128 @@
       <!-- Summary Tab -->
       <div id="summary-tab">
         <div class="results-grid">
-          <div class="results-card">
-            <div class="score-display">
-              <div class="score-label">Net Sentiment Score</div>
-              <div class="score-value success" id="nss-display">+0.75</div>
-              <div class="band-indicator band-success" id="nss-band">
-                Positive
+          <div class="results-card highlight-card" id="results-hero-card">
+            <div class="results-hero">
+              <div class="score-orb" id="score-orb">
+                <span class="orb-value" id="orb-score">82</span>
+                <span class="orb-label">Composite Index</span>
+                <div class="orb-band">
+                  <span id="orb-band-label">Success</span>
+                </div>
+              </div>
+              <div class="hero-metric-grid">
+                <div class="metric-tile">
+                  <div>
+                    <div class="metric-label">Net Sentiment Score</div>
+                    <div class="metric-value" id="nss-display">+0.75</div>
+                  </div>
+                  <div class="band-indicator band-success" id="nss-band">
+                    Positive
+                  </div>
+                </div>
+                <div class="metric-tile">
+                  <div>
+                    <div class="metric-label">Quality Signal</div>
+                    <div class="metric-value" id="quality-score">92%</div>
+                  </div>
+                  <div class="band-indicator band-success" id="quality-band">
+                    Eligible
+                  </div>
+                </div>
+                <div class="metric-tile">
+                  <div>
+                    <div class="metric-label">Attention</div>
+                    <div class="metric-value" id="attention-score">4.8</div>
+                  </div>
+                  <div class="band-indicator band-success" id="attention-band">
+                    High
+                  </div>
+                </div>
               </div>
             </div>
+            <div
+              class="transcript-playback"
+              id="transcript-playback"
+              aria-live="polite"
+            ></div>
+          </div>
+
+          <div class="results-card" id="insight-card">
+            <h3>✨ Signal Highlights</h3>
             <div class="highlights-section">
-              <h4>Key Phrases</h4>
-              <div id="highlights-display">
+              <div id="highlights-display" class="highlight-stream">
                 <span class="highlight-item highlight-positive"
                   >clear communication</span
                 >
-                <span class="highlight-item highlight-positive"
-                  >responsive team</span
-                >
-                <span class="highlight-item highlight-negative"
-                  >slow feedback</span
-                >
               </div>
+            </div>
+            <div class="highlights-section mt-1">
+              <h4>Aspect Pulse</h4>
+              <div class="absa-tags" id="absa-display"></div>
             </div>
           </div>
 
-          <div class="results-card">
-            <div class="score-display">
-              <div class="score-label">Composite Index</div>
-              <div class="score-value success" id="index-display">0.82</div>
-              <div class="band-indicator band-success" id="index-band">
-                Success
+          <div class="results-card" id="summary-card">
+            <h3>📝 Narrative &amp; Coaching</h3>
+            <div id="summary-text">
+              <p>
+                <strong>Summary:</strong>
+                <span id="response-summary"
+                  >Positive experience at panel stage. Strengths: communication,
+                  clarity. Areas for improvement: feedback timeliness.</span
+                >
+              </p>
+              <div class="task-coaching">
+                <strong>Coaching Cue:</strong>
+                <span id="coaching-cue"
+                  >Set feedback SLA ≤3 business days for panel stage.</span
+                >
               </div>
-            </div>
-            <div class="highlights-section">
-              <h4>ABSA Analysis</h4>
-              <div class="absa-tags" id="absa-display">
-                <span class="absa-tag absa-positive">Communication</span>
-                <span class="absa-tag absa-positive">Clarity</span>
-                <span class="absa-tag absa-negative">Feedback Timeline</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="results-card">
-          <h3>📝 Summary & Coaching</h3>
-          <div id="summary-text">
-            <p>
-              <strong>Summary:</strong>
-              <span id="response-summary"
-                >Positive experience at panel stage. Strengths: communication,
-                clarity. Areas for improvement: feedback timeliness.</span
-              >
-            </p>
-            <div class="task-coaching">
-              <strong>Coaching Cue:</strong>
-              <span id="coaching-cue"
-                >Set feedback SLA ≤3 business days for panel stage.</span
-              >
-            </div>
-            <div id="quality-block" class="mt-1" hidden>
-              <div class="small muted" id="quality-flags"></div>
-              <div class="quality-row">
-                <div id="results-live" aria-live="polite" aria-atomic="true">
-                  <span id="quality-badge" class="quality-badge"
-                    ><svg aria-hidden="true" width="14" height="14">
-                      <use href="#icon-info" />
-                    </svg>
-                    <span class="qb-text">Quality: --</span></span
-                  >
+              <div id="quality-block" class="mt-1" hidden>
+                <div class="small muted" id="quality-flags"></div>
+                <div class="quality-row">
+                  <div id="results-live" aria-live="polite" aria-atomic="true">
+                    <span id="quality-badge" class="quality-badge"
+                      ><svg aria-hidden="true" width="14" height="14">
+                        <use href="#icon-info" />
+                      </svg>
+                      <span class="qb-text">Quality: --</span></span
+                    >
+                  </div>
+                  <span id="incentive-eligibility" class="small ml-1"></span>
                 </div>
-                <span id="incentive-eligibility" class="small ml-1"></span>
               </div>
             </div>
-          </div>
-          <div class="mt-1">
-            <button class="btn btn-primary" onclick="pushToDashboard()">
-              Push to Dashboard
-            </button>
-            <button class="btn btn-ghost" onclick="resetDemo()">
-              Reset Sample
-            </button>
-          </div>
-        </div>
-
-        <div class="results-card" id="ctr-card">
-          <div class="ctr-hdr">
-            <h3 class="no-m">📈 Invite CTR</h3>
-            <div>
-              <label class="small" for="ctr-days-select">Range</label>
-              <select id="ctr-days-select" class="small" aria-label="CTR range">
-                <option value="7" selected>Last 7 days</option>
-                <option value="14">Last 14 days</option>
-                <option value="30">Last 30 days</option>
-              </select>
+            <div class="mt-1 action-row">
+              <button class="btn btn-primary" onclick="pushToDashboard()">
+                Push to Dashboard
+              </button>
+              <button class="btn btn-ghost" onclick="resetDemo()">
+                Reset Sample
+              </button>
             </div>
           </div>
-          <div class="muted small">Views vs Accepts by invite variant</div>
-          <div id="ctr-summary" class="mt-1 muted">Loading…</div>
-          <div id="ctr-breakdown" class="mt-1 small"></div>
+
+          <div class="results-card" id="ctr-card">
+            <div class="ctr-hdr">
+              <h3 class="no-m">📈 Invite CTR</h3>
+              <div>
+                <label class="small" for="ctr-days-select">Range</label>
+                <select
+                  id="ctr-days-select"
+                  class="small"
+                  aria-label="CTR range"
+                >
+                  <option value="7" selected>Last 7 days</option>
+                  <option value="14">Last 14 days</option>
+                  <option value="30">Last 30 days</option>
+                </select>
+              </div>
+            </div>
+            <div class="muted small">Views vs Accepts by invite variant</div>
+            <div id="ctr-summary" class="mt-1 muted">Loading…</div>
+            <div id="ctr-breakdown" class="mt-1 small"></div>
+          </div>
         </div>
       </div>
 
@@ -1840,242 +1888,341 @@
             negative sentiment.
           </p>
 
-          <div class="heatmap-grid" id="heatmap-grid">
-            <!-- Headers -->
-            <div class="heatmap-header"></div>
-            <div class="heatmap-header">Applied</div>
-            <div class="heatmap-header">Recruiter</div>
-            <div class="heatmap-header">Hiring Mgr</div>
-            <div class="heatmap-header">Panel</div>
-            <div class="heatmap-header">Assignment</div>
-            <div class="heatmap-header">Offer</div>
-            <div class="heatmap-header">Rejected</div>
+        <div class="heatmap-grid" id="heatmap-grid">
+          <div class="heatmap-header"></div>
+          <div class="heatmap-header">Applied</div>
+          <div class="heatmap-header">Recruiter</div>
+          <div class="heatmap-header">Hiring Mgr</div>
+          <div class="heatmap-header">Panel</div>
+          <div class="heatmap-header">Assignment</div>
+          <div class="heatmap-header">Offer</div>
+          <div class="heatmap-header">Rejected</div>
 
-            <!-- Communication Row -->
-            <div class="heatmap-row-label">Communication</div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('communication', 'applied')"
-            >
-              +0.8
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('communication', 'recruiter')"
-            >
-              +0.6
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('communication', 'hiring_manager')"
-            >
-              +0.7
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('communication', 'panel')"
-            >
-              +0.5
-            </div>
-            <div
-              class="heatmap-cell heatmap-neutral"
-              onclick="showHeatmapDetail('communication', 'assignment')"
-            >
-              +0.2
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('communication', 'offer')"
-            >
-              +0.9
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('communication', 'rejected')"
-            >
-              -0.3
-            </div>
-
-            <!-- Scheduling Row -->
-            <div class="heatmap-row-label">Scheduling</div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('scheduling', 'applied')"
-            >
-              +0.9
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('scheduling', 'recruiter')"
-            >
-              +0.4
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('scheduling', 'hiring_manager')"
-            >
-              -0.2
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('scheduling', 'panel')"
-            >
-              -0.4
-            </div>
-            <div
-              class="heatmap-cell heatmap-neutral"
-              onclick="showHeatmapDetail('scheduling', 'assignment')"
-            >
-              +0.1
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('scheduling', 'offer')"
-            >
-              +0.7
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('scheduling', 'rejected')"
-            >
-              -0.6
-            </div>
-
-            <!-- Clarity Row -->
-            <div class="heatmap-row-label">Clarity</div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('clarity', 'applied')"
-            >
-              +0.6
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('clarity', 'recruiter')"
-            >
-              +0.8
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('clarity', 'hiring_manager')"
-            >
-              +0.3
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('clarity', 'panel')"
-            >
-              -0.1
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('clarity', 'assignment')"
-            >
-              -0.3
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('clarity', 'offer')"
-            >
-              +0.8
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('clarity', 'rejected')"
-            >
-              -0.5
-            </div>
-
-            <!-- Respect Row -->
-            <div class="heatmap-row-label">Respect</div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('respect', 'applied')"
-            >
-              +0.9
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('respect', 'recruiter')"
-            >
-              +0.7
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('respect', 'hiring_manager')"
-            >
-              +0.8
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('respect', 'panel')"
-            >
-              +0.6
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('respect', 'assignment')"
-            >
-              +0.4
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('respect', 'offer')"
-            >
-              +0.9
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('respect', 'rejected')"
-            >
-              -0.2
-            </div>
-
-            <!-- Feedback Timeline Row -->
-            <div class="heatmap-row-label">Feedback</div>
-            <div
-              class="heatmap-cell heatmap-neutral"
-              onclick="showHeatmapDetail('feedback', 'applied')"
-            >
-              +0.1
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('feedback', 'recruiter')"
-            >
-              -0.2
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('feedback', 'hiring_manager')"
-            >
-              -0.4
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('feedback', 'panel')"
-            >
-              -0.6
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('feedback', 'assignment')"
-            >
-              -0.8
-            </div>
-            <div
-              class="heatmap-cell heatmap-positive"
-              onclick="showHeatmapDetail('feedback', 'offer')"
-            >
-              +0.5
-            </div>
-            <div
-              class="heatmap-cell heatmap-negative"
-              onclick="showHeatmapDetail('feedback', 'rejected')"
-            >
-              -0.9
-            </div>
+          <div class="heatmap-row-label">Communication</div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="communication"
+            data-stage="applied"
+            data-label="Applied"
+            onclick="showHeatmapDetail('communication', 'applied')"
+          >
+            +0.8
           </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="communication"
+            data-stage="recruiter"
+            data-label="Recruiter"
+            onclick="showHeatmapDetail('communication', 'recruiter')"
+          >
+            +0.6
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="communication"
+            data-stage="hiring_manager"
+            data-label="Hiring Mgr"
+            onclick="showHeatmapDetail('communication', 'hiring_manager')"
+          >
+            +0.7
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="communication"
+            data-stage="panel"
+            data-label="Panel"
+            onclick="showHeatmapDetail('communication', 'panel')"
+          >
+            +0.5
+          </div>
+          <div
+            class="heatmap-cell heatmap-neutral"
+            data-aspect="communication"
+            data-stage="assignment"
+            data-label="Assignment"
+            onclick="showHeatmapDetail('communication', 'assignment')"
+          >
+            +0.2
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="communication"
+            data-stage="offer"
+            data-label="Offer"
+            onclick="showHeatmapDetail('communication', 'offer')"
+          >
+            +0.9
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="communication"
+            data-stage="rejected"
+            data-label="Rejected"
+            onclick="showHeatmapDetail('communication', 'rejected')"
+          >
+            -0.3
+          </div>
+
+          <div class="heatmap-row-label">Scheduling</div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="scheduling"
+            data-stage="applied"
+            data-label="Applied"
+            onclick="showHeatmapDetail('scheduling', 'applied')"
+          >
+            +0.9
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="scheduling"
+            data-stage="recruiter"
+            data-label="Recruiter"
+            onclick="showHeatmapDetail('scheduling', 'recruiter')"
+          >
+            +0.4
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="scheduling"
+            data-stage="hiring_manager"
+            data-label="Hiring Mgr"
+            onclick="showHeatmapDetail('scheduling', 'hiring_manager')"
+          >
+            -0.2
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="scheduling"
+            data-stage="panel"
+            data-label="Panel"
+            onclick="showHeatmapDetail('scheduling', 'panel')"
+          >
+            -0.4
+          </div>
+          <div
+            class="heatmap-cell heatmap-neutral"
+            data-aspect="scheduling"
+            data-stage="assignment"
+            data-label="Assignment"
+            onclick="showHeatmapDetail('scheduling', 'assignment')"
+          >
+            +0.1
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="scheduling"
+            data-stage="offer"
+            data-label="Offer"
+            onclick="showHeatmapDetail('scheduling', 'offer')"
+          >
+            +0.7
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="scheduling"
+            data-stage="rejected"
+            data-label="Rejected"
+            onclick="showHeatmapDetail('scheduling', 'rejected')"
+          >
+            -0.6
+          </div>
+
+          <div class="heatmap-row-label">Clarity</div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="clarity"
+            data-stage="applied"
+            data-label="Applied"
+            onclick="showHeatmapDetail('clarity', 'applied')"
+          >
+            +0.6
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="clarity"
+            data-stage="recruiter"
+            data-label="Recruiter"
+            onclick="showHeatmapDetail('clarity', 'recruiter')"
+          >
+            +0.8
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="clarity"
+            data-stage="hiring_manager"
+            data-label="Hiring Mgr"
+            onclick="showHeatmapDetail('clarity', 'hiring_manager')"
+          >
+            +0.3
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="clarity"
+            data-stage="panel"
+            data-label="Panel"
+            onclick="showHeatmapDetail('clarity', 'panel')"
+          >
+            -0.1
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="clarity"
+            data-stage="assignment"
+            data-label="Assignment"
+            onclick="showHeatmapDetail('clarity', 'assignment')"
+          >
+            -0.3
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="clarity"
+            data-stage="offer"
+            data-label="Offer"
+            onclick="showHeatmapDetail('clarity', 'offer')"
+          >
+            +0.8
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="clarity"
+            data-stage="rejected"
+            data-label="Rejected"
+            onclick="showHeatmapDetail('clarity', 'rejected')"
+          >
+            -0.5
+          </div>
+
+          <div class="heatmap-row-label">Respect</div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="respect"
+            data-stage="applied"
+            data-label="Applied"
+            onclick="showHeatmapDetail('respect', 'applied')"
+          >
+            +0.9
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="respect"
+            data-stage="recruiter"
+            data-label="Recruiter"
+            onclick="showHeatmapDetail('respect', 'recruiter')"
+          >
+            +0.7
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="respect"
+            data-stage="hiring_manager"
+            data-label="Hiring Mgr"
+            onclick="showHeatmapDetail('respect', 'hiring_manager')"
+          >
+            +0.8
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="respect"
+            data-stage="panel"
+            data-label="Panel"
+            onclick="showHeatmapDetail('respect', 'panel')"
+          >
+            +0.6
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="respect"
+            data-stage="assignment"
+            data-label="Assignment"
+            onclick="showHeatmapDetail('respect', 'assignment')"
+          >
+            +0.4
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="respect"
+            data-stage="offer"
+            data-label="Offer"
+            onclick="showHeatmapDetail('respect', 'offer')"
+          >
+            +0.9
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="respect"
+            data-stage="rejected"
+            data-label="Rejected"
+            onclick="showHeatmapDetail('respect', 'rejected')"
+          >
+            -0.2
+          </div>
+
+          <div class="heatmap-row-label">Feedback</div>
+          <div
+            class="heatmap-cell heatmap-neutral"
+            data-aspect="feedback"
+            data-stage="applied"
+            data-label="Applied"
+            onclick="showHeatmapDetail('feedback', 'applied')"
+          >
+            +0.1
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="feedback"
+            data-stage="recruiter"
+            data-label="Recruiter"
+            onclick="showHeatmapDetail('feedback', 'recruiter')"
+          >
+            -0.2
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="feedback"
+            data-stage="hiring_manager"
+            data-label="Hiring Mgr"
+            onclick="showHeatmapDetail('feedback', 'hiring_manager')"
+          >
+            -0.4
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="feedback"
+            data-stage="panel"
+            data-label="Panel"
+            onclick="showHeatmapDetail('feedback', 'panel')"
+          >
+            -0.6
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="feedback"
+            data-stage="assignment"
+            data-label="Assignment"
+            onclick="showHeatmapDetail('feedback', 'assignment')"
+          >
+            -0.8
+          </div>
+          <div
+            class="heatmap-cell heatmap-positive"
+            data-aspect="feedback"
+            data-stage="offer"
+            data-label="Offer"
+            onclick="showHeatmapDetail('feedback', 'offer')"
+          >
+            +0.5
+          </div>
+          <div
+            class="heatmap-cell heatmap-negative"
+            data-aspect="feedback"
+            data-stage="rejected"
+            data-label="Rejected"
+            onclick="showHeatmapDetail('feedback', 'rejected')"
+          >
+            -0.9
+          </div>
+        </div>
         </div>
 
         <div id="heatmap-detail" class="results-card hidden">
@@ -2123,10 +2270,45 @@
           </div>
         </div>
 
+        <div class="results-card roster-card" id="interviewer-roster">
+          <h4>Interview Team Coaching Focus</h4>
+          <ul>
+            <li>
+              <span class="name">Jason R.</span>
+              <span class="goal">Weekly goal: SLA &lt; 48 hours feedback.</span>
+            </li>
+            <li>
+              <span class="name">Jess D.</span>
+              <span class="goal"
+                >Communication must clearly outline the role and agenda.</span
+              >
+            </li>
+            <li>
+              <span class="name">Priya K.</span>
+              <span class="goal"
+                >Ensure technical debriefs include action-ready notes for hiring
+                managers.</span
+              >
+            </li>
+            <li>
+              <span class="name">Amelia S.</span>
+              <span class="goal"
+                >Build consistent rubric talk-throughs to set candidate
+                expectations.</span
+              >
+            </li>
+          </ul>
+        </div>
+
         <div class="task-list" id="task-list">
           <div class="task-header">Active Tasks (3)</div>
 
-          <div class="task-item" data-stage="panel" data-priority="high">
+          <div
+            class="task-item"
+            data-stage="panel"
+            data-priority="high"
+            data-age-minutes="120"
+          >
             <div class="task-meta">
               <div>
                 <span class="task-priority priority-high">High</span>
@@ -2143,7 +2325,12 @@
             </div>
           </div>
 
-          <div class="task-item" data-stage="recruiter" data-priority="medium">
+          <div
+            class="task-item"
+            data-stage="recruiter"
+            data-priority="medium"
+            data-age-minutes="300"
+          >
             <div class="task-meta">
               <div>
                 <span class="task-priority priority-medium">Medium</span>
@@ -2159,7 +2346,12 @@
             </div>
           </div>
 
-          <div class="task-item" data-stage="offer" data-priority="low">
+          <div
+            class="task-item"
+            data-stage="offer"
+            data-priority="low"
+            data-age-minutes="1440"
+          >
             <div class="task-meta">
               <div>
                 <span class="task-priority priority-low">Low</span>
@@ -2208,6 +2400,120 @@
       </div>
     </div>
 
+    <div
+      id="score-reveal"
+      class="score-reveal"
+      role="dialog"
+      aria-modal="true"
+      aria-live="assertive"
+      hidden
+    >
+      <div class="score-reveal__panel">
+        <button
+          type="button"
+          class="score-reveal__close"
+          data-close-reveal
+          aria-label="Dismiss score reveal"
+        >
+          ×
+        </button>
+        <span class="score-reveal__eyebrow">Magic minute</span>
+        <h2 class="score-reveal__headline">Signal spell complete ✨</h2>
+        <div class="score-reveal__grid">
+          <div class="score-reveal__metric">
+            <span class="label">Composite Index</span>
+            <span class="value" data-reveal-index>0</span>
+          </div>
+          <div class="score-reveal__metric">
+            <span class="label">Net Sentiment</span>
+            <span class="value" data-reveal-nss>+0.00</span>
+          </div>
+          <div class="score-reveal__metric">
+            <span class="label">Quality Gate</span>
+            <span class="value" data-reveal-quality>0%</span>
+          </div>
+        </div>
+        <div class="score-reveal__summary" data-reveal-summary>
+          Candidate sentiment landed positive at the panel stage. Strengths:
+          communication &amp; clarity. Focus next: feedback cadence.
+        </div>
+        <div class="score-reveal__stage">
+          <span data-reveal-stage>Panel Interview</span>
+          <span class="band-pill" data-reveal-band>Success</span>
+        </div>
+        <div class="score-reveal__aspects" data-reveal-aspects>
+          <span>Communication</span><span>Clarity</span>
+        </div>
+        <div class="score-reveal__sentence" data-reveal-sentence>
+          Panel started on time with clear introductions and respectful tone
+          throughout.
+        </div>
+        <div class="score-reveal__actions">
+          <button type="button" class="btn btn-ghost" data-close-reveal>
+            Skip animation
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-reveal-open-dashboard
+          >
+            Open full dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard share modal -->
+    <div
+      id="dashboard-modal"
+      class="modal-overlay"
+      role="presentation"
+      hidden
+    >
+      <div
+        class="modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dashboard-modal-title"
+      >
+        <header>
+          <h3 id="dashboard-modal-title">Push to CXI Dashboard</h3>
+          <button
+            type="button"
+            class="btn btn-ghost"
+            data-close-dashboard
+            aria-label="Close push-to-dashboard modal"
+          >
+            ×
+          </button>
+        </header>
+        <div id="dashboard-modal-summary" class="muted small">
+          Coaching tasks staged for review.
+        </div>
+        <div class="modal-body">
+          <div class="checklist" id="dashboard-task-list"></div>
+          <div>
+            <h4>Share instantly</h4>
+            <div class="share-buttons">
+              <button class="btn btn-primary" data-share="email">Email</button>
+              <button class="btn btn-primary" data-share="slack">Slack</button>
+              <button class="btn btn-primary" data-share="teams">Teams</button>
+              <button class="btn btn-primary" data-share="pdf">Export PDF</button>
+            </div>
+            <div class="share-preview" id="share-preview" hidden></div>
+          </div>
+        </div>
+        <footer>
+          <button class="btn btn-ghost" data-action="copy-checklist">
+            Copy selected tasks
+          </button>
+          <button class="btn btn-primary" data-close-dashboard>Done</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="toast-layer" class="toast-layer" aria-live="polite"></div>
+
     <script>
       let currentStage = "call";
       let isRecording = false;
@@ -2235,6 +2541,7 @@
       // Zoom Call Functions
       function showStage(stage) {
         currentStage = stage;
+        document.body.dataset.stage = stage;
         // Hide all major views
         ["interview-view", "survey-view", "results-view"].forEach((id) => {
           const el = document.getElementById(id);
@@ -2254,6 +2561,10 @@
         // Auto-load summary metrics when landing on results
         if (stage === "results" && typeof loadCtrMetrics === "function") {
           loadCtrMetrics();
+          requestAnimationFrame(() => {
+            document.getElementById("results-view")?.scrollTo?.(0, 0);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
         }
 
         // Update hash
@@ -2654,6 +2965,24 @@
         }, 1000);
       }
 
+      function showToast(message, tone = "positive") {
+        const layer = document.getElementById("toast-layer");
+        if (!layer) return;
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.dataset.tone = tone;
+        toast.innerHTML = `<span>${message}</span><button type="button" class="toast-close" aria-label="Dismiss notification">×</button>`;
+        const closeBtn = toast.querySelector(".toast-close");
+        const dismiss = () => {
+          toast.classList.add("hiding");
+          setTimeout(() => toast.remove(), 200);
+        };
+        closeBtn?.addEventListener("click", dismiss);
+        layer.appendChild(toast);
+        setTimeout(dismiss, 4200);
+      }
+      window.__cxToast = showToast;
+
       /* Inline fallback functions for when modules don't load properly */
       function updateWordCount(textareaId, countId) {
         const textarea = document.getElementById(textareaId);
@@ -2755,7 +3084,6 @@
       }
 
       function enforceExactWords(textareaId, countId, exact) {
-        console.log('enforceExactWords called (fallback)');
         const ta = document.getElementById(textareaId);
         if (!ta) return;
         const words = ta.value.trim().match(/\S+/g) || [];
@@ -2778,6 +3106,53 @@
       
       document.addEventListener("DOMContentLoaded", function () {
         init();
+        const inlineCta = document.getElementById("inline-cta");
+        if (inlineCta && inlineCta.dataset.managed !== "true") {
+          inlineCta.dataset.managed = "true";
+          let fadeTimer;
+          let hideTimer;
+          const clearTimers = () => {
+            clearTimeout(fadeTimer);
+            clearTimeout(hideTimer);
+          };
+          const scheduleTimers = () => {
+            clearTimers();
+            fadeTimer = setTimeout(() => {
+              inlineCta.setAttribute("data-state", "fading");
+            }, 9000);
+            hideTimer = setTimeout(() => {
+              inlineCta.setAttribute("data-hidden", "true");
+            }, 15000);
+          };
+          const revealPlacard = () => {
+            inlineCta.removeAttribute("data-state");
+            inlineCta.removeAttribute("data-hidden");
+          };
+          const dismissPlacard = () => {
+            clearTimers();
+            inlineCta.removeAttribute("data-state");
+            inlineCta.setAttribute("data-hidden", "true");
+          };
+          scheduleTimers();
+          inlineCta.addEventListener("mouseenter", () => {
+            revealPlacard();
+            clearTimers();
+          });
+          inlineCta.addEventListener("focusin", () => {
+            revealPlacard();
+            clearTimers();
+          });
+          inlineCta.addEventListener("mouseleave", () => {
+            if (inlineCta.getAttribute("data-hidden") === "true") return;
+            scheduleTimers();
+          });
+          inlineCta.addEventListener("focusout", () => {
+            if (!inlineCta.contains(document.activeElement)) scheduleTimers();
+          });
+          inlineCta
+            .querySelector("[data-dismiss-instructions]")
+            ?.addEventListener("click", dismissPlacard);
+        }
         // Show HUD toggle only when ?debug=1
         try {
           const debug = new URL(location.href).searchParams.get("debug");
@@ -3478,7 +3853,7 @@
         .getElementById("cxi-cta-remind")
         .addEventListener("click", () => {
           const st = getNudgeState();
-          const plan = [4, 24, 72];
+          const plan = [1, 24, 72];
           const nextIdx = Math.min(st.count, plan.length - 1);
           if (typeof track === "function")
             track("remind", {
@@ -3487,6 +3862,11 @@
               variant: window.__cxiVariantKey,
             });
           scheduleNudge(plan[nextIdx]);
+          if (typeof showToast === "function") {
+            const hours = plan[nextIdx];
+            const label = hours === 1 ? "one hour" : `${hours} hours`;
+            showToast(`We\'ll send a nudge in ${label}.`, "warning");
+          }
           closeInvite();
         });
       document
@@ -3536,6 +3916,13 @@
 
       // ATS webhook simulator
       function showATSWebhook(stage, role, token) {
+        let debugMode = false;
+        try {
+          debugMode = new URL(location.href).searchParams.get("debug") === "1";
+        } catch (_) {
+          debugMode = false;
+        }
+        if (!debugMode) return;
         const payload = {
           event: "candidate_feedback_invite",
           stage,
@@ -3547,6 +3934,12 @@
         };
         const el = document.getElementById("ats-json");
         const panel = document.getElementById("ats-panel");
+        const stageEl = document.getElementById("ats-stage");
+        const roleEl = document.getElementById("ats-role");
+        const tokenEl = document.getElementById("ats-token");
+        if (stageEl) stageEl.textContent = stage;
+        if (roleEl) roleEl.textContent = role;
+        if (tokenEl) tokenEl.textContent = payload.candidate_token;
         if (el && panel) {
           el.textContent = JSON.stringify(payload, null, 2);
           panel.hidden = false;

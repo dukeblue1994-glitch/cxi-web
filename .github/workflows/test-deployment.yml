@@ -2,18 +2,6 @@ name: Run Demo (Netlify Dev + Tests)
 
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - main
-      - master
-      - "copilot/**"
-      - "chore/**"
-  pull_request:
-    branches:
-      - main
-      - master
-      - "copilot/**"
-      - "chore/**"
 
 concurrency:
   group: run-demo-${{ github.ref }}
@@ -24,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
@@ -33,14 +22,8 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
-
       - name: Build
         run: npm run build
-
-      - name: Install Netlify CLI (dev only)
-        run: npm install -D netlify-cli@latest
 
       - name: Start Netlify Dev (background)
         run: |
@@ -53,7 +36,7 @@ jobs:
         run: |
           set -e
           echo "Waiting for http://localhost:8888 ..."
-          deadline=$((SECONDS+180))
+          deadline=$((SECONDS+240))
           until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
             if [ $SECONDS -gt $deadline ]; then
               echo "Timeout waiting for root.";

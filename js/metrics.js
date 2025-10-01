@@ -14,12 +14,10 @@ function getMetricsRoot() {
 
 function formatVariantLabel(variant) {
   if (typeof variant !== "string") return "Unknown";
-  const core = variant.replace(/^(li-|std-)/, "");
-  const prefix = variant.startsWith("li-")
-    ? "LI "
-    : variant.startsWith("std-")
-      ? "Std "
-      : "";
+  const match = /^(li-|std-)?(.*)$/.exec(variant);
+  if (!match) return "Unknown";
+  const [, prefixRaw, core] = match;
+  const prefix = prefixRaw === "li-" ? "LI " : prefixRaw === "std-" ? "Std " : "";
   return `${prefix}${core}`;
 }
 

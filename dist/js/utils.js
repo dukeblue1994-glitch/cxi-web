@@ -75,3 +75,50 @@ export function seededRandom(seed = "", key = "") {
   const normalized = ((h >>> 0) % 10000) / 10000;
   return normalized;
 }
+
+/**
+ * Show an element with optional transition support
+ * @param {HTMLElement} element - Element to show
+ * @param {Object} options - Configuration options
+ * @param {boolean} options.transition - Whether to use CSS transition (default: false)
+ * @param {string} options.visibleClass - CSS class to add (default: 'is-visible')
+ */
+export function showElement(element, options = {}) {
+  if (!element) return;
+  const { transition = false, visibleClass = 'is-visible' } = options;
+  
+  element.hidden = false;
+  element.setAttribute('aria-hidden', 'false');
+  
+  if (transition) {
+    requestAnimationFrame(() => element.classList.add(visibleClass));
+  }
+}
+
+/**
+ * Hide an element with optional transition support
+ * @param {HTMLElement} element - Element to hide
+ * @param {Object} options - Configuration options
+ * @param {boolean} options.transition - Whether to use CSS transition (default: false)
+ * @param {string} options.visibleClass - CSS class to remove (default: 'is-visible')
+ * @param {number} options.transitionDuration - Delay before setting hidden in ms (default: 240)
+ */
+export function hideElement(element, options = {}) {
+  if (!element) return;
+  const { 
+    transition = false, 
+    visibleClass = 'is-visible',
+    transitionDuration = 240 
+  } = options;
+  
+  if (transition) {
+    element.classList.remove(visibleClass);
+    element.setAttribute('aria-hidden', 'true');
+    setTimeout(() => {
+      element.hidden = true;
+    }, transitionDuration);
+  } else {
+    element.hidden = true;
+    element.setAttribute('aria-hidden', 'true');
+  }
+}

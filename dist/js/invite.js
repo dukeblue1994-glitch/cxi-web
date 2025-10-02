@@ -168,5 +168,8 @@ export function showATSWebhook(stage, role, token) {
   if (roleEl) roleEl.textContent = payload.role_family;
   if (tokenEl) tokenEl.textContent = payload.candidate_token;
   if (json) json.textContent = JSON.stringify(payload, null, 2);
-  if (panel) panel.hidden = false;
+  if (panel) {
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
+  }
 }

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Element Visibility Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .test-section {
+      margin: 2rem 0;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    .test-element {
+      padding: 1rem;
+      background: #3b82f6;
+      color: white;
+      border-radius: 4px;
+      margin: 1rem 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .test-element.is-visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .test-element:not(.is-visible) {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    .test-element[hidden] {
+      display: none;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0.25rem;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .status {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+    .pass {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Element Visibility Utility Test</h1>
+  
+  <div class="test-section">
+    <h2>Test 1: Simple Show/Hide (No Transition)</h2>
+    <div id="test1" class="test-element" hidden aria-hidden="true">
+      Test Element 1
+    </div>
+    <div>
+      <button onclick="showTest1()">Show</button>
+      <button onclick="hideTest1()">Hide</button>
+    </div>
+    <div id="status1" class="status"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Show/Hide with Transition</h2>
+    <div id="test2" class="test-element" hidden aria-hidden="true">
+      Test Element 2
+    </div>
+    <div>
+      <button onclick="showTest2()">Show (Transition)</button>
+      <button onclick="hideTest2()">Hide (Transition)</button>
+    </div>
+    <div id="status2" class="status"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Multiple Toggles</h2>
+    <div id="test3" class="test-element" hidden aria-hidden="true">
+      Test Element 3
+    </div>
+    <div>
+      <button onclick="toggleTest3()">Toggle (Transition)</button>
+    </div>
+    <div id="status3" class="status"></div>
+  </div>
+
+  <script type="module">
+    import { showElement, hideElement } from './js/utils.js';
+
+    // Make functions global for onclick handlers
+    window.showElement = showElement;
+    window.hideElement = hideElement;
+
+    // Test 1: Simple show/hide
+    window.showTest1 = function() {
+      const el = document.getElementById('test1');
+      showElement(el);
+      updateStatus('status1', el);
+    };
+
+    window.hideTest1 = function() {
+      const el = document.getElementById('test1');
+      hideElement(el);
+      updateStatus('status1', el);
+    };
+
+    // Test 2: Show/hide with transition
+    window.showTest2 = function() {
+      const el = document.getElementById('test2');
+      showElement(el, { transition: true });
+      setTimeout(() => updateStatus('status2', el), 100);
+    };
+
+    window.hideTest2 = function() {
+      const el = document.getElementById('test2');
+      hideElement(el, { transition: true, transitionDuration: 300 });
+      setTimeout(() => updateStatus('status2', el), 100);
+    };
+
+    // Test 3: Toggle
+    let test3Visible = false;
+    window.toggleTest3 = function() {
+      const el = document.getElementById('test3');
+      if (test3Visible) {
+        hideElement(el, { transition: true });
+        test3Visible = false;
+      } else {
+        showElement(el, { transition: true });
+        test3Visible = true;
+      }
+      setTimeout(() => updateStatus('status3', el), 100);
+    };
+
+    function updateStatus(statusId, element) {
+      const status = document.getElementById(statusId);
+      const isHidden = element.hidden;
+      const ariaHidden = element.getAttribute('aria-hidden');
+      const hasClass = element.classList.contains('is-visible');
+      
+      const checks = [
+        isHidden ? '❌ hidden=true' : '✅ hidden=false',
+        ariaHidden === 'true' ? '❌ aria-hidden=true' : '✅ aria-hidden=false',
+        `Class: ${hasClass ? 'is-visible' : 'none'}`
+      ];
+
+      const allCorrect = (!isHidden && ariaHidden === 'false') || (isHidden && ariaHidden === 'true');
+      status.className = 'status ' + (allCorrect ? 'pass' : 'fail');
+      status.textContent = checks.join(' | ');
+    }
+
+    // Initialize status displays
+    setTimeout(() => {
+      updateStatus('status1', document.getElementById('test1'));
+      updateStatus('status2', document.getElementById('test2'));
+      updateStatus('status3', document.getElementById('test3'));
+    }, 100);
+  </script>
+</body>
+</html>

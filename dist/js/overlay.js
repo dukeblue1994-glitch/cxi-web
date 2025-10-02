@@ -1,7 +1,7 @@
 // Lightweight performance HUD (lazy optional)
 // Toggle with Alt+P. Displays FPS, memory if available, CTR metrics fetch time.
 
-import { performanceMark } from "./utils.js";
+import { performanceMark, showElement, hideElement } from "./utils.js";
 
 let hudEl = null;
 let fps = 0;
@@ -66,22 +66,27 @@ export function trackNetTiming(name, ms) {
 
 export function toggleHud() {
   if (!hudEl) createHud();
-  const hidden = hudEl.style.display === "none";
-  hudEl.style.display = hidden ? "block" : "none";
-  if (hidden) {
+  const isHidden = hudEl.hidden;
+  if (isHidden) {
+    showElement(hudEl);
     performanceMark("hud_shown");
     rafId = requestAnimationFrame(loop);
     initLongTasks();
     summarizeNav();
     initLayoutMetrics();
     initInp();
-  } else if (rafId) {
-    cancelAnimationFrame(rafId);
+  } else {
+    hideElement(hudEl);
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
   }
 }
 function createHud() {
   hudEl = document.createElement("div");
   hudEl.id = "cxi-perf-hud";
+  hudEl.hidden = true;
+  hudEl.setAttribute("aria-hidden", "true");
   Object.assign(hudEl.style, {
     position: "fixed",
     top: "8px",

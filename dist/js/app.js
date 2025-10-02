@@ -13,6 +13,8 @@ import {
   performanceMark,
   seededRandom,
   typewriter,
+  showElement,
+  hideElement,
 } from "./utils.js";
 
 window.showResultsTab = showResultsTab;
@@ -71,16 +73,20 @@ function setupInstructionPlacard() {
       placard.setAttribute("data-state", "fading");
     }, 9000);
     instructionTimers.hide = window.setTimeout(() => {
+      placard.setAttribute("data-state", "fading");
+      placard.setAttribute("aria-hidden", "true");
       placard.setAttribute("data-hidden", "true");
     }, 15000);
   };
   const reveal = () => {
     placard.removeAttribute("data-state");
     placard.removeAttribute("data-hidden");
+    placard.setAttribute("aria-hidden", "false");
   };
   const dismiss = () => {
     clearTimers();
-    placard.removeAttribute("data-state");
+    placard.setAttribute("data-state", "fading");
+    placard.setAttribute("aria-hidden", "true");
     placard.setAttribute("data-hidden", "true");
   };
   schedule();
@@ -115,12 +121,7 @@ function clearScoreRevealTimers() {
 function hideScoreReveal() {
   if (!scoreRevealEl) return;
   clearScoreRevealTimers();
-  scoreRevealEl.classList.remove("is-visible");
-  scoreRevealEl.setAttribute("aria-hidden", "true");
-  const el = scoreRevealEl;
-  window.setTimeout(() => {
-    el.hidden = true;
-  }, 240);
+  hideElement(scoreRevealEl, { transition: true, transitionDuration: 240 });
 }
 
 function setupScoreReveal() {
@@ -186,9 +187,7 @@ function highlightRevealSentence(sentence = "", aspects = []) {
 function triggerScoreReveal(context) {
   if (!scoreRevealEl) return;
   clearScoreRevealTimers();
-  scoreRevealEl.hidden = false;
-  scoreRevealEl.setAttribute("aria-hidden", "false");
-  requestAnimationFrame(() => scoreRevealEl.classList.add("is-visible"));
+  showElement(scoreRevealEl, { transition: true });
   const indexEl = scoreRevealEl.querySelector("[data-reveal-index]");
   const nssEl = scoreRevealEl.querySelector("[data-reveal-nss]");
   const qualityEl = scoreRevealEl.querySelector("[data-reveal-quality]");

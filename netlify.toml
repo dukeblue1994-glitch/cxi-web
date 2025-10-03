@@ -1,9 +1,12 @@
 # Netlify config for static site + functions
 
 [build]
-  functions = "netlify/functions"
   command = "npm run build"
   publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -18,33 +21,28 @@
 
 [[redirects]]
   from = "/api/dlq-retry"
-  to = "/.netlify/functions/dlq-retry-http"
+  to   = "/.netlify/functions/dlq-retry-http"
+  status = 200
+
+[[redirects]]
+  from = "/api/chat"
+  to   = "/.netlify/functions/openai-chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/moderate"
+  to   = "/.netlify/functions/moderate"
   status = 200
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to   = "/.netlify/functions/:splat"
   status = 200
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to   = "/index.html"
   status = 200
-
-[functions."nudge-cron"]
-  schedule = "*/30 * * * *"
-
-[functions."dlq-retry-cron"]
-  schedule = "*/15 * * * *"
-
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "preview"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"
 
 [[headers]]
   for = "/*"
@@ -61,3 +59,26 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Cache-Control = "no-store"
+
+[functions."nudge-cron"]
+  schedule = "*/30 * * * *"
+
+[functions."dlq-retry-cron"]
+  schedule = "*/15 * * * *"
+
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "preview"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "development"

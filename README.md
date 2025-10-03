@@ -276,3 +276,68 @@ For questions, suggestions, or support, please open an issue on GitHub or contac
 ---
 
 ### Built with ❤️ for better customer experiences
+
+## AI Integration & OpenAI Setup
+
+This project optionally integrates with OpenAI’s API to provide
+real‑time analysis and moderation of candidate feedback. To enable
+these features you must supply your own credentials and configure the
+environment properly.
+
+### Required environment variables
+
+1. `OPENAI_API_KEY` – your OpenAI secret key. Set this **only** in
+   Netlify’s environment variable settings or via the Netlify CLI.
+   Never commit keys to source control or add them to `netlify.toml`.
+2. `DEFAULT_MODEL` (optional) – override the default chat model
+   (defaults to `gpt-4.1-mini`).
+3. `MODERATION_MODEL` (optional) – override the moderation model
+   (defaults to `omni-moderation-latest`).
+
+When these variables are present the `/api/chat` function streams
+responses from OpenAI using Server‑Sent Events (SSE). The
+`/api/moderate` function checks free‑text fields against OpenAI’s
+Moderations API before generation to ensure unsafe content is
+flagged.
+
+### Smoke tests
+
+After starting local development with `netlify dev` or after deployment you can
+verify the AI endpoints with simple `curl` commands:
+
+```bash
+# Local moderation check (returns JSON)
+curl -N -X POST http://localhost:8888/api/moderate \
+  -H 'content-type: application/json' \
+  -d '{"text":"Hello world"}'
+
+# Local chat streaming (prints streamed data: lines)
+curl -N -X POST http://localhost:8888/api/chat \
+  -H 'content-type: application/json' \
+  -d '{"messages":[{"role":"user","content":"Say hi in five words."}]}'
+
+# Production chat streaming (replace <your-site> with your Netlify site name)
+curl -N -X POST https://<your-site>.netlify.app/api/chat \
+  -H 'content-type: application/json' \
+  -d '{"messages":[{"role":"user","content":"Summarize CXI"}]}'
+```
+
+Each call to `/api/chat` will return a stream of `data:` lines followed by
+`[DONE]`. Use `tail -f` or similar tools to observe the incremental tokens.
+
+### Runbook
+
+If the AI integration stops functioning:
+
+1. **Verify environment variables** – ensure `OPENAI_API_KEY` (and optional
+   model variables) are set in Netlify.
+2. **Check function logs** – Netlify’s dashboard under *Functions* will show
+   runtime logs for `openai-chat` and `moderate`. Upstream errors from OpenAI
+   will be logged here.
+3. **Watch for rate limiting** – repeated 429 responses indicate you are
+   exceeding your OpenAI rate limits. The function retries twice with
+   exponential backoff but will ultimately propagate the error if limits are
+   exceeded.
+4. **Update model settings** – you can reduce latency or cost by setting
+   `DEFAULT_MODEL` to a smaller model (e.g. `gpt-4o-mini`). Adjust as new
+   models become available.

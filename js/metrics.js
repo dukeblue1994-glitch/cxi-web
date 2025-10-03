@@ -14,7 +14,7 @@ function getMetricsRoot() {
 
 function formatVariantLabel(variant) {
   if (typeof variant !== "string") return "Unknown";
-  const match = /^(li-|std-)?(.*)$/.exec(variant);
+  const match = /^(li-|std-)?(.+)$/.exec(variant);
   if (!match) return "Unknown";
   const [, prefixRaw, core] = match;
   const prefix = prefixRaw === "li-" ? "LI " : prefixRaw === "std-" ? "Std " : "";
@@ -29,7 +29,7 @@ function createBreakdownRow(label, metrics) {
   bullet.className = "variant-bullet";
   bullet.textContent = "• ";
   const bold = document.createElement("b");
-  bold.innerHTML = label;
+  bold.textContent = label;
   const metricsText = document.createTextNode(
     ` — ${metrics.accept}/${metrics.view} (${metrics.ctr.toFixed(1)}% CTR)`,
   );

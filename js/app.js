@@ -1,22 +1,66 @@
 // Orchestrator module tying together survey, invite, panels, overlay.
 // dashboard.js & metrics.js are now lazy-loaded via dynamic import proxies.
-import { openInvite, pushTaskRow, showATSWebhook } from "./invite.js";
-import { toggleHud, trackNetTiming } from "./overlay.js";
-import { restorePanels } from "./panels.js";
-import {
-  setupSurveyInteractions,
-  showResultsTab,
-  updateProgress,
-} from "./survey.js";
-import { performanceMark } from "./utils.js";
 
-window.showResultsTab = showResultsTab;
-if (typeof window.openInvite !== "function") {
-  window.openInvite = (...args) => openInvite(...args);
+function createModuleLoader(loader) {
+  let promise;
+  return () => {
+    if (!promise) {
+      promise = loader();
+    }
+    return promise;
+  };
 }
-window.showATSWebhook = showATSWebhook;
-window.pushTaskRow = pushTaskRow;
-window.toggleHud = toggleHud;
+
+const loadInviteModule = createModuleLoader(() => import("./invite.js"));
+const loadOverlayModule = createModuleLoader(() => import("./overlay.js"));
+const loadPanelsModule = createModuleLoader(() => import("./panels.js"));
+const loadSurveyModule = createModuleLoader(() => import("./survey.js"));
+const loadUtilsModule = createModuleLoader(() => import("./utils.js"));
+
+let openInvite;
+let pushTaskRow;
+let showATSWebhook;
+let toggleHud;
+let trackNetTiming;
+let restorePanels;
+let setupSurveyInteractions;
+let showResultsTab = () => {};
+let updateProgress;
+let performanceMark = () => {};
+
+let coreModulesReady;
+
+async function ensureCoreModules() {
+  if (!coreModulesReady) {
+    coreModulesReady = Promise.all([
+      loadInviteModule(),
+      loadOverlayModule(),
+      loadPanelsModule(),
+      loadSurveyModule(),
+      loadUtilsModule(),
+    ]).then(([inviteMod, overlayMod, panelsMod, surveyMod, utilsMod]) => {
+      ({ openInvite, pushTaskRow, showATSWebhook } = inviteMod);
+      ({ toggleHud, trackNetTiming } = overlayMod);
+      ({ restorePanels } = panelsMod);
+      ({
+        setupSurveyInteractions,
+        showResultsTab,
+        updateProgress,
+      } = surveyMod);
+      ({ performanceMark } = utilsMod);
+
+      window.showResultsTab = showResultsTab;
+      if (typeof window.openInvite !== "function") {
+        window.openInvite = (...args) => openInvite(...args);
+      }
+      window.showATSWebhook = showATSWebhook;
+      window.pushTaskRow = pushTaskRow;
+      window.toggleHud = toggleHud;
+    });
+  }
+  return coreModulesReady;
+}
+
 // Dashboard helpers (for existing onclick attributes)
 // Lazy dashboard loader proxies (first invocation triggers network fetch)
 function ensureDashboard() {
@@ -271,7 +315,8 @@ function wireMisc() {
   qs("reset")?.addEventListener("click", () => location.reload());
 }
 
-function init() {
+async function init() {
+  await ensureCoreModules();
   performanceMark("app_init_start");
   initCandidateToken();
   wireSurvey();
@@ -289,7 +334,9 @@ function init() {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", () => {
+    init().catch(() => {});
+  });
 } else {
-  init();
+  init().catch(() => {});
 }

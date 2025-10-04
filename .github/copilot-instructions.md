@@ -1,17 +1,18 @@
 name: Run Demo (Netlify Dev + Tests)
 
 on:
-workflow_dispatch: {}
+  workflow_dispatch: {}
 
 concurrency:
-group: run-demo-${{ github.ref }}
-cancel-in-progress: true
+  group: run-demo-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-dev_and_test:
-runs-on: ubuntu-latest
-timeout-minutes: 15
-steps: - uses: actions/checkout@v4
+  dev_and_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v5
         with:

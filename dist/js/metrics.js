@@ -29,7 +29,7 @@ function createBreakdownRow(label, metrics) {
   bullet.className = "variant-bullet";
   bullet.textContent = "• ";
   const bold = document.createElement("b");
-  bold.textContent = label;
+  bold.innerHTML = label;
   const metricsText = document.createTextNode(
     ` — ${metrics.accept}/${metrics.view} (${metrics.ctr.toFixed(1)}% CTR)`,
   );

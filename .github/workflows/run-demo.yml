@@ -69,8 +69,11 @@ jobs:
       - name: Stop Netlify Dev (always)
         if: always()
         run: |
-          if [ -f netlify_dev.pid ]; then kill -9 "$(cat netlify_dev.pid)" 2>/dev/null || true; fi
-          sleep 1
+          if [ -f netlify_dev.pid ]; then
+            kill "$(cat netlify_dev.pid)" 2>/dev/null || true
+            sleep 2
+            kill -9 "$(cat netlify_dev.pid)" 2>/dev/null || true
+          fi
           echo "::group::Netlify Dev Log"
           sed -n '1,200p' netlify-dev.log || true
           echo "::endgroup::"

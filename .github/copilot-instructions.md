@@ -1,79 +1,69 @@
-name: Run Demo (Netlify Dev + Tests)
+# GitHub Copilot Instructions
 
-on:
-workflow_dispatch: {}
+This repository contains a Customer Experience Intelligence (CXI) feedback collection and analysis system built with vanilla JavaScript, Netlify Functions, and serverless architecture.
 
-concurrency:
-group: run-demo-${{ github.ref }}
-cancel-in-progress: true
+## Project Structure
 
-jobs:
-dev_and_test:
-runs-on: ubuntu-latest
-timeout-minutes: 15
-steps: - uses: actions/checkout@v4
+- `/js` - Frontend JavaScript modules (app.js, dashboard.js, survey.js, etc.)
+- `/netlify/functions` - Serverless functions for scoring, ATS webhooks, and incentive delivery
+- `/test` - Test files for quality gating, ATS integration, and reliability
+- `index.html` - Main application entry point
+- `styles.css` - Application styling
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "22"
-          cache: "npm"
+## Code Style Guidelines
 
-      - name: Install
-        run: npm ci
+### JavaScript
+- Use ES6+ module syntax (`import`/`export`)
+- Prefer `const` and `let` over `var`
+- Use async/await for asynchronous operations
+- Keep functions small and focused (single responsibility)
+- Avoid deeply nested callbacks or promise chains
+- Add JSDoc comments for complex functions
 
-      - name: Build
-        run: npm run build
+### Netlify Functions
+- All functions should export a default async handler: `export default async function handler(request)`
+- Always return proper Response objects with status codes and headers
+- Include CORS headers in responses: `"Access-Control-Allow-Origin": "*"`
+- Handle errors gracefully with try-catch blocks
+- Validate and sanitize all input data
 
-      - name: Start Netlify Dev (background)
-        run: |
-          NETLIFY_LOG=debug npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
-          echo $! > netlify_dev.pid
-        env:
-          NODE_ENV: test
+### Testing
+- Test files are located in `/test` directory
+- Tests run against a local Netlify Dev server at `http://localhost:8888`
+- Use the existing test patterns (see `test-quality.js` for examples)
+- Test serverless functions by posting to `/.netlify/functions/[function-name]`
 
-      - name: Wait for server
-        run: |
-          set -e
-          echo "Waiting for http://localhost:8888 ..."
-          deadline=$((SECONDS+240))
-          until curl -sf http://localhost:8888/ >/dev/null 2>&1; do
-            if [ $SECONDS -gt $deadline ]; then
-              echo "Timeout waiting for root.";
-              echo "::group::Netlify Dev Log (wait failure root)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1;
-            fi
-            sleep 2
-          done
-          echo "Root is up. Waiting for function endpoint..."
-          deadline=$((SECONDS+180))
-          until curl -sf http://localhost:8888/.netlify/functions/score >/dev/null 2>&1; do
-            if [ $SECONDS -gt $deadline ]; then
-              echo "Timeout waiting for function endpoint.";
-              echo "::group::Netlify Dev Log (wait failure fn)"; sed -n '1,400p' netlify-dev.log || true; echo "::endgroup::"; exit 1;
-            fi
-            sleep 2
-          done
-          echo "Function endpoint is up."
+## Quality Gates
 
-      - name: Run tests
-        env:
-          BASE_URL: http://localhost:8888
-        run: |
-          node test/test-quality.js
-          node test/test-ats.js
-          node test/test-reliability.js
+The scoring function (`netlify/functions/score.js`) implements quality checks:
+- Text diversity scoring for feedback fields
+- Repetition penalties
+- Word count validation (15 words for specific fields)
+- Composite scoring combining ratings and text quality
+- Incentive eligibility gating based on quality thresholds
 
-      - name: Stop Netlify Dev (always)
-        if: always()
-        run: |
-          if [ -f netlify_dev.pid ]; then kill -9 $(cat netlify_dev.pid) 2>/dev/null || true; fi
-          sleep 1
-          echo "::group::Netlify Dev Log"
-          sed -n '1,200p' netlify-dev.log || true
-          echo "::endgroup::"
+## ATS Integration
 
-      - name: Upload logs (on failure)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: netlify-dev-log
-          path: netlify-dev.log
+The system supports webhook integration with ATS vendors:
+- Greenhouse
+- Lever  
+- Workday
+- Generic webhook endpoints
+
+See `netlify/functions/atsWebhook.js` for adapter implementations.
+
+## Development Commands
+
+- `npm run dev` - Start local Netlify Dev server
+- `npm run build` - Build the project (copies files to `/dist`)
+- `npm test` - Run all tests
+- `npm run lint` - Lint serverless functions
+- `npm run format` - Format code with Prettier
+
+## Security Considerations
+
+- Always sanitize user input before rendering to DOM
+- Use `textContent` instead of `innerHTML` for user-generated content
+- Validate and escape data in metrics rendering
+- Never expose sensitive environment variables to client-side code
+- Implement HMAC signature verification for webhooks when applicable

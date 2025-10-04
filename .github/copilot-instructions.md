@@ -13,6 +13,7 @@ This repository contains a Customer Experience Intelligence (CXI) feedback colle
 ## Code Style Guidelines
 
 ### JavaScript
+
 - Use ES6+ module syntax (`import`/`export`)
 - Prefer `const` and `let` over `var`
 - Use async/await for asynchronous operations
@@ -21,6 +22,7 @@ This repository contains a Customer Experience Intelligence (CXI) feedback colle
 - Add JSDoc comments for complex functions
 
 ### Netlify Functions
+
 - All functions should export a default async handler: `export default async function handler(request)`
 - Always return proper Response objects with status codes and headers
 - Include CORS headers in responses: `"Access-Control-Allow-Origin": "*"`
@@ -28,6 +30,7 @@ This repository contains a Customer Experience Intelligence (CXI) feedback colle
 - Validate and sanitize all input data
 
 ### Testing
+
 - Test files are located in `/test` directory
 - Tests run against a local Netlify Dev server at `http://localhost:8888`
 - Use the existing test patterns (see `test-quality.js` for examples)
@@ -36,6 +39,7 @@ This repository contains a Customer Experience Intelligence (CXI) feedback colle
 ## Quality Gates
 
 The scoring function (`netlify/functions/score.js`) implements quality checks:
+
 - Text diversity scoring for feedback fields
 - Repetition penalties
 - Word count validation (15 words for specific fields)
@@ -45,8 +49,9 @@ The scoring function (`netlify/functions/score.js`) implements quality checks:
 ## ATS Integration
 
 The system supports webhook integration with ATS vendors:
+
 - Greenhouse
-- Lever  
+- Lever
 - Workday
 - Generic webhook endpoints
 

@@ -74,3 +74,4 @@ jobs:
         with:
           name: netlify-dev-log
           path: netlify-dev.log
+          if-no-files-found: ignore

@@ -1,4 +1,4 @@
-const q = new URLSearchParams(location.search);
+const q = new URLSearchParams(typeof location !== 'undefined' ? location.search : '');
 export const flags = {
   pitch: q.get('pitch') === '1',
   force: q.get('force') === '1',

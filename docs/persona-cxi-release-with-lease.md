@@ -53,4 +53,4 @@
 - Add persona-based guided tours within the demo to help other release managers adopt best practices quickly.
 
 ---
-_Last updated: $(date +%Y-%m-%d)_
+_Last updated: 2024-06-09_

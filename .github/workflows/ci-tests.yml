@@ -2,21 +2,94 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      - "feat/*"
+      - "fix/*"
+      - "chore/*"
   pull_request:
-    branches: ["main"]
+    branches:
+      - "*"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # 1) Local tests against Netlify Dev (mirrors your local flow)
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    env:
+      NODE_ENV: test
+      BASE_URL: http://localhost:8888
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
-      - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22.x
+        uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
-      - name: Install dependencies
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install dependencies (clean)
         run: npm ci
-      - name: Run tests
-        run: npm test --if-present
+
+      - name: Start Netlify Dev (background)
+        run: |
+          npx netlify dev --port 8888 > netlify.log 2>&1 &
+          echo $! > netlify.pid
+          # Wait until server responds
+          for i in {1..60}; do
+            if curl -sSf http://localhost:8888 >/dev/null; then
+              echo "Netlify Dev is up on :8888"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Run DLQ tests
+        run: npm run test:dlq
+
+      - name: Run reliability tests (safe)
+        run: npm run test:reliability
+
+      - name: Show Netlify logs on failure
+        if: failure()
+        run: |
+          echo "----- netlify.log -----"
+          sed -n '1,200p' netlify.log || true
+
+      - name: Stop Netlify Dev
+        if: always()
+        run: |
+          if [ -f netlify.pid ]; then
+            kill $(cat netlify.pid) || true
+          fi
+
+  # 2) Production smoke checks against deployed site
+  prod-smoke:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROD_BASE: https://cxis.today
+    steps:
+      - name: Curl home
+        run: |
+          curl -fsSL "${PROD_BASE}" >/dev/null
+          echo "✅ Home reachable"
+
+      # Hit your public function endpoints; adjust paths if you renamed them
+      - name: DLQ stats
+        run: |
+          curl -fsSL -X POST "${PROD_BASE}/api/ats-dlq-stats" -H "Content-Type: application/json" -d '{}' | jq .
+          echo "✅ /api/ats-dlq-stats OK"
+
+      - name: DLQ retry
+        run: |
+          curl -fsSL -X POST "${PROD_BASE}/api/dlq-retry" -H "Content-Type: application/json" -d '{}' | jq .
+          echo "✅ /api/dlq-retry OK"

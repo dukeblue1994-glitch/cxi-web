@@ -1,12 +1,8 @@
 # Netlify config for static site + functions
 
 [build]
-  command = "npm run build"
-  publish = "dist"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
+  publish   = "."
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -14,7 +10,7 @@
 
 [dev]
   framework = "#static"
-  publish = "dist"
+  publish = "."
   functions = "netlify/functions"
   port = 8888
   autoLaunch = false

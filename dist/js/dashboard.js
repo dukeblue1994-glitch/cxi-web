@@ -1,3 +1,5 @@
+import { getSnapshot } from "./snapshot.js";
+
 const stageLabels = {
   applied: "Applied",
   recruiter: "Recruiter Screen",
@@ -158,16 +160,30 @@ function closeModal() {
 function gatherContext() {
   const submission = window.__lastSubmission || {};
   const result = window.__lastResult || {};
+  const snapshot = getSnapshot();
   const summary =
     document.getElementById("response-summary")?.textContent.trim() ||
     "Latest candidate feedback captured.";
-  const stage = submission.stage || "panel";
-  const index = Number(result.composite_index || 0.62);
-  const nss = Number(result.nss ?? 0.4);
+  const normalizeIndex = (value) => {
+    if (typeof value !== "number") return null;
+    return value > 1 ? value / 100 : value;
+  };
+  const stage = snapshot?.stage || submission.stage || "panel";
+  const index =
+    normalizeIndex(snapshot?.index) ??
+    normalizeIndex(result.composite_percent) ??
+    normalizeIndex(result.composite_index) ??
+    0.62;
+  const nss =
+    typeof snapshot?.nss === "number"
+      ? snapshot.nss
+      : Number(result.nss ?? 0.4);
   const stageLabel = stageLabels[stage] || formatAspect(stage);
-  const aspects = Array.isArray(submission.aspects) && submission.aspects.length
-    ? submission.aspects
-    : ["communication", "feedback", "clarity"];
+  const aspects = snapshot?.aspects && snapshot.aspects.length
+    ? snapshot.aspects
+    : Array.isArray(submission.aspects) && submission.aspects.length
+      ? submission.aspects
+      : ["communication", "feedback", "clarity"];
   const deadlineLabel = new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",

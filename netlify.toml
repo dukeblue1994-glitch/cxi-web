@@ -1,84 +1,13 @@
-# Netlify config for static site + functions
-
 [build]
-  command = "npm run build"
-  publish = "dist"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
+  command   = "npm run build"
+  publish   = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22"
-  NPM_VERSION = "10"
-
-[dev]
-  framework = "#static"
-  publish = "dist"
-  functions = "netlify/functions"
-  port = 8888
-  autoLaunch = false
-
-[[redirects]]
-  from = "/api/dlq-retry"
-  to   = "/.netlify/functions/dlq-retry-http"
-  status = 200
-
-[[redirects]]
-  from = "/api/chat"
-  to   = "/.netlify/functions/openai-chat"
-  status = 200
-
-[[redirects]]
-  from = "/api/moderate"
-  to   = "/.netlify/functions/moderate"
-  status = 200
-
-[[redirects]]
-  from = "/api/*"
-  to   = "/.netlify/functions/:splat"
-  status = 200
+  NPM_VERSION  = "10"
 
 [[redirects]]
   from = "/*"
   to   = "/index.html"
   status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
-
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Cache-Control = "no-store"
-
-[functions."nudge-cron"]
-  schedule = "*/30 * * * *"
-
-[functions."dlq-retry-cron"]
-  schedule = "*/15 * * * *"
-
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "preview"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"

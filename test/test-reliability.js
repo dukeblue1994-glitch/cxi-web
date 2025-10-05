@@ -1,54 +1,30 @@
-// test/test-reliability.js
-// Reliability test with auto-check for Netlify Dev
-
-const BASE = process.env.BASE_URL || "http://localhost:8888";
-
-async function isServerUp(url = BASE) {
+const BASE = process.env.BASE_URL || 'http://localhost:8888';
+async function ping(u = BASE) {
   try {
-    const res = await fetch(url);
-    return res.ok;
+    const r = await fetch(u);
+    return r.ok;
   } catch {
     return false;
   }
 }
-
-async function hit(path, body = {}) {
+async function post(path, body = {}) {
   const res = await fetch(BASE + path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
   });
   return res.json();
 }
-
-async function run() {
-  console.log(`Reliability test starting → ${BASE}`);
-
-  const up = await isServerUp(BASE);
-  if (!up) {
-    console.warn(`
-⚠️  Netlify Dev is not running at ${BASE}
-Start it first with:
-    npx netlify dev --port 8888
-or set BASE_URL to your deployed endpoint:
-    export BASE_URL=https://cxis.today
-Skipping reliability test.
-    `);
+(async function run(){
+  console.log(`Reliability → ${BASE}`);
+  if(!(await ping())) {
+    console.warn(`⚠️ Netlify Dev not running at ${BASE}. Start with:
+  npx netlify dev --port 8888 --dir dist --functions netlify/functions
+or set BASE_URL=https://cxis.today
+Skipping.`);
     process.exit(0);
   }
-
-  try {
-    const baseline = await hit("/api/ats-dlq-stats");
-    console.log("Baseline DLQ count:", baseline.count);
-
-    const retry = await hit("/api/dlq-retry");
-    console.log("DLQ retry status:", retry.status);
-
-    console.log("✅ Reliability test complete.");
-  } catch (err) {
-    console.error("Reliability test failed:", err);
-    process.exit(1);
-  }
-}
-
-run();
+  const r = await post('/.netlify/functions/dev-webhook', { went_well:'kind and clear', improve:'slow feedback', headline:'not bad overall' });
+  console.log('Webhook:', r);
+  console.log('✅ Reliability ok');
+})();

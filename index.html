@@ -3989,6 +3989,12 @@
         }
       });
     </script>
+    <script>
+      (function(){
+        const isDev = /[?&]dev=1\b/.test(location.search) || location.hostname === 'localhost';
+        if (!isDev) document.querySelectorAll('[data-dev-only]').forEach(el => el.remove());
+      })();
+    </script>
     <!-- ES Module bundle (incremental migration) -->
     <link rel="modulepreload" href="./js/utils.js" />
     <link rel="modulepreload" href="./js/survey.js" />
@@ -3997,5 +4003,37 @@
     <link rel="modulepreload" href="./js/metrics.js" />
     <link rel="modulepreload" href="./js/overlay.js" />
     <script type="module" src="./js/app.js"></script>
+    <script type="module">
+      import { initPulse, mountFeatures } from './js/bootstrap.js';
+      import { nssToIndex, composite, eligible } from './js/scores.js';
+      window.cxiHeadline = document.getElementById('rant');
+      window.cxiBuildSnapshot = (nss) => {
+        const stage = (document.querySelector('[name="stage"]') || {}).value || 'hm';
+        const roleFamily = (document.querySelector('[name="role_family"]') || {}).value || 'software';
+        const ww = document.getElementById('well')?.value?.trim() || 'kind and clear';
+        const im = document.getElementById('better')?.value?.trim() || 'slow feedback';
+        const aspects = [...document.querySelectorAll('.aspect-btn.selected')].map((x) => x.dataset.aspect);
+        const rrs = 0.8;
+        const pbi = 0.6;
+        const index = nssToIndex(nss);
+        const comp = composite({ nss, rrs, pbi });
+        return {
+          id: crypto.randomUUID(),
+          stage,
+          roleFamily,
+          nss,
+          index,
+          rrs,
+          pbi,
+          composite: comp,
+          eligible: eligible({ composite: comp, rrs }),
+          aspects,
+          narrative: `${ww} | ${im}`,
+          createdAt: Date.now()
+        };
+      };
+      initPulse();
+      mountFeatures();
+    </script>
   </body>
 </html>

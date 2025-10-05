@@ -22,7 +22,7 @@ test("snapshot clamps scores", () => {
     seed: "test-seed",
   });
 
-  assert.ok(snapshot.nss >= -1 && snapshot.nss <= 1, "NSS should be normalised");
+  assert.ok(snapshot.nss >= -1 && snapshot.nss <= 1, "NSS should be normalized");
   assert.ok(snapshot.index >= 0 && snapshot.index <= 100, "Index should map to 0-100");
   assert.ok(snapshot.composite >= 0 && snapshot.composite <= 100, "Composite should stay in range");
   assert.equal(snapshot.eligible, true, "Submission should be incentive eligible");

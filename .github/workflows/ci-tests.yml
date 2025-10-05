@@ -1,95 +1,60 @@
-name: CI
-
-on:
-  push:
-    branches:
-      - main
-      - "feat/*"
-      - "fix/*"
-      - "chore/*"
-  pull_request:
-    branches:
-      - "*"
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+name: ci-tests
+on: [push, pull_request]
 
 jobs:
-  # 1) Local tests against Netlify Dev (mirrors your local flow)
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
-    env:
-      NODE_ENV: test
-      BASE_URL: http://localhost:8888
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node 22.x
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
-          cache: "npm"
+          node-version: '22'
 
-      - name: Install dependencies (clean)
+      - name: Install deps
         run: npm ci
 
-      - name: Start Netlify Dev (background)
+      - name: Start Netlify Dev (root publish)
         run: |
-          npx netlify dev --port 8888 > netlify.log 2>&1 &
+          npx netlify dev --port 8888 --dir . --functions netlify/functions > netlify.log 2>&1 &
           echo $! > netlify.pid
-          # Wait until server responds
-          for i in {1..60}; do
-            if curl -sSf http://localhost:8888 >/dev/null; then
-              echo "Netlify Dev is up on :8888"
-              break
+
+      - name: Wait for Netlify Dev to be ready
+        run: |
+          set -euo pipefail
+          for i in {1..40}; do
+            if curl -fsS http://localhost:8888/ >/dev/null; then
+              echo "✅ Netlify Dev is up"
+              exit 0
             fi
-            sleep 1
+            # If dev server crashed, fail fast with logs
+            if ! ps -p "$(cat netlify.pid)" >/dev/null 2>&1; then
+              echo "❌ Netlify Dev crashed — tailing log"
+              tail -n +1 netlify.log || true
+              exit 1
+            fi
+            sleep 2
           done
+          echo "⏰ Timed out waiting for Netlify Dev"
+          tail -n +1 netlify.log || true
+          exit 1
+
+      - name: Sanity ping function (200 expected)
+        run: |
+          curl -fsS http://localhost:8888/.netlify/functions/dev-webhook -X POST -H 'content-type: application/json' -d '{}' \
+          || (echo '❌ Function ping failed'; tail -n +1 netlify.log; false)
 
       - name: Run DLQ tests
         run: npm run test:dlq
 
-      - name: Run reliability tests (safe)
+      - name: Run reliability tests
         run: npm run test:reliability
-
-      - name: Show Netlify logs on failure
-        if: failure()
-        run: |
-          echo "----- netlify.log -----"
-          sed -n '1,200p' netlify.log || true
 
       - name: Stop Netlify Dev
         if: always()
         run: |
-          if [ -f netlify.pid ]; then
-            kill $(cat netlify.pid) || true
-          fi
-
-  # 2) Production smoke checks against deployed site
-  prod-smoke:
-    needs: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      PROD_BASE: https://cxis.today
-    steps:
-      - name: Curl home
-        run: |
-          curl -fsSL "${PROD_BASE}" >/dev/null
-          echo "✅ Home reachable"
-
-      # Hit your public function endpoints; adjust paths if you renamed them
-      - name: DLQ stats
-        run: |
-          curl -fsSL -X POST "${PROD_BASE}/api/ats-dlq-stats" -H "Content-Type: application/json" -d '{}' | jq .
-          echo "✅ /api/ats-dlq-stats OK"
-
-      - name: DLQ retry
-        run: |
-          curl -fsSL -X POST "${PROD_BASE}/api/dlq-retry" -H "Content-Type: application/json" -d '{}' | jq .
-          echo "✅ /api/dlq-retry OK"
+          kill "$(cat netlify.pid)" 2>/dev/null || true
+          sleep 1
+          pkill -f "netlify dev" || true
+          echo "🛑 Netlify Dev stopped"

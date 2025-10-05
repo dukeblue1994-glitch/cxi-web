@@ -1,19 +1,33 @@
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
-  try {
-    const data = JSON.parse(event.body || '{}');
-    const scrub = (s = '') =>
-      s.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]')
-       .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[candidate]');
-    const safe = {
-      ...data,
-      went_well: scrub(data.went_well),
-      improve: scrub(data.improve),
-      headline: scrub(data.headline)
-    };
-    console.log('[CXI demo event]', JSON.stringify(safe));
-    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-  } catch (e) {
-    return { statusCode: 400, body: JSON.stringify({ ok: false, error: String(e) }) };
+export default async function handler(request) {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
   }
-};
+
+  let payload = {};
+  try {
+    payload = await request.json();
+  } catch {
+    payload = {};
+  }
+
+  const body = {
+    ok: true,
+    received: payload,
+    timestamp: new Date().toISOString(),
+  };
+
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+}

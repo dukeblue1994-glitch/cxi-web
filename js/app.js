@@ -376,13 +376,16 @@ function displayResults(data) {
   const indexPercent = snapshot.index;
   const compositePercent = snapshot.composite;
   const compositeIndex = indexPercent / 100;
+  const compositeIndexFromComposite = compositePercent / 100;
 
   window.__lastResult = {
     ...data,
     nss: snapshot.nss,
-    composite_index: compositeIndex,
-    composite_percent: indexPercent,
+    composite_index: compositeIndexFromComposite, // compositePercent / 100
+    composite_percent: compositePercent,          // compositePercent
     composite_score: compositePercent,
+    index_ratio: compositeIndex,                  // indexPercent / 100
+    index_percent: indexPercent,                  // indexPercent
     eligible: snapshot.eligible,
   };
   window.CXI_LAST_INDEX = compositeIndex;

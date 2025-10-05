@@ -1,717 +1,382 @@
-// Orchestrator module tying together survey, invite, panels, overlay.
-// dashboard.js & metrics.js are now lazy-loaded via dynamic import proxies.
-import { openInvite, pushTaskRow, showATSWebhook } from "./invite.js";
-import { toggleHud, trackNetTiming } from "./overlay.js";
-import { restorePanels } from "./panels.js";
-import {
-  setupSurveyInteractions,
-  showResultsTab,
-  updateProgress,
-} from "./survey.js";
-import {
-  animateNumber,
-  performanceMark,
-  seededRandom,
-  typewriter,
-  showElement,
-  hideElement,
-} from "./utils.js";
+import { createRng, randomize } from "./rng.js";
+import { computeSentiment } from "./sentiment.js";
+import { clamp, createSnapshot, describeBand, wordCount } from "./snapshot.js";
 
-window.showResultsTab = showResultsTab;
-if (typeof window.openInvite !== "function") {
-  window.openInvite = (...args) => openInvite(...args);
-}
-window.showATSWebhook = showATSWebhook;
-window.pushTaskRow = pushTaskRow;
-window.toggleHud = toggleHud;
-// Dashboard helpers (for existing onclick attributes)
-// Lazy dashboard loader proxies (first invocation triggers network fetch)
-function ensureDashboard() {
-  if (window.__dashboardLoaded) return Promise.resolve();
-  return import("./dashboard.js").then((mod) => {
-    window.exportData = mod.exportData;
-    window.showHeatmapDetail = mod.showHeatmapDetail;
-    window.filterTasks = mod.filterTasks;
-    window.pushToDashboard = mod.pushToDashboard;
-    if (mod.updateRosterHighlight) {
-      window.updateRosterHighlight = mod.updateRosterHighlight;
-    }
-    window.__dashboardLoaded = true;
-  });
-}
-// Install provisional proxies (idempotent once real funcs assigned)
-["exportData", "showHeatmapDetail", "filterTasks", "pushToDashboard"].forEach(
-  (fn) => {
-    window[fn] = (...args) => ensureDashboard().then(() => window[fn](...args));
-  }
-);
+const ASPECTS = [
+  "Communication",
+  "Fairness",
+  "Feedback Timeliness",
+  "Conduct",
+  "Clarity",
+  "Scheduling",
+  "Respect",
+];
+
+const ATTENTION_ITEMS = [
+  {
+    value: "strongly-agree",
+    label: "I strongly agree that I stayed fully attentive through the conversation.",
+  },
+  { value: "agree", label: "I agree the conversation required my full attention." },
+  { value: "neutral", label: "I neither agree nor disagree about my attention level." },
+  { value: "disagree", label: "I disagree — my attention dipped." },
+  { value: "strongly-disagree", label: "I strongly disagree — I missed key details." },
+];
+
+const state = {
+  rng: createRng(Date.now().toString(36)),
+  samplingRate: 0.35,
+  interceptArmed: false,
+  forceMode: false,
+  snapshot: null,
+  seed: null,
+};
 
 function qs(id) {
-  return document.getElementById(id);
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Missing element #${id}`);
+  return el;
 }
 
-function initCandidateToken() {
-  const url = new URL(location.href);
-  const existing = url.searchParams.get("token");
-  window.CANDIDATE_TOKEN =
-    existing || "cand_" + Math.random().toString(36).slice(2, 10).toLowerCase();
-}
-
-let instructionTimers = { fade: 0, hide: 0 };
-function setupInstructionPlacard() {
-  const placard = document.getElementById("inline-cta");
-  if (!placard) return;
-  if (placard.dataset.managed === "true") return;
-  placard.dataset.managed = "true";
-  const clearTimers = () => {
-    clearTimeout(instructionTimers.fade);
-    clearTimeout(instructionTimers.hide);
-  };
-  const schedule = () => {
-    clearTimers();
-    instructionTimers.fade = window.setTimeout(() => {
-      placard.setAttribute("data-state", "fading");
-    }, 9000);
-    instructionTimers.hide = window.setTimeout(() => {
-      placard.setAttribute("data-state", "fading");
-      placard.setAttribute("aria-hidden", "true");
-      placard.setAttribute("data-hidden", "true");
-    }, 15000);
-  };
-  const reveal = () => {
-    placard.removeAttribute("data-state");
-    placard.removeAttribute("data-hidden");
-    placard.setAttribute("aria-hidden", "false");
-  };
-  const dismiss = () => {
-    clearTimers();
-    placard.setAttribute("data-state", "fading");
-    placard.setAttribute("aria-hidden", "true");
-    placard.setAttribute("data-hidden", "true");
-  };
-  schedule();
-  placard.addEventListener("mouseenter", () => {
-    reveal();
-    clearTimers();
-  });
-  placard.addEventListener("focusin", () => {
-    reveal();
-    clearTimers();
-  });
-  placard.addEventListener("mouseleave", () => {
-    if (placard.getAttribute("data-hidden") === "true") return;
-    schedule();
-  });
-  placard.addEventListener("focusout", () => {
-    if (!placard.contains(document.activeElement)) schedule();
-  });
-  placard
-    .querySelector("[data-dismiss-instructions]")
-    ?.addEventListener("click", dismiss);
-}
-
-let scoreRevealEl = null;
-const scoreRevealTimers = new Set();
-
-function clearScoreRevealTimers() {
-  scoreRevealTimers.forEach((id) => clearTimeout(id));
-  scoreRevealTimers.clear();
-}
-
-function hideScoreReveal() {
-  if (!scoreRevealEl) return;
-  clearScoreRevealTimers();
-  hideElement(scoreRevealEl, { transition: true, transitionDuration: 240 });
-}
-
-function setupScoreReveal() {
-  scoreRevealEl = document.getElementById("score-reveal");
-  if (!scoreRevealEl) return;
-  scoreRevealEl.hidden = true;
-  scoreRevealEl.setAttribute("aria-hidden", "true");
-  scoreRevealEl.addEventListener("click", (evt) => {
-    if (evt.target === scoreRevealEl) hideScoreReveal();
-  });
-  scoreRevealEl
-    .querySelectorAll("[data-close-reveal]")
-    .forEach((btn) => btn.addEventListener("click", hideScoreReveal));
-  const jumpBtn = scoreRevealEl.querySelector(
-    "[data-reveal-open-dashboard]",
-  );
-  if (jumpBtn) {
-    jumpBtn.addEventListener("click", () => {
-      hideScoreReveal();
-      showResultsTab("summary");
-      document
-        .getElementById("results-view")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+function updateCounter(textarea, counterEl) {
+  const kind = textarea.parentElement?.dataset?.kind;
+  if (kind === "characters") {
+    const len = textarea.value.trim().length;
+    counterEl.textContent = `${len} / 90–120`;
+    counterEl.dataset.valid = len >= 90 && len <= 120 ? "true" : "false";
+  } else {
+    const wc = wordCount(textarea.value);
+    const min = Number.parseInt(textarea.dataset.minWords ?? "0", 10);
+    counterEl.textContent = `${wc} words`;
+    counterEl.dataset.valid = wc >= min ? "true" : "false";
   }
-  window.dismissScoreReveal = hideScoreReveal;
 }
 
-function highlightRevealSentence(sentence = "", aspects = []) {
-  if (!scoreRevealEl) return;
-  const target = scoreRevealEl.querySelector("[data-reveal-sentence]");
-  if (!target) return;
-  const cleaned = (sentence || "").trim();
-  if (!cleaned) {
-    target.textContent =
-      "NSS translator will light up once a candidate story streams in.";
-    return;
-  }
-  target.textContent = cleaned;
-  const keywords = (aspects || [])
-    .map((aspect) => formatAspect(aspect).toLowerCase())
-    .filter(Boolean)
-    .flatMap((word) => [word, word.replace(/\s+/g, "")]);
-  const timer = window.setTimeout(() => {
-    const tokens = cleaned.split(/(\s+)/);
-    target.innerHTML = tokens
-      .map((token) => {
-        const normalized = token
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, "");
-        const hit = keywords.some((kw) =>
-          normalized.includes(kw.replace(/[^a-z0-9]/g, "")),
-        );
-        return hit && token.trim()
-          ? `<mark>${token}</mark>`
-          : token;
-      })
-      .join("");
-  }, 720);
-  scoreRevealTimers.add(timer);
+function updateSentimentChip(target, text) {
+  const chip = document.querySelector(`.sentiment-chip[data-target="${target}"]`);
+  if (!chip) return;
+  const sentiment = computeSentiment(text);
+  chip.textContent = `${sentiment.tone.charAt(0).toUpperCase()}${sentiment.tone.slice(1)} · ${sentiment.compound.toFixed(2)}`;
+  chip.dataset.tone = sentiment.tone;
 }
 
-function triggerScoreReveal(context) {
-  if (!scoreRevealEl) return;
-  clearScoreRevealTimers();
-  showElement(scoreRevealEl, { transition: true });
-  const indexEl = scoreRevealEl.querySelector("[data-reveal-index]");
-  const nssEl = scoreRevealEl.querySelector("[data-reveal-nss]");
-  const qualityEl = scoreRevealEl.querySelector("[data-reveal-quality]");
-  if (indexEl)
-    animateNumber(indexEl, {
-      from: 0,
-      to: Number(context.index || 0) * 100,
-      duration: 900,
-      decimals: 0,
-    });
-  if (nssEl)
-    animateNumber(nssEl, {
-      from: 0,
-      to: Number(context.nss || 0),
-      duration: 900,
-      decimals: 2,
-      prefix: context.nss >= 0 ? "+" : "",
-    });
-  if (qualityEl)
-    animateNumber(qualityEl, {
-      from: 0,
-      to: Number(context.quality || 0) * 100,
-      duration: 900,
-      decimals: 0,
-      suffix: "%",
-    });
-  const summaryEl = scoreRevealEl.querySelector("[data-reveal-summary]");
-  if (summaryEl) {
-    summaryEl.textContent = context.summary || "Fresh signal incoming.";
-    summaryEl.classList.remove("is-highlighted");
-    const t = window.setTimeout(
-      () => summaryEl.classList.add("is-highlighted"),
-      520,
-    );
-    scoreRevealTimers.add(t);
-  }
-  const stageEl = scoreRevealEl.querySelector("[data-reveal-stage]");
-  if (stageEl) stageEl.textContent = formatStage(context.stage);
-  const bandEl = scoreRevealEl.querySelector("[data-reveal-band]");
-  if (bandEl)
-    bandEl.textContent =
-      context.band || (context.index >= 0.7 ? "Success" : "Watch");
-  const aspectsEl = scoreRevealEl.querySelector("[data-reveal-aspects]");
-  if (aspectsEl) {
-    const aspects = Array.isArray(context.aspects) ? context.aspects : [];
-    const chips = aspects
-      .slice(0, 4)
-      .map((aspect) => `<span>${formatAspect(aspect)}</span>`)
-      .join("");
-    aspectsEl.innerHTML = chips || '<span>Candidate Delight</span>';
-  }
-  highlightRevealSentence(context.sentence, context.aspects);
-  const hideTimer = window.setTimeout(hideScoreReveal, 10000);
-  scoreRevealTimers.add(hideTimer);
-}
-
-function wireSurvey() {
-  setupSurveyInteractions();
-  window.startSurvey = function startSurvey() {
-    performanceMark("survey_start");
-    if (typeof window.showStage === "function") {
-      window.showStage("survey");
-    } else {
-      document.getElementById("interview-view")?.classList.add("hidden");
-      document.getElementById("survey-view")?.classList.remove("hidden");
-    }
-    const inviteTrigger = document.getElementById("invite-trigger");
-    if (inviteTrigger) inviteTrigger.hidden = true;
-    updateProgress();
-    document.getElementById("well")?.focus();
+function sanitizeSubmission(snapshot) {
+  return {
+    stage: snapshot.stage,
+    composite: snapshot.composite,
+    nss: snapshot.nss,
+    index: snapshot.index,
+    eligible: snapshot.eligible,
+    attentionPassed: snapshot.attentionPassed,
+    consent: snapshot.consent,
+    sentiments: snapshot.sentiments,
+    aspects: snapshot.aspects,
+    summary: snapshot.summary,
+    wentWell: snapshot.wentWell,
+    couldBeBetter: snapshot.couldBeBetter,
+    submittedAt: snapshot.submittedAt,
+    seed: snapshot.seed,
+    persona: { interviewer: "Jordan (Acme)", candidate: "[candidate]", email: "[email]" },
   };
 }
 
-function wireSubmission() {
-  const form = qs("survey-form");
-  if (!form) return;
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
-    const well = qs("well").value.trim();
-    const better = qs("better").value.trim();
-    const rant = qs("rant").value.trim();
-    const stage = fd.get("stage");
-    const role = fd.get("role_family");
-    const overall = document.querySelector(
-      '.rating-group[data-field="overall"] .rating-btn.selected'
-    )?.dataset.value;
-    const fairness = document.querySelector(
-      '.rating-group[data-field="fairness"] .rating-btn.selected'
-    )?.dataset.value;
-    const attention = document.querySelector(
-      '.rating-group[data-field="attention"] .rating-btn.selected'
-    )?.dataset.value;
-    const aspects = Array.from(
-      document.querySelectorAll(".aspect-btn.selected")
-    ).map((b) => b.dataset.aspect);
-    const payload = {
-      candidate_token: window.CANDIDATE_TOKEN,
-      stage,
-      role_family: role,
-      overall: Number(overall),
-      fairness: Number(fairness),
-      attention: Number(attention),
-      aspects,
-      well,
-      better,
-      rant,
-      consent: !!qs("consent").checked,
-    };
-    window.__lastSubmission = payload;
-    const t0 = performance.now();
-    const resp = await fetch("/api/score", {
+async function postSnapshot(snapshot) {
+  try {
+    const response = await fetch("/.netlify/functions/dev-webhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(sanitizeSubmission(snapshot)),
     });
-    const t1 = performance.now();
-    trackNetTiming("score", Math.round(t1 - t0));
-    if (!resp.ok) return alert("Score service error");
-    const data = await resp.json();
-    window.__lastResult = data;
-
-    displayResults(data);
-  });
-}
-
-
-function displayResults(data) {
-  performanceMark("results_display");
-  if (typeof window.showStage === "function") {
-    window.showStage("results");
-  } else {
-    const surveyView = document.getElementById("survey-view");
-    if (surveyView) surveyView.classList.add("hidden");
-    const resultsView = document.getElementById("results-view");
-    if (resultsView) resultsView.classList.remove("hidden");
-  }
-
-  requestAnimationFrame(() => {
-    const resultsView = document.getElementById("results-view");
-    resultsView?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  showResultsTab("summary");
-
-  const submission = window.__lastSubmission || {};
-  const bands = data.bands || {};
-  const compositeIndex = Number(data.composite_index || 0);
-  const textScore = Number(data.diagnostics?.textScore ?? 0.6);
-  const qualityScore = Number(data.quality_score ?? 0);
-  const attentionRaw = Number(submission.attention ?? 0);
-  const nss = Number(((textScore - 0.5) * 2).toFixed(2));
-
-  window.__lastResult = { ...data, nss };
-  window.CXI_LAST_INDEX = compositeIndex;
-
-  animateNumber(document.getElementById("orb-score"), {
-    from: 0,
-    to: compositeIndex * 100,
-    duration: 1200,
-    decimals: 0,
-  });
-  const orbBand = document.getElementById("orb-band-label");
-  if (orbBand) orbBand.textContent = bands.overall || "Success";
-
-  animateNumber(document.getElementById("nss-display"), {
-    from: 0,
-    to: nss,
-    duration: 1000,
-    decimals: 2,
-    prefix: nss >= 0 ? "+" : "",
-  });
-  setBandIndicator(
-    document.getElementById("nss-band"),
-    bands.sentiment || (nss >= 0 ? "Positive" : "Needs Work"),
-  );
-
-  animateNumber(document.getElementById("quality-score"), {
-    from: 0,
-    to: qualityScore * 100,
-    decimals: 0,
-    suffix: "%",
-  });
-  const qualityLabel =
-    qualityScore >= 0.75 ? "Eligible" : qualityScore >= 0.55 ? "Caution" : "Risk";
-  setBandIndicator(document.getElementById("quality-band"), qualityLabel);
-
-  animateNumber(document.getElementById("attention-score"), {
-    from: 0,
-    to: attentionRaw,
-    decimals: 1,
-  });
-  const attentionLabel =
-    attentionRaw >= 4 ? "High" : attentionRaw >= 3 ? "Medium" : "Low";
-  setBandIndicator(document.getElementById("attention-band"), attentionLabel);
-
-  renderHighlights(submission.aspects || [], data.quality_flags || []);
-
-  const summaryText = buildSummaryText(
-    submission.stage,
-    nss,
-    submission.aspects || [],
-    bands.overall,
-  );
-  const summaryEl = document.getElementById("response-summary");
-  if (summaryEl) typewriter(summaryEl, summaryText, { delay: 16 });
-
-  const cueText = buildCoachingCue(submission.aspects || [], submission.stage);
-  const cueEl = document.getElementById("coaching-cue");
-  if (cueEl) typewriter(cueEl, cueText, { delay: 20 });
-
-  renderTranscriptPlayback(
-    [submission.well, submission.better, submission.rant]
-      .filter(Boolean)
-      .join(" "),
-  );
-
-  const revealSentence =
-    (submission.rant || "").trim() ||
-    (submission.well || "").trim() ||
-    (submission.better || "").trim() ||
-    "";
-  triggerScoreReveal({
-    stage: submission.stage,
-    band: bands.overall,
-    index: compositeIndex,
-    nss,
-    quality: qualityScore,
-    summary: summaryText,
-    aspects: submission.aspects || [],
-    sentence: revealSentence,
-  });
-
-  updateQualityBlock(data);
-
-  const heatmap = synthesizeHeatmapMatrix(
-    compositeIndex,
-    textScore,
-    submission,
-  );
-  applyHeatmapMatrix(heatmap);
-  window.__lastResult.heatmap = heatmap;
-  ensureDashboard().then(() => {
-    window.updateRosterHighlight?.();
-  });
-}
-
-function setBandIndicator(element, label = "") {
-  if (!element) return;
-  element.classList.remove("band-success", "band-caution", "band-risk");
-  const lower = label.toLowerCase();
-  const cls = lower.includes("risk")
-    ? "band-risk"
-    : lower.includes("caution") || lower.includes("medium") || lower.includes("later")
-      ? "band-caution"
-      : "band-success";
-  element.classList.add(cls);
-  element.textContent = label;
-}
-
-function renderHighlights(aspects, flags) {
-  const highlightEl = document.getElementById("highlights-display");
-  const absaEl = document.getElementById("absa-display");
-  const items = Array.isArray(aspects) && aspects.length ? aspects : ["responsiveness", "clarity"];
-  if (highlightEl) {
-    highlightEl.innerHTML = items
-      .slice(0, 4)
-      .map((aspect) => {
-        const tone = aspect.includes("feedback") || flags.length ? "negative" : "positive";
-        return `<span class="highlight-item highlight-${tone}">${formatAspect(aspect)}</span>`;
-      })
-      .join("");
-  }
-  if (absaEl) {
-    absaEl.innerHTML = items
-      .slice(0, 5)
-      .map((aspect) => {
-        const tone = aspect.includes("feedback") ? "negative" : "positive";
-        return `<span class="absa-tag absa-${tone}">${formatAspect(aspect)}</span>`;
-      })
-      .join("");
-  }
-}
-
-function buildSummaryText(stage, nss, aspects, band) {
-  const stageLabel = formatStage(stage);
-  const sentiment = band ? band.toLowerCase() : nss >= 0 ? "positive" : "risk";
-  const strengths = aspects.slice(0, 2).map(formatAspect);
-  const focus = aspects[2] ? formatAspect(aspects[2]) : "feedback cadence";
-  const strengthLabel = strengths.length ? strengths.join(" & ") : "responsiveness";
-  return `Candidate sentiment landed ${sentiment} at the ${stageLabel} stage. Strengths: ${strengthLabel}. Focus next: ${focus}.`;
-}
-
-function buildCoachingCue(aspects, stage) {
-  const focus = aspects.find((a) => a.includes("feedback")) || aspects[0] || "follow-up clarity";
-  const stageLabel = formatStage(stage);
-  return `Coach the ${stageLabel.toLowerCase()} crew on ${formatAspect(
-    focus,
-  )} and ship a follow-up within 24 hours.`;
-}
-
-function renderTranscriptPlayback(text) {
-  const target = document.getElementById("transcript-playback");
-  if (!target) return;
-  clearTimeout(target.__transcriptTimer);
-  const cleaned = text.trim();
-  if (!cleaned) {
-    target.textContent = "Transcript playback will appear here once scored.";
-    return;
-  }
-  const tokens = cleaned.split(/\s+/);
-  target.innerHTML = tokens
-    .map((word, idx) => `<span data-idx="${idx}">${word}</span>`)
-    .join(" ");
-  let index = 0;
-  const step = () => {
-    const prev = target.querySelector("span.active");
-    if (prev) prev.classList.remove("active");
-    const next = target.querySelector(`span[data-idx="${index}"]`);
-    if (next) {
-      next.classList.add("active");
-      next.scrollIntoView({ block: "nearest", inline: "center" });
+    if (!response.ok) {
+      throw new Error(`Webhook responded with ${response.status}`);
     }
-    index = (index + 1) % tokens.length;
-    target.__transcriptTimer = setTimeout(step, 240);
-  };
-  target.__transcriptTimer = setTimeout(step, 320);
-}
-
-function updateQualityBlock(data) {
-  try {
-    const qBlock = qs("quality-block");
-    if (!qBlock || data.quality_score === undefined) return;
-    qBlock.hidden = false;
-    const badge = qs("quality-badge");
-    const elig = qs("incentive-eligibility");
-    const flagsEl = qs("quality-flags");
-    const score = data.quality_score;
-    let cls = "";
-    if (score < 0.55) cls = "risk";
-    else if (score < 0.75) cls = "warn";
-    if (badge) {
-      badge.className = "quality-badge " + cls;
-      let svg = badge.querySelector("svg");
-      if (!svg) {
-        svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", "14");
-        svg.setAttribute("height", "14");
-        svg.setAttribute("aria-hidden", "true");
-        const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-        svg.appendChild(use);
-        badge.prepend(svg);
-      }
-      const useEl = svg.querySelector("use");
-      const icon =
-        cls === "risk"
-          ? "#icon-risk"
-          : cls === "warn"
-            ? "#icon-warn"
-            : "#icon-check";
-      if (useEl) useEl.setAttribute("href", icon);
-      let textSpan = badge.querySelector(".qb-text");
-      if (!textSpan) {
-        textSpan = document.createElement("span");
-        textSpan.className = "qb-text";
-        badge.appendChild(textSpan);
-      }
-      textSpan.textContent = `Quality: ${(score * 100).toFixed(0)}%`;
-    }
-    if (flagsEl) {
-      const fl = data.quality_flags || [];
-      flagsEl.textContent = fl.length ? `Flags: ${fl.join(", ")}` : "";
-    }
-    if (elig) {
-      const eligible = !!data.incentive_eligible;
-      elig.textContent = eligible
-        ? "Eligible for eGift"
-        : "Ineligible (low-effort detected)";
-      elig.style.color = eligible ? "#34d399" : "#f87171";
-    }
-  } catch (err) {
-    console.warn("quality block render error", err);
+    return response.json();
+  } catch (error) {
+    console.warn("Webhook simulation failed", error);
+    return { ok: false };
   }
 }
 
-function synthesizeHeatmapMatrix(index, textScore, submission) {
+function renderSnapshot(snapshot) {
+  const resultsView = qs("results-view");
+  resultsView.hidden = false;
+
+  qs("composite-score").textContent = `${snapshot.composite}`;
+  qs("composite-band").textContent = describeBand(snapshot.composite);
+  qs("nss-score").textContent = snapshot.nss.toFixed(2);
+  qs("index-score").textContent = `${snapshot.index}`;
+  qs("eligibility-flag").textContent = snapshot.eligible ? "Eligible" : "Review";
+  qs("attention-status").textContent = snapshot.attentionPassed ? "Strongly agree" : "Retake";
+  qs("summary-length").textContent = `${snapshot.summaryLength} chars`;
+
+  const chips = snapshot.aspects.map((aspect) => {
+    const li = document.createElement("li");
+    li.textContent = aspect;
+    return li;
+  });
+  const chipContainer = qs("aspect-chips");
+  chipContainer.replaceChildren(...chips);
+
+  const heatmapRows = qs("heatmap-rows");
+  heatmapRows.replaceChildren();
   const stages = [
-    "applied",
-    "recruiter",
-    "hiring_manager",
-    "panel",
-    "assignment",
-    "offer",
-    "rejected",
+    { stage: "Recruiter screen", index: clamp(snapshot.index - 8, 0, 100), sla: "On track" },
+    { stage: "Panel", index: clamp(snapshot.index - 4, 0, 100), sla: "Coaching" },
+    { stage: snapshot.stage, index: snapshot.index, sla: snapshot.eligible ? "Met" : "Follow up" },
   ];
-  const aspects = ["communication", "scheduling", "clarity", "respect", "feedback"];
-  const token = window.CANDIDATE_TOKEN || "seed";
-  const activeStage = submission.stage;
-  const matrix = {};
-  aspects.forEach((aspect, aIdx) => {
-    matrix[aspect] = {};
-    stages.forEach((stage, sIdx) => {
-      const noise = seededRandom(token, `${aspect}:${stage}`) - 0.5;
-      let value = index - 0.4 + noise * 0.6;
-      if (stage === activeStage) value += 0.12;
-      if (aspect === "feedback") value += (textScore - 0.5) * 0.5;
-      if (aspect === "respect") value += 0.05;
-      value += (aIdx - 2) * 0.03 + (sIdx - 3) * 0.015;
-      value = Math.max(-0.9, Math.min(0.9, value));
-      matrix[aspect][stage] = Number(value.toFixed(2));
-    });
+  stages.forEach(({ stage, index, sla }) => {
+    const row = document.createElement("tr");
+    const stageCell = document.createElement("th");
+    stageCell.scope = "row";
+    stageCell.textContent = stage;
+    const indexCell = document.createElement("td");
+    indexCell.textContent = `${index}`;
+    const slaCell = document.createElement("td");
+    slaCell.textContent = sla;
+    row.append(stageCell, indexCell, slaCell);
+    heatmapRows.append(row);
   });
-  return matrix;
+
+  const exportPreview = qs("export-preview");
+  exportPreview.textContent = JSON.stringify(sanitizeSubmission(snapshot), null, 2);
+
+  const panels = ["aspect-panel", "heatmap-panel", "export-panel"];
+  panels.forEach((id) => {
+    const panel = qs(id);
+    setTimeout(() => {
+      panel.dataset.state = "ready";
+    }, 320);
+  });
 }
 
-function applyHeatmapMatrix(matrix) {
+function toggleHint() {
+  const hint = qs("intercept-hint");
+  hint.hidden = !state.interceptArmed;
+}
+
+function openPulse(reason = "manual") {
+  state.lastTrigger = reason;
+  const overlay = qs("pulse-overlay");
+  overlay.hidden = false;
+  overlay.dataset.opened = "true";
+  const summary = qs("summary-input");
+  summary.focus({ preventScroll: false });
+}
+
+function closePulse() {
+  qs("pulse-overlay").hidden = true;
+  qs("pulse-overlay").dataset.opened = "false";
+}
+
+function resetForm(form) {
+  form.reset();
+  [
+    ["summary-input", "summary-counter", "summary"],
+    ["well-input", "well-counter", "went-well"],
+    ["better-input", "better-counter", "could-be-better"],
+  ].forEach(([inputId, counterId, target]) => {
+    const textarea = qs(inputId);
+    const counter = qs(counterId);
+    textarea.value = "";
+    updateCounter(textarea, counter);
+    updateSentimentChip(target, "");
+  });
   document
-    .querySelectorAll(".heatmap-cell[data-aspect]")
-    .forEach((cell) => {
-      const aspect = cell.dataset.aspect;
-      const stage = cell.dataset.stage;
-      const value = matrix?.[aspect]?.[stage];
-      if (typeof value !== "number") return;
-      const formatted = value >= 0 ? `+${value.toFixed(1)}` : value.toFixed(1);
-      cell.textContent = formatted;
-      cell.classList.remove(
-        "heatmap-positive",
-        "heatmap-negative",
-        "heatmap-neutral",
-      );
-      const cls =
-        value > 0.15
-          ? "heatmap-positive"
-          : value < -0.15
-            ? "heatmap-negative"
-            : "heatmap-neutral";
-      cell.classList.add(cls);
-    });
+    .querySelectorAll(".aspect-chip")
+    .forEach((chip) => chip.setAttribute("aria-pressed", "false"));
+  qs("submit-btn").disabled = true;
+  renderAttentionOptions(state.rng);
+  validateForm();
 }
 
-function formatStage(stage) {
-  const map = {
-    applied: "Applied",
-    recruiter: "Recruiter Screen",
-    hiring_manager: "Hiring Manager",
-    panel: "Panel",
-    assignment: "Take-home",
-    offer: "Offer",
-    rejected: "Closure",
-  };
-  return map[stage] || "Panel";
+function validateForm() {
+  const summary = qs("summary-input").value.trim();
+  const well = qs("well-input").value.trim();
+  const better = qs("better-input").value.trim();
+  const attention = document.querySelector("input[name=attention]:checked");
+  const consent = qs("consent-checkbox").checked;
+
+  const summaryValid = summary.length >= 90 && summary.length <= 120;
+  const wellValid = wordCount(well) >= 15;
+  const betterValid = wordCount(better) >= 15;
+  const attentionValid = attention?.value === "strongly-agree";
+
+  const submitBtn = qs("submit-btn");
+  const ready = summaryValid && wellValid && betterValid && attentionValid && consent;
+  submitBtn.disabled = !ready;
+  qs("submit-hint").textContent = ready
+    ? "Looks great — submit when you're ready."
+    : "Complete the required fields to enable submit.";
 }
 
-function formatAspect(aspect) {
-  return (aspect || "")
-    .replace(/[_-]/g, " ")
-    .replace(/\b\w/g, (m) => m.toUpperCase())
-    .trim();
+function handleAspectToggle(event) {
+  const button = event.currentTarget;
+  const pressed = button.getAttribute("aria-pressed") === "true";
+  button.setAttribute("aria-pressed", pressed ? "false" : "true");
 }
-window.displayResults = displayResults;
 
-function wireTabs() {
-  document.querySelectorAll(".nav-tab").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      showResultsTab(btn.dataset.tab);
-    });
+function renderAspects() {
+  const grid = qs("aspect-grid");
+  const buttons = ASPECTS.map((aspect) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "aspect-chip";
+    btn.textContent = aspect;
+    btn.setAttribute("aria-pressed", "false");
+    btn.dataset.aspect = aspect;
+    btn.addEventListener("click", handleAspectToggle);
+    return btn;
   });
+  grid.replaceChildren(...buttons);
 }
 
-function wireDLQButtons() {
-  const seedBtn = qs("seed-dlq");
-  const replayBtn = qs("replay-dlq");
-  seedBtn?.addEventListener("click", async () => {
-    const t0 = performance.now();
-    const r = await fetch("/api/seed-dlq");
-    const t1 = performance.now();
-    trackNetTiming("seed-dlq", Math.round(t1 - t0));
-    alert(r.ok ? "DLQ seeded" : "Error seeding");
+function renderAttentionOptions(rng) {
+  const options = qs("attention-options");
+  const randomized = randomize(ATTENTION_ITEMS, rng);
+  const inputs = randomized.map(({ value, label }) => {
+    const wrapper = document.createElement("label");
+    wrapper.className = "attention-option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "attention";
+    input.value = value;
+    const span = document.createElement("span");
+    span.textContent = label;
+    wrapper.append(input, span);
+    return wrapper;
   });
-  replayBtn?.addEventListener("click", async () => {
-    const t0 = performance.now();
-    const r = await fetch("/api/dlq-retry");
-    const t1 = performance.now();
-    trackNetTiming("dlq-retry", Math.round(t1 - t0));
-    alert(r.ok ? "Replay triggered" : "Replay error");
-  });
+  options.replaceChildren(...inputs);
 }
 
-function wireMisc() {
-  qs("invite-trigger")?.addEventListener("click", () =>
-    openInvite(window.CANDIDATE_TOKEN)
-  );
-  qs("open-hud")?.addEventListener("click", () => toggleHud());
-  // Autofill helpers
-  qs("autofill")?.addEventListener("click", () => {
-    qs("well").value =
-      "Supportive interviewer detailed role growth values alignment culture";
-    qs("better").value =
-      "Faster feedback clarity next steps comp range fewer rounds timeline expectations";
-    ["well", "better"].forEach((id) =>
-      document.getElementById(id).dispatchEvent(new Event("input"))
-    );
-  });
-  qs("reset")?.addEventListener("click", () => location.reload());
+function getSelectedAspects() {
+  return Array.from(document.querySelectorAll(".aspect-chip[aria-pressed='true']"), (btn) => btn.dataset.aspect);
+}
+
+function armSampling(params) {
+  const samplingParam = Number.parseFloat(params.get("sampling"));
+  if (!Number.isNaN(samplingParam) && samplingParam >= 0 && samplingParam <= 1) {
+    state.samplingRate = samplingParam;
+  }
+  const seed = params.get("seed") ?? Date.now().toString(36);
+  state.seed = seed;
+  state.rng = createRng(seed);
+  state.forceMode = params.get("force") === "1";
+  state.interceptArmed = state.forceMode || state.rng() < state.samplingRate;
+  toggleHint();
+  if (state.forceMode) {
+    setTimeout(() => openPulse("force"), 800);
+  }
+}
+
+function handleKeyboard(event) {
+  if (event.key.toLowerCase() === "d" && event.shiftKey) {
+    state.interceptArmed = !state.interceptArmed;
+    toggleHint();
+    if (state.interceptArmed && qs("pulse-overlay").hidden) {
+      setTimeout(() => openPulse("demo-toggle"), 200);
+    }
+  }
+  if (event.key === "Escape" && !qs("pulse-overlay").hidden) {
+    closePulse();
+  }
+}
+
+function setUpCounters() {
+  const summary = qs("summary-input");
+  const well = qs("well-input");
+  const better = qs("better-input");
+  updateCounter(summary, qs("summary-counter"));
+  updateCounter(well, qs("well-counter"));
+  updateCounter(better, qs("better-counter"));
 }
 
 function init() {
-  performanceMark("app_init_start");
-  initCandidateToken();
-  wireSurvey();
-  wireSubmission();
-  wireTabs();
-  wireDLQButtons();
-  wireMisc();
-  setupInstructionPlacard();
-  setupScoreReveal();
-  restorePanels();
-  performanceMark("app_init_end");
-  // Auto-load panel metrics after idle
-  // Idle-load CTR metrics module only when browser is free
-  requestIdleCallback?.(() => {
-    import("./metrics.js").then((m) => m.loadCtrMetrics()).catch(() => {});
+  renderAspects();
+  setUpCounters();
+
+  const params = new URLSearchParams(window.location.search);
+  armSampling(params);
+  renderAttentionOptions(state.rng);
+
+  qs("leave-button").addEventListener("click", () => {
+    if (state.interceptArmed) {
+      openPulse("leave");
+      state.interceptArmed = state.forceMode ? true : state.rng() < state.samplingRate;
+      toggleHint();
+    } else {
+      state.interceptArmed = state.rng() < state.samplingRate;
+      toggleHint();
+    }
   });
+
+  qs("pulse-close").addEventListener("click", closePulse);
+  qs("pulse-overlay").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) {
+      closePulse();
+    }
+  });
+
+  const form = qs("pulse-form");
+  form.addEventListener("input", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLTextAreaElement)) {
+      if (target instanceof HTMLInputElement) {
+        if (target.name === "attention" || target.name === "consent") {
+          validateForm();
+        }
+      }
+      return;
+    }
+
+    if (target.id === "summary-input") {
+      updateCounter(target, qs("summary-counter"));
+      updateSentimentChip("summary", target.value);
+    } else if (target.id === "well-input") {
+      updateCounter(target, qs("well-counter"));
+      updateSentimentChip("went-well", target.value);
+    } else if (target.id === "better-input") {
+      updateCounter(target, qs("better-counter"));
+      updateSentimentChip("could-be-better", target.value);
+    }
+    validateForm();
+  });
+
+  form.addEventListener("change", validateForm);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const summary = qs("summary-input").value.trim();
+    const wentWell = qs("well-input").value.trim();
+    const couldBeBetter = qs("better-input").value.trim();
+    const attention = form.elements.namedItem("attention");
+    const attentionValue = attention && "value" in attention ? attention.value :
+      (form.querySelector("input[name=attention]:checked")?.value ?? "");
+    const consent = qs("consent-checkbox").checked;
+    const aspects = getSelectedAspects();
+
+    const snapshot = createSnapshot({
+      summary,
+      wentWell,
+      couldBeBetter,
+      aspects,
+      attention: attentionValue,
+      consent,
+      stage: "Final round",
+      seed: state.seed,
+    });
+
+    state.snapshot = snapshot;
+    renderSnapshot(snapshot);
+    resetForm(form);
+    closePulse();
+    await postSnapshot(snapshot);
+    document.dispatchEvent(new CustomEvent("cxi:snapshot", { detail: snapshot }));
+  });
+
+  document.addEventListener("keydown", handleKeyboard);
+
+  document.dispatchEvent(new CustomEvent("cxi:ready", { detail: { state } }));
+  validateForm();
 }
 
 if (document.readyState === "loading") {

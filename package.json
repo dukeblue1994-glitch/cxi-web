@@ -6,33 +6,17 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run build && netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open --site cxis.today",
-    "build": "rm -rf dist && mkdir -p dist && cp -R js dist/ && cp index.html styles.css dist/",
-    "build:bundle": "esbuild js/app.js --bundle --format=esm --sourcemap --outdir=dist/js --minify",
-    "deploy": "netlify deploy --prod --site cxis.today",
-    "deploy:preview": "netlify deploy --site cxis.today",
-    "test": "node test/test-quality.js && node test/test-reliability.js && node test/test-ats.js",
-    "test:basic": "node test/test-basic.js",
-    "test:comprehensive": "node test/test-comprehensive.js",
-    "test:integration": "node test/test-integration.js",
-    "test:quality": "node test/test-quality.js",
-    "test:reliability": "node test/test-reliability.js",
-    "test:ats": "node test/test-ats.js",
-    "audit:css": "node scripts/audit-css.cjs",
-    "test:quick": "bash test-quick.sh",
-    "test:watch": "nodemon test/test-functions.js",
+    "dev": "npm run build && netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open",
+    "build": "rm -rf dist && mkdir -p dist && cp -R js dist/js && cp -R css dist/css && cp index.html dist/index.html",
+    "test": "npm run build && node --test \"test/**/*.test.js\"",
+    "test:unit": "npm run build && node --test \"test/unit/**/*.test.js\"",
+    "test:e2e": "npm run build && node --test \"test/e2e/**/*.test.js\"",
+    "test:reliability": "node --test \"test/reliability/**/*.test.js\"",
     "lint": "eslint netlify/functions/**/*.js",
     "lint:fix": "eslint netlify/functions/**/*.js --fix",
-    "format": "prettier --write \"**/*.{js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md}\"",
-    "env:check": "echo skip env check",
-    "clean": "rm -rf .netlify dist node_modules/.cache",
-    "functions:list": "netlify functions:list",
-    "functions:invoke": "netlify functions:invoke",
-    "status": "netlify status --site cxis.today",
-    "link": "netlify link --name cxis.today",
-    "postinstall": "npm run env:check",
-    "test:dlq": "node test/test-dlq-retry.js"
+    "format": "prettier --write \"**/*.{js,json,md,css,html}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,css,html}\"",
+    "clean": "rm -rf .netlify dist"
   },
   "keywords": [
     "customer-experience",
@@ -45,13 +29,12 @@
   "author": "Nick Anderson",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
   },
   "dependencies": {
     "@netlify/blobs": "^10.0.11",
-      "@netlify/functions": "^2.6.0",
-  
+    "@netlify/functions": "^2.6.0",
     "dotenv": "^17.2.2"
   },
   "devDependencies": {
@@ -59,8 +42,8 @@
     "@netlify/edge-functions": "^2.18.1",
     "esbuild": "^0.25.10",
     "eslint": "^9.36.0",
+    "jsdom": "^26.0.0",
     "netlify-cli": "^23.8.0",
-    "nodemon": "^3.0.3",
     "prettier": "^3.2.5"
   },
   "repository": {

@@ -1,7 +1,7 @@
 # Netlify config for static site + functions
 
 [build]
-  publish   = "dist"
+  publish   = "."
   functions = "netlify/functions"
 
 [build.environment]

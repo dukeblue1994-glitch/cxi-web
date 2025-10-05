@@ -4018,7 +4018,7 @@
         const index = nssToIndex(nss);
         const comp = composite({ nss, rrs, pbi });
         return {
-          id: crypto.randomUUID(),
+          id: (globalThis.crypto && typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : String(Date.now()),
           stage,
           roleFamily,
           nss,

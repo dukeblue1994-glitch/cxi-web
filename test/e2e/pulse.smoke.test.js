@@ -29,7 +29,20 @@ async function bootDom() {
   window.fetch = async (input, init = {}) => {
     const url = typeof input === "string" ? input : input.href;
     if (url.includes("/.netlify/functions/dev-webhook")) {
-      const result = await handler({ httpMethod: "POST", body: init.body ?? "{}" });
+      // Construct a more complete Netlify event object
+      const event = {
+        httpMethod: "POST",
+        body: init.body ?? "{}",
+        headers: init.headers ?? {},
+        queryStringParameters: {},
+        path: "/.netlify/functions/dev-webhook",
+        isBase64Encoded: false,
+        multiValueHeaders: {},
+        multiValueQueryStringParameters: {},
+        rawUrl: url,
+        rawQuery: "",
+      };
+      const result = await handler(event);
       const ResponseCtor = globalThis.Response;
       return new ResponseCtor(result.body, {
         status: result.statusCode,

@@ -9,7 +9,8 @@
       "args": [
         "--runInBand",
         "--watchAll=false",
-        "--testNamePattern"        "${jest.testNamePattern}",
+        "--testNamePattern",
+        "${jest.testNamePattern}",
         "--runTestsByPath",
         "${jest.testFile}"
       ],

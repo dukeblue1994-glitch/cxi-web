@@ -1,0 +1,1 @@
+{"name": "Codespaces Node.js Dev", "build": { "dockerfile": "Dockerfile" }, "postCreateCommand": "npm install"}

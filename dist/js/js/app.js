@@ -50,10 +50,6 @@ function qs(id) {
   return document.getElementById(id);
 }
 
-function toast() {
-  return window.showToast || window.__cxToast || null;
-}
-
 function initCandidateToken() {
   const url = new URL(location.href);
   const existing = url.searchParams.get("token");

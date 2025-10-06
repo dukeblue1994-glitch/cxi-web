@@ -1,5 +1,3 @@
-# Netlify config for static site + functions
-
 [build]
   publish   = "."
   functions = "netlify/functions"
@@ -40,41 +38,17 @@
   to   = "/index.html"
   status = 200
 
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+    Content-Security-Policy = "default-src 'self';"
 
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Cache-Control = "no-store"
-
-[functions."nudge-cron"]
-  schedule = "*/30 * * * *"
-
-[functions."dlq-retry-cron"]
-  schedule = "*/15 * * * *"
-
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "preview"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"

@@ -33,8 +33,8 @@ The CXI Project is a comprehensive feedback collection platform that:
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js 22 (see `.nvmrc` for the pinned runtime)
+- npm 10
 - Git
 
 ### Local Development Setup
@@ -49,23 +49,24 @@ The CXI Project is a comprehensive feedback collection platform that:
 2. **Install dependencies**
 
    ```bash
-   npm install
+   nvm use
+   npm ci
+   cp .env.example .env # optional; demo-friendly defaults ship empty
    ```
 
-3. **Set up environment variables** (for Netlify Functions)
-   Create a `.env` file in the root directory:
-
-   ```env
-   GITHUB_TOKEN=your_github_personal_access_token
-   REPO=your-username/your-repo
-   BRANCH=main
-   FEEDBACK_PATH=data/feedbacks.json
-   ```
-
-4. **Run linting** (optional - note: current codebase has linting issues that can be fixed)
+3. **Start the modular demo sandbox**
 
    ```bash
-   npm run lint
+   npm run build
+   netlify dev --port 8888 --dir dist --functions netlify/functions
+   open http://localhost:8888/?pitch=1&force=1&seed=42
+   ```
+
+4. **Run smoke tests**
+
+   ```bash
+   npm test
+   npm run test:reliability # requires `netlify dev` or BASE_URL target
    ```
 
 ### Deployment

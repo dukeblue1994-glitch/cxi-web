@@ -16,6 +16,8 @@ import {
   showElement,
   hideElement,
 } from "./utils.js";
+import { setSnapshot } from "./snapshot.js";
+import { composite, eligible, nssToIndex } from "./scores.js";
 
 window.showResultsTab = showResultsTab;
 if (typeof window.openInvite !== "function") {
@@ -336,18 +338,61 @@ function displayResults(data) {
 
   const submission = window.__lastSubmission || {};
   const bands = data.bands || {};
-  const compositeIndex = Number(data.composite_index || 0);
   const textScore = Number(data.diagnostics?.textScore ?? 0.6);
   const qualityScore = Number(data.quality_score ?? 0);
   const attentionRaw = Number(submission.attention ?? 0);
   const nss = Number(((textScore - 0.5) * 2).toFixed(2));
 
-  window.__lastResult = { ...data, nss };
+  const baseSnapshot = window.cxiBuildSnapshot
+    ? window.cxiBuildSnapshot(nss)
+    : {
+        id: typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()),
+        stage: submission.stage || "panel",
+        roleFamily: submission.role_family || "software",
+        nss,
+        index: nssToIndex(nss),
+        rrs: 0.8,
+        pbi: 0.6,
+        composite: composite({ nss, rrs: 0.8, pbi: 0.6 }),
+        eligible: true,
+        aspects: submission.aspects || [],
+        narrative: `${(submission.well || "kind and clear").trim()} | ${(submission.better || "slow feedback").trim()}`,
+        createdAt: Date.now(),
+      };
+  const rrs = Number.isFinite(data.rrs) ? data.rrs : baseSnapshot.rrs;
+  const pbi = Number.isFinite(data.pbi) ? data.pbi : baseSnapshot.pbi;
+  const compositeScore = composite({ nss: baseSnapshot.nss, rrs, pbi });
+  const snapshot = {
+    ...baseSnapshot,
+    rrs,
+    pbi,
+    composite: compositeScore,
+    eligible: eligible({ composite: compositeScore, rrs }),
+  };
+  setSnapshot(snapshot);
+
+  const indexPercent = snapshot.index;
+  const compositePercent = snapshot.composite;
+  const compositeIndex = indexPercent / 100;
+  const compositeIndexFromComposite = compositePercent / 100;
+
+  window.__lastResult = {
+    ...data,
+    nss: snapshot.nss,
+    composite_index: compositeIndexFromComposite, // compositePercent / 100
+    composite_percent: compositePercent,          // compositePercent
+    composite_score: compositePercent,
+    index_ratio: compositeIndex,                  // indexPercent / 100
+    index_percent: indexPercent,                  // indexPercent
+    eligible: snapshot.eligible,
+  };
   window.CXI_LAST_INDEX = compositeIndex;
 
   animateNumber(document.getElementById("orb-score"), {
     from: 0,
-    to: compositeIndex * 100,
+    to: compositePercent,
     duration: 1200,
     decimals: 0,
   });
@@ -356,14 +401,14 @@ function displayResults(data) {
 
   animateNumber(document.getElementById("nss-display"), {
     from: 0,
-    to: nss,
+    to: snapshot.nss,
     duration: 1000,
     decimals: 2,
-    prefix: nss >= 0 ? "+" : "",
+    prefix: snapshot.nss >= 0 ? "+" : "",
   });
   setBandIndicator(
     document.getElementById("nss-band"),
-    bands.sentiment || (nss >= 0 ? "Positive" : "Needs Work"),
+    bands.sentiment || (snapshot.nss >= 0 ? "Positive" : "Needs Work"),
   );
 
   animateNumber(document.getElementById("quality-score"), {
@@ -385,18 +430,21 @@ function displayResults(data) {
     attentionRaw >= 4 ? "High" : attentionRaw >= 3 ? "Medium" : "Low";
   setBandIndicator(document.getElementById("attention-band"), attentionLabel);
 
-  renderHighlights(submission.aspects || [], data.quality_flags || []);
+  const aspects = (snapshot.aspects && snapshot.aspects.length)
+    ? snapshot.aspects
+    : submission.aspects || [];
+  renderHighlights(aspects, data.quality_flags || []);
 
   const summaryText = buildSummaryText(
-    submission.stage,
-    nss,
-    submission.aspects || [],
+    snapshot.stage,
+    snapshot.nss,
+    aspects,
     bands.overall,
   );
   const summaryEl = document.getElementById("response-summary");
   if (summaryEl) typewriter(summaryEl, summaryText, { delay: 16 });
 
-  const cueText = buildCoachingCue(submission.aspects || [], submission.stage);
+  const cueText = buildCoachingCue(aspects, snapshot.stage);
   const cueEl = document.getElementById("coaching-cue");
   if (cueEl) typewriter(cueEl, cueText, { delay: 20 });
 
@@ -412,13 +460,13 @@ function displayResults(data) {
     (submission.better || "").trim() ||
     "";
   triggerScoreReveal({
-    stage: submission.stage,
+    stage: snapshot.stage,
     band: bands.overall,
     index: compositeIndex,
-    nss,
+    nss: snapshot.nss,
     quality: qualityScore,
     summary: summaryText,
-    aspects: submission.aspects || [],
+    aspects,
     sentence: revealSentence,
   });
 
@@ -427,7 +475,7 @@ function displayResults(data) {
   const heatmap = synthesizeHeatmapMatrix(
     compositeIndex,
     textScore,
-    submission,
+    { ...submission, stage: snapshot.stage },
   );
   applyHeatmapMatrix(heatmap);
   window.__lastResult.heatmap = heatmap;

@@ -1,3 +1,5 @@
+import { getSnapshot } from "./snapshot.js";
+
 const inlineOpenInvite =
   typeof window !== "undefined" && typeof window.openInvite === "function"
     ? window.openInvite
@@ -109,22 +111,35 @@ export function openInvite(candidateToken = "", nudgeRound = 0) {
 }
 
 export function pushTaskRow(task = {}) {
+  const snapshot = getSnapshot();
   const submission = window.__lastSubmission || {};
   const result = window.__lastResult || {};
-  const stage = task.stage || submission.stage || "panel";
-  const aspects = task.aspects && task.aspects.length ? task.aspects : submission.aspects || [];
+  const normalizeIndex = (value) => {
+    if (typeof value !== "number") return null;
+    return value > 1 ? value / 100 : value;
+  };
+  const stage =
+    task.stage || snapshot?.stage || submission.stage || "panel";
+  const aspects =
+    (task.aspects && task.aspects.length
+      ? task.aspects
+      : snapshot?.aspects && snapshot.aspects.length
+        ? snapshot.aspects
+        : submission.aspects || []);
   const index =
-    typeof task.index === "number"
-      ? task.index
-      : typeof result.composite_index === "number"
-        ? result.composite_index
-        : 0.62;
+    normalizeIndex(task.index) ??
+    normalizeIndex(snapshot?.index) ??
+    normalizeIndex(result.composite_percent) ??
+    normalizeIndex(result.composite_index) ??
+    0.62;
   const nss =
     typeof task.nss === "number"
       ? task.nss
-      : typeof result.nss === "number"
-        ? result.nss
-        : 0.32;
+      : typeof snapshot?.nss === "number"
+        ? snapshot.nss
+        : typeof result.nss === "number"
+          ? result.nss
+          : 0.32;
   const cue =
     task.cue ||
     document.getElementById("coaching-cue")?.textContent ||

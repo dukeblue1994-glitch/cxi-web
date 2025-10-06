@@ -666,17 +666,14 @@ function wireDLQButtons() {
     const r = await fetch("/api/seed-dlq");
     const t1 = performance.now();
     trackNetTiming("seed-dlq", Math.round(t1 - t0));
-    toast()?.(r.ok ? "DLQ seeded" : "Error seeding", r.ok ? "positive" : "warning");
+    alert(r.ok ? "DLQ seeded" : "Error seeding");
   });
   replayBtn?.addEventListener("click", async () => {
     const t0 = performance.now();
     const r = await fetch("/api/dlq-retry");
     const t1 = performance.now();
     trackNetTiming("dlq-retry", Math.round(t1 - t0));
-    toast()?.(
-      r.ok ? "Replay triggered" : "Replay error",
-      r.ok ? "positive" : "warning",
-    );
+    alert(r.ok ? "Replay triggered" : "Replay error");
   });
 }
 

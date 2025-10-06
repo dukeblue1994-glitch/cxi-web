@@ -1,1 +1,55 @@
-{"name": "Codespaces Node.js Dev", "build": { "dockerfile": "Dockerfile" }, "postCreateCommand": "npm install"}
+codespaces - types - support;
+{
+  "name";
+  "Codespaces Node.js Dev", "build";
+  {
+    "dockerfile";
+    "Dockerfile";
+  }
+  "postCreateCommand";
+  "npm install";
+}
+{
+  "name";
+  "CXI Web Development", "image";
+  "mcr.microsoft.com/devcontainers/javascript-node:22", "features";
+  {
+    "ghcr.io/devcontainers/features/node:1";
+    {
+      "version";
+      "22";
+    }
+  }
+  "customizations";
+  {
+    "vscode";
+    {
+      "extensions";
+      [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next"
+      ], "settings";
+      {
+        "editor.formatOnSave";
+        true, "editor.defaultFormatter";
+        "esbenp.prettier-vscode", "editor.codeActionsOnSave";
+        {
+          "source.fixAll.eslint";
+          "explicit";
+        }
+      }
+    }
+  }
+  "postCreateCommand";
+  "npm install", "forwardPorts";
+  [8888], "portsAttributes";
+  {
+    "8888";
+    {
+      "label";
+      "Netlify Dev Server", "onAutoForward";
+      "notify";
+    }
+  }
+}

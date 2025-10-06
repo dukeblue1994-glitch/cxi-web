@@ -3,7 +3,7 @@
   directory = "my_functions"
 
 [build]
-  publish   = "."
+  publish   = "dist"
   functions = "netlify/functions"
 
 [build.environment]

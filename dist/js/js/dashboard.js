@@ -292,10 +292,13 @@ function extractEvidence(aspect) {
   sentences.forEach((sentence) => {
     const lower = sentence.toLowerCase();
     if (keywords.some((kw) => lower.includes(kw))) {
-      let highlighted = sentence;
+      const tempDiv = document.createElement("div");
+      tempDiv.textContent = sentence;
+      let highlighted = tempDiv.innerHTML;
       keywords.forEach((kw) => {
-        const reg = new RegExp(`(${kw})`, "gi");
-        highlighted = highlighted.replace(reg, '<mark>$1</mark>');
+        const escapedKw = kw.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+        const reg = new RegExp(`(${escapedKw})`, "gi");
+        highlighted = highlighted.replace(reg, "<mark>$1</mark>");
       });
       matches.push(highlighted);
     }

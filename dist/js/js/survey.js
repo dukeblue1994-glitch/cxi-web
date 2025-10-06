@@ -121,6 +121,6 @@ export function showResultsTab(tabName) {
         const data = window.__lastResult || {};
         m.renderHeatmap(data);
       })
-      .catch((err) => console.error("Failed to load or render heatmap:", err));
+      .catch(() => {});
   }
 }

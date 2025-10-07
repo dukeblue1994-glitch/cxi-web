@@ -78,8 +78,8 @@ function createTaskCard({
     </div>
     <div class="task-coaching">${new Option(cue ?? "").innerHTML}</div>
     <div class="task-details">Aspects: ${aspectTags || "–"} • Index: ${(index * 100).toFixed(
-      0,
-    )}</div>
+    0,
+  )}</div>
   `;
   container.prepend(card);
   return card;

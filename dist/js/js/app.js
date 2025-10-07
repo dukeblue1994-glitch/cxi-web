@@ -673,10 +673,7 @@ function wireDLQButtons() {
     const r = await fetch("/api/dlq-retry");
     const t1 = performance.now();
     trackNetTiming("dlq-retry", Math.round(t1 - t0));
-    toast()?.(
-      r.ok ? "Replay triggered" : "Replay error",
-      r.ok ? "positive" : "warning",
-    );
+    alert(r.ok ? "Replay triggered" : "Replay error");
   });
 }
 

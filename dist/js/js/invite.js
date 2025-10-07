@@ -76,10 +76,10 @@ function createTaskCard({
       </div>
       <div class="muted small">NSS: ${nss >= 0 ? "+" : ""}${nss.toFixed(2)}</div>
     </div>
-    <div class="task-coaching">${new Option(cue ?? "").innerHTML}</div>
+    <div class="task-coaching">${cue}</div>
     <div class="task-details">Aspects: ${aspectTags || "–"} • Index: ${(index * 100).toFixed(
-      0,
-    )}</div>
+    0,
+  )}</div>
   `;
   container.prepend(card);
   return card;

@@ -4,6 +4,9 @@ node_modules
 # Local Netlify folder
 .netlify
 
+# Build artifacts
+dist
+
 # Local dev artifacts
 netlify_dev.pid
 netlify-dev.log

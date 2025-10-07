@@ -1,5 +1,5 @@
 # Netlify config for static site + functions
- directory = "my_functions"
+ directory = "netlifyfunctions"
 
 [build]
   publish   = "dist"

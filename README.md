@@ -68,6 +68,31 @@ The CXI Project is a comprehensive feedback collection platform that:
    npm run lint
    ```
 
+5. **Development workflow**
+
+   ```bash
+   # Build the project (copies /src to /dist)
+   npm run build
+   
+   # Run local dev server (serves from /src for faster iteration)
+   npm run dev
+   
+   # Run tests
+   npm test
+   ```
+
+### Project Structure
+
+The project follows Netlify best practices:
+
+- **`/src`** - Frontend source files (HTML, CSS, JavaScript modules)
+- **`/dist`** - Build output directory (created by `npm run build`, not committed to git)
+- **`/netlify/functions`** - Serverless functions
+- **`netlify.toml`** - Netlify configuration
+  - Production builds publish from `/dist`
+  - Dev server serves from `/src` for faster development
+- **`/src/_redirects`** - SPA routing and API redirects
+
 ### Deployment
 
 This project is designed to deploy on Netlify with zero configuration:
@@ -197,17 +222,28 @@ When reporting bugs or requesting features:
 ## Architecture
 
 ```text
-├── src/
-│   ├── app.js          # Main application logic
-│   └── app.test.js     # Application tests
+├── src/                    # Frontend source files
+│   ├── index.html         # Main HTML entry point
+│   ├── styles.css         # Global styles
+│   ├── _redirects         # Netlify redirects for SPA routing
+│   └── js/                # Frontend JavaScript modules
+│       ├── app.js         # Main application logic
+│       ├── survey.js      # Survey functionality
+│       ├── dashboard.js   # Dashboard UI
+│       ├── metrics.js     # Metrics display
+│       ├── utils.js       # Utility functions
+│       └── ...            # Other modules
 ├── netlify/
-│   └── functions/
-│       └── saveFeedback.js  # Serverless function for data persistence
-├── scripts/
-│   └── run-eslint.js   # Linting utilities
-├── package.json        # Dependencies and scripts
-├── netlify.toml        # Netlify configuration
-└── README.md          # This file
+│   └── functions/         # Serverless functions
+│       ├── score.js       # Quality scoring
+│       ├── atsWebhook.js  # ATS integrations
+│       └── ...            # Other functions
+├── test/                  # Test files
+├── scripts/               # Utility scripts
+├── dist/                  # Build output (gitignored)
+├── package.json           # Dependencies and scripts
+├── netlify.toml           # Netlify configuration
+└── README.md             # This file
 ```
 
 ## License

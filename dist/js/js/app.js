@@ -666,7 +666,7 @@ function wireDLQButtons() {
     const r = await fetch("/api/seed-dlq");
     const t1 = performance.now();
     trackNetTiming("seed-dlq", Math.round(t1 - t0));
-    alert(r.ok ? "DLQ seeded" : "Error seeding");
+    toast()?.(r.ok ? "DLQ seeded" : "Error seeding", r.ok ? "positive" : "warning");
   });
   replayBtn?.addEventListener("click", async () => {
     const t0 = performance.now();

@@ -15,31 +15,6 @@
   port = 8888
   autoLaunch = false
 
-[[redirects]]
-  from = "/api/dlq-retry"
-  to   = "/.netlify/functions/dlq-retry-http"
-  status = 200
-
-[[redirects]]
-  from = "/api/chat"
-  to   = "/.netlify/functions/openai-chat"
-  status = 200
-
-[[redirects]]
-  from = "/api/moderate"
-  to   = "/.netlify/functions/moderate"
-  status = 200
-
-[[redirects]]
-  from = "/api/*"
-  to   = "/.netlify/functions/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to   = "/index.html"
-  status = 200
-
 [[headers]]
   for = "/*"
   [headers.values]

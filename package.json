@@ -7,8 +7,8 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist .netlify || true",
-    "build": "mkdir -p dist && cp index.html styles.css -t dist 2>/dev/null || true && cp -R js dist/js 2>/dev/null || true",
-    "dev": "npx netlify dev --port 8888 --dir . --functions netlify/functions",
+    "build": "mkdir -p dist && cp src/index.html src/styles.css src/_redirects -t dist 2>/dev/null || true && cp -R src/js dist/js 2>/dev/null || true",
+    "dev": "npx netlify dev --port 8888 --dir src --functions netlify/functions",
     "test": "node tests/scores.test.js || true",
     "test:dlq": "node test/test-dlq-retry.js",
     "test:reliability": "node test/test-reliability.js",

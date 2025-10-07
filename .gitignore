@@ -10,6 +10,7 @@ dist
 # Local dev artifacts
 netlify_dev.pid
 netlify-dev.log
+netlify-dev2.log
 
 # Environment variables
 .env

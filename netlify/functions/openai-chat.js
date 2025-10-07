@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { stream } from '@netlify/functions';
 
 const CORS = {

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { getStore } from "@netlify/blobs";
 
 async function hmacHex(secret, msg) {

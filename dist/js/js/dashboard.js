@@ -287,25 +287,30 @@ function extractEvidence(aspect) {
     ];
   }
   const keywords = aspectKeywords[aspect] || [aspect];
+  const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
+  const escapeRegex = (kw) => String(kw || "").replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
+  const escapedKeywords = sortedKeywords.map(escapeRegex).filter(Boolean);
+  const allKeywordsRegex = escapedKeywords.length
+    ? new RegExp(`(${escapedKeywords.join("|")})`, "gi")
+    : null;
   const sentences = text.split(/(?<=[.!?])\s+/);
   const matches = [];
+  const tempDiv = document.createElement("div");
   sentences.forEach((sentence) => {
-    const lower = sentence.toLowerCase();
-    if (keywords.some((kw) => lower.includes(kw))) {
-      const tempDiv = document.createElement("div");
-      tempDiv.textContent = sentence;
-      let highlighted = tempDiv.innerHTML;
-      keywords.forEach((kw) => {
-        const escapedKw = kw.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
-        const reg = new RegExp(`(${escapedKw})`, "gi");
-        highlighted = highlighted.replace(reg, "<mark>$1</mark>");
-      });
+    tempDiv.textContent = sentence;
+    const sanitized = tempDiv.innerHTML;
+    if (!allKeywordsRegex) {
+      return;
+    }
+    const highlighted = sanitized.replace(allKeywordsRegex, '<mark>$1</mark>');
+    if (highlighted !== sanitized) {
       matches.push(highlighted);
     }
   });
   if (!matches.length) {
     const first = sentences[0] || text;
-    return [first];
+    tempDiv.textContent = first;
+    return [tempDiv.innerHTML];
   }
   return matches.slice(0, 3);
 }

@@ -3,7 +3,7 @@
  */
 
 import assert from "assert";
-import { renderMetrics } from "../js/metrics.js";
+import { renderMetrics } from "../src/js/metrics.js";
 
 const BASE =
   (globalThis.process &&

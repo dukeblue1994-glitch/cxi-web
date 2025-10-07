@@ -1,5 +1,5 @@
 // Test element visibility utility functions
-import { showElement, hideElement } from '../js/utils.js';
+import { showElement, hideElement } from '../src/js/utils.js';
 
 // Mock browser APIs for Node.js environment
 global.requestAnimationFrame = (cb) => setTimeout(cb, 0);

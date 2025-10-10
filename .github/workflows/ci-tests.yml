@@ -10,7 +10,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
       - name: Install deps
         run: npm ci
@@ -39,6 +39,10 @@ jobs:
           echo "⏰ Timed out waiting for Netlify Dev"
           tail -n +1 netlify.log || true
           exit 1
+
+      - name: Output Netlify log on failure
+        if: failure()
+        run: cat netlify.log || true
 
       - name: Sanity ping function (200 expected)
         run: |

@@ -47,10 +47,10 @@ async function run() {
   // 2. Add a test item to DLQ by simulating a failure
   const failEvent = await post(
     "/api/atsWebhook",
-    { 
-      event: "test_dlq_retry", 
+    {
+      event: "test_dlq_retry",
       candidate_token: "tok_dlq_test_" + Date.now(),
-      stage: "test_stage"
+      stage: "test_stage",
     },
     { "x-ats-test-fail": "1" },
   );
@@ -79,7 +79,7 @@ async function run() {
       "DLQ count did not decrease after replay. Expected <= " +
         baselineCount +
         ", got " +
-        afterReplay.count
+        afterReplay.count,
     );
   }
   console.log("✓ DLQ count after replay:", afterReplay.count);

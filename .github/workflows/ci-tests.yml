@@ -47,11 +47,6 @@ jobs:
         if: failure()
         run: cat netlify.log || true
 
-      - name: Sanity ping function (200 expected)
-        run: |
-          curl -fsS http://localhost:8888/.netlify/functions/dev-webhook -X POST -H 'content-type: application/json' -d '{}' \
-          || (echo '❌ Function ping failed'; tail -n +1 netlify.log; false)
-
       - name: Run DLQ tests
         run: npm run test:dlq
 

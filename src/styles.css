@@ -244,3 +244,89 @@ textarea::-webkit-scrollbar-thumb,.transcript-playback::-webkit-scrollbar-thumb,
 #results-view .results-card{padding:clamp(20px,3vw,28px);}
 #results-view .results-grid{gap:clamp(18px,3vw,32px);}
 #results-view .score-value{font-size:clamp(2.4rem,4vw,3.4rem);}
+
+/* === Survey readability overrides (append at end of file) === */
+
+/* Make the survey card fully light so fields are readable */
+.survey-card {
+  background: #ffffff;
+  color: #0f172a; /* slate-900 */
+  border: 1px solid #e2e8f0; /* slate-200 */
+}
+
+/* Ensure form labels are dark on white */
+.survey-card .form-group label {
+  color: #0f172a; /* slate-900 */
+}
+
+/* Light inputs for survey (override global dark inputs) */
+.survey-card .form-group input,
+.survey-card .form-group select,
+.survey-card .form-group textarea {
+  background: #ffffff !important;
+  color: #111827 !important; /* gray-900 */
+  border: 1px solid #cbd5e1 !important; /* slate-300 */
+  box-shadow: none !important;
+  border-radius: 8px;
+}
+
+/* Placeholders readable on light fields */
+.survey-card .form-group input::placeholder,
+.survey-card .form-group textarea::placeholder {
+  color: #64748b; /* slate-500 */
+}
+
+/* Focus state: clear, accessible */
+.survey-card .form-group input:focus,
+.survey-card .form-group select:focus,
+.survey-card .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.20) !important; /* --primary with opacity */
+}
+
+/* Rating buttons read well on light background */
+.survey-card .rating-btn {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #cbd5e1;
+}
+.survey-card .rating-btn:hover {
+  background: #f8fafc; /* slate-50 */
+  border-color: var(--primary);
+}
+.survey-card .rating-btn.selected {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* Aspect chips readable with clear selected/hover state */
+.survey-card .aspect-btn {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #cbd5e1;
+}
+.survey-card .aspect-btn:hover {
+  background: rgba(255, 176, 0, 0.08); /* subtle amber hover */
+  border-color: var(--cxi-amber);
+}
+
+/* Word count feedback more visible on light card */
+.survey-card .word-count {
+  color: #64748b; /* slate-500 */
+}
+.survey-card .word-count.valid {
+  color: #16a34a; /* green-600 */
+}
+.survey-card .word-count.invalid {
+  color: #dc2626; /* red-600 */
+}
+
+/* Progress bar stands out on light card */
+.survey-card .progress-bar {
+  background: #e2e8f0; /* slate-200 */
+}
+.survey-card .progress-fill {
+  background: var(--primary);
+}

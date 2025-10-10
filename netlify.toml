@@ -1,79 +1,76 @@
-# Netlify config for static site + functions
 [build]
-  publish   = "dist"
+  command = "npm run build && [ -f src/_redirects ] && cp src/_redirects dist/_redirects || true"
+  publish = "dist"
   functions = "netlify/functions"
-
-[build.environment]
-  NODE_VERSION = "22"
-  NPM_VERSION = "10"
 
 [dev]
-  framework = "#static"
-  publish = "."
-  functions = "netlify/functions"
-  port = 8888
-  autoLaunch = false
+  command = "netlify dev"
+  targetPort = 8888
+  framework = "custom"
 
-[[redirects]]
-  from = "/api/dlq-retry"
-  to   = "/.netlify/functions/dlq-retry-http"
-  status = 200
+# Context: Production
+[context.production.environment]
+  NODE_VERSION = "22"
+  BASE_URL = "https://cxis.today"
+  LOG_LEVEL = "error"
+  ATS_WEBHOOK_SECRET = "${ATS_WEBHOOK_SECRET}"
+  SCORE_TOKENS = "${SCORE_TOKENS}"
 
-[[redirects]]
-  from = "/api/chat"
-  to   = "/.netlify/functions/openai-chat"
-  status = 200
+# Context: Staging
+[context.staging.environment]
+  NODE_ENV = "staging"
+  BASE_URL = "https://staging--cxis.netlify.app"
+  LOG_LEVEL = "debug"
+  ATS_WEBHOOK_SECRET = "${ATS_WEBHOOK_SECRET}"
+  SCORE_TOKENS = "${SCORE_TOKENS}"
 
-[[redirects]]
-  from = "/api/moderate"
-  to   = "/.netlify/functions/moderate"
-  status = 200
+# Context: Deploy Previews
+[context.deploy-preview.environment]
+  NODE_ENV = "preview"
+  BASE_URL = "https://deploy-preview--cxis.netlify.app"
+  LOG_LEVEL = "info"
+  ATS_WEBHOOK_SECRET = "${ATS_WEBHOOK_SECRET}"
+  SCORE_TOKENS = "${SCORE_TOKENS}"
+
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+[[plugins]]
+  package = "@netlify/plugin-checklinks"
+
+[[plugins]]
+  package = "@netlify/plugin-sitemap"
+
+[[plugins]]
+  package = "netlify-plugin-debug-cache"
+
+[[plugins]]
+  package = "netlify-plugin-snyk"
+
+[[plugins]]
+  package = "netlify-plugin-inline-functions-env"
+
+[[plugins]]
+  package = "netlify-plugin-html-validate"
+
+[[plugins]]
+  package = "netlify-plugin-submit-sitemap"
+
+[[plugins]]
+  package = "netlify-plugin-no-more-404"
+
+[functions]
+  node_bundler = "esbuild"
+
+[headers]
+  [[headers]]
+    for = "/.netlify/functions/*"
+    [headers.values]
+      Access-Control-Allow-Origin = "*"
+      Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+      Access-Control-Allow-Headers = "Content-Type"
 
 [[redirects]]
   from = "/api/*"
-  to   = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/:splat"
   status = 200
-
-[[redirects]]
-  from = "/*"
-  to   = "/index.html"
-  status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
-
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Cache-Control = "no-store"
-
-[functions."nudge-cron"]
-  schedule = "*/30 * * * *"
-
-[functions."dlq-retry-cron"]
-  schedule = "*/15 * * * *"
-
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "preview"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"

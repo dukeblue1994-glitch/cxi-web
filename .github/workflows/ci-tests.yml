@@ -15,17 +15,20 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Start Netlify Dev (root publish)
+      - name: Build project
+        run: npm run build
+
+      - name: Start Netlify Dev (dist publish)
         run: |
-          npx netlify dev --port 8888 --dir . --functions netlify/functions > netlify.log 2>&1 &
+          npx netlify dev --port 8888 --dir dist --functions netlify/functions > netlify.log 2>&1 &
           echo $! > netlify.pid
 
       - name: Wait for Netlify Dev to be ready
         run: |
           set -euo pipefail
-          for i in {1..40}; do
-            if curl -fsS http://localhost:8888/ >/dev/null; then
-              echo "✅ Netlify Dev is up"
+          for i in {1..60}; do
+            if curl -fsS -X POST -H 'content-type: application/json' -d '{}' http://localhost:8888/.netlify/functions/dev-webhook >/dev/null; then
+              echo "✅ Netlify Dev is up (dev-webhook responding)"
               exit 0
             fi
             # If dev server crashed, fail fast with logs
@@ -36,7 +39,7 @@ jobs:
             fi
             sleep 2
           done
-          echo "⏰ Timed out waiting for Netlify Dev"
+          echo "⏰ Timed out waiting for Netlify Dev (120 seconds)"
           tail -n +1 netlify.log || true
           exit 1
 

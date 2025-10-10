@@ -45,12 +45,16 @@ jobs:
       - name: Install Netlify CLI (dev only)
         run: npm install -D netlify-cli@latest
 
+      # IMPORTANT: Do not pass --dir here; let netlify.toml [dev] (publish=src) route content & functions
       - name: Start Netlify Dev (background)
-        run: |
-          NETLIFY_LOG=debug npx netlify dev --dir dist --functions netlify/functions --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
-          echo $! > netlify_dev.pid
         env:
           NODE_ENV: test
+        run: |
+          NETLIFY_LOG=debug npx netlify dev --port 8888 --offline --no-open > netlify-dev.log 2>&1 &
+          echo $! > netlify_dev.pid
+          # brief grace period; tail a bit for visibility
+          sleep 2
+          tail -n +1 -f netlify-dev.log | sed -n '1,120p' &
 
       - name: Wait for server
         run: |

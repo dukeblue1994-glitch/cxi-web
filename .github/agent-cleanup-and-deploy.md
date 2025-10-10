@@ -83,9 +83,7 @@ SENTRY_DSN
 
 ### In Site Settings:
 - ✅ Build Command:
-  ```bash
-  npm run build && cp src/_redirects dist/_redirects
-  ```
+  npm run build
 - ✅ Publish Directory:
   ```bash
   ./dist

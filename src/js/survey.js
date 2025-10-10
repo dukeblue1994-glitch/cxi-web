@@ -115,12 +115,11 @@ export function showResultsTab(tabName) {
   });
   if (tabName === "summary") loadCtrMetrics();
   if (tabName === "heatmap") {
-    // Lazy import heatmap module and render using last result if available
-    import("./heatmap.js")
-      .then((m) => {
-        const data = window.__lastResult || {};
-        m.renderHeatmap(data);
-      })
-      .catch((err) => console.error("Failed to load or render heatmap:", err));
+    // Ensure dashboard is loaded for showHeatmapDetail binding
+    if (typeof window.ensureDashboard === "function") {
+      window.ensureDashboard().catch((err) => console.error("Failed to load dashboard:", err));
+    }
+    // Heatmap matrix is already applied by displayResults via applyHeatmapMatrix
+    // No need to call renderHeatmap from heatmap.js module
   }
 }

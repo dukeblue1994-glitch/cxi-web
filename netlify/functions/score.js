@@ -152,6 +152,20 @@ export default async function handler(request) {
       },
     };
 
+    // Demo persistence logging (NDJSON, no PII)
+    var nss = Number(((textScore - 0.5) * 2).toFixed(2));
+    var salientAspects = aspects.slice(0, 3).join(",") || "none";
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        stage: stage,
+        role: role_family,
+        nss: nss,
+        composite_index: composite_index,
+        salient_aspects: salientAspects,
+      })
+    );
+
     return new Response(JSON.stringify(resp), {
       status: 200,
       headers: {

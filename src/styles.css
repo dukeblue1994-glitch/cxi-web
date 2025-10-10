@@ -330,3 +330,16 @@ textarea::-webkit-scrollbar-thumb,.transcript-playback::-webkit-scrollbar-thumb,
 .survey-card .progress-fill {
   background: var(--primary);
 }
+
+/* Ghost/secondary button improvements for better visibility */
+.btn-ghost {
+  background: #ffffff;
+  color: #1e293b; /* slate-800 for better readability */
+  border: 1px solid #cbd5e1; /* slate-300 */
+  font-weight: 600; /* Make text more visible */
+}
+.btn-ghost:hover {
+  background: #f8fafc; /* slate-50 */
+  border-color: var(--primary);
+  color: var(--primary);
+}

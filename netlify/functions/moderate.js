@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 const CORS = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'POST, OPTIONS',

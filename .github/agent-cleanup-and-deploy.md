@@ -56,7 +56,7 @@ If not present, copy from `main` branch or request regenerations.
 ```bash
 npm ci
 npx playwright install
-npx playwright test tests/e2e/feedback.test.js
+npx playwright test test/feedback.test.js
 netlify dev
 ```
 - Confirm:

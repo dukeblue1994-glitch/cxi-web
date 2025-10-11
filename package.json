@@ -61,7 +61,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.6",
     "esbuild": "^0.25.10",
-    "eslint": "^9.36.0",
+    "eslint": "^9.37.0",
     "netlify-cli": "^23.8.0",
     "nodemon": "^3.0.3",
     "prettier": "^3.2.5"

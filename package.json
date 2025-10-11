@@ -64,7 +64,9 @@
     "eslint": "^9.36.0",
     "netlify-cli": "^23.8.0",
     "nodemon": "^3.0.3",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "@types/node": "^20.10.5",
+    "@types/mocha": "^10.0.6"
   },
   "repository": {
     "type": "git",

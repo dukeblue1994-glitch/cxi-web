@@ -62,7 +62,7 @@
     "@types/node": "^22.10.6",
     "esbuild": "^0.25.10",
     "eslint": "^9.36.0",
-    "netlify-cli": "^23.8.0",
+    "netlify-cli": "^23.9.1",
     "nodemon": "^3.0.3",
     "prettier": "^3.2.5"
   },

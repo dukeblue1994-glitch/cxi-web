@@ -1,6 +1,7 @@
+// netlify/functions/dlq-retry.js
 import { getStore } from "@netlify/blobs";
 
-export default async () => {
+export default async function handler() {
   try {
     const today = new Date().toISOString().slice(0, 10);
     const dlq = getStore({ name: "ats-dead-letter" });
@@ -11,11 +12,9 @@ export default async () => {
       if (data) {
         const lines = data.split(/\n+/).filter(Boolean);
         processed = lines.length;
-        // archive by concatenation
         const archive = getStore({ name: "ats-archive" });
         const existing = (await archive.get(key)) || "";
         await archive.set(key, existing + data);
-        // clear dlq
         await dlq.set(key, "");
       }
     } catch {}
@@ -35,4 +34,4 @@ export default async () => {
       },
     });
   }
-};
+}

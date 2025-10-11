@@ -1410,7 +1410,7 @@
           </div>
           <div class="helper-actions" id="demo-helpers">
             <button type="button" class="btn btn-ghost" id="btn-autofill">
-              Auto‑fill sample
+              Auto-fill sample
             </button>
             <button type="button" class="btn btn-ghost" id="btn-reset">
               Reset
@@ -2582,7 +2582,8 @@
         callInterface.style.opacity = "0.5";
 
         setTimeout(() => {
-          if (typeof openInvite === "function") {
+          // Optional: gate invite with ~50% randomization for demo
+          if (typeof openInvite === "function" && Math.random() > 0.5) {
             openInvite(window.CANDIDATE_TOKEN || "", 0);
           }
         }, 800);
@@ -3730,7 +3731,21 @@
       const hintedLI =
         ["li", "linkedin"].includes(
           (urlCXI.searchParams.get("src") || "").toLowerCase(),
-        ) || (document.referrer || "").toLowerCase().includes("linkedin.com");
+        ) || (() => {
+          try {
+            const refURL = new URL(document.referrer);
+            const host = refURL.host.toLowerCase();
+            const allowedHosts = [
+              "linkedin.com",
+              "www.linkedin.com"
+            ];
+            // Allow exact match or any subdomain of linkedin.com
+            return allowedHosts.includes(host) ||
+              (host.endsWith(".linkedin.com"));
+          } catch (e) {
+            return false;
+          }
+        })();
       function seededIndex(seed, len) {
         let x = 0;
         for (let i = 0; i < seed.length; i++)

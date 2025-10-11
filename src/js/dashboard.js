@@ -262,8 +262,41 @@ function handleShare(channel) {
   sharePreviewEl.hidden = false;
   sharePreviewEl.textContent = preview;
   sharePreviewEl.dataset.channel = channel;
-  const toastTone = channel === "email" || channel === "pdf" ? "positive" : "warning";
-  getToast()?.(`Preview ready for ${channel.toUpperCase()}.`, toastTone);
+  
+  // Handle different channels
+  if (channel === "email") {
+    // Extract subject and body from template
+    const lines = preview.split("\n");
+    const subject = lines[0].replace("Subject: ", "");
+    const body = lines.slice(2).join("\n");
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    // Open mailto link
+    window.location.href = mailtoLink;
+    getToast()?.("Opening email client...", "positive");
+  } else if (channel === "slack" || channel === "teams") {
+    // Copy to clipboard for Slack/Teams
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(preview).then(
+        () => getToast()?.(`${channel.toUpperCase()} message copied to clipboard.`, "positive"),
+        () => getToast()?.("Clipboard copy unavailable.", "warning"),
+      );
+    } else {
+      getToast()?.(`${channel.toUpperCase()} content ready - select text to copy.`, "warning");
+    }
+  } else if (channel === "pdf") {
+    // Copy PDF content to clipboard
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(preview).then(
+        () => getToast()?.("PDF content copied to clipboard.", "positive"),
+        () => getToast()?.("Clipboard copy unavailable.", "warning"),
+      );
+    } else {
+      getToast()?.("PDF content ready - select text to copy.", "warning");
+    }
+  } else {
+    getToast()?.(`Preview ready for ${channel.toUpperCase()}.`, "positive");
+  }
 }
 
 function highlightCell(aspect, stage) {

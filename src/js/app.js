@@ -39,6 +39,8 @@ function ensureDashboard() {
     window.__dashboardLoaded = true;
   });
 }
+// Export ensureDashboard to window so survey.js can use it
+window.ensureDashboard = ensureDashboard;
 // Install provisional proxies (idempotent once real funcs assigned)
 ["exportData", "showHeatmapDetail", "filterTasks", "pushToDashboard"].forEach(
   (fn) => {
@@ -240,7 +242,7 @@ function triggerScoreReveal(context) {
     aspectsEl.innerHTML = chips || '<span>Candidate Delight</span>';
   }
   highlightRevealSentence(context.sentence, context.aspects);
-  const hideTimer = window.setTimeout(hideScoreReveal, 10000);
+  const hideTimer = window.setTimeout(hideScoreReveal, 18000);
   scoreRevealTimers.add(hideTimer);
 }
 
@@ -266,51 +268,74 @@ function wireSubmission() {
   if (!form) return;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const fd = new FormData(form);
-    const well = qs("well").value.trim();
-    const better = qs("better").value.trim();
-    const rant = qs("rant").value.trim();
-    const stage = fd.get("stage");
-    const role = fd.get("role_family");
-    const overall = document.querySelector(
-      '.rating-group[data-field="overall"] .rating-btn.selected'
-    )?.dataset.value;
-    const fairness = document.querySelector(
-      '.rating-group[data-field="fairness"] .rating-btn.selected'
-    )?.dataset.value;
-    const attention = document.querySelector(
-      '.rating-group[data-field="attention"] .rating-btn.selected'
-    )?.dataset.value;
-    const aspects = Array.from(
-      document.querySelectorAll(".aspect-btn.selected")
-    ).map((b) => b.dataset.aspect);
-    const payload = {
-      candidate_token: window.CANDIDATE_TOKEN,
-      stage,
-      role_family: role,
-      overall: Number(overall),
-      fairness: Number(fairness),
-      attention: Number(attention),
-      aspects,
-      well,
-      better,
-      rant,
-      consent: !!qs("consent").checked,
-    };
-    window.__lastSubmission = payload;
-    const t0 = performance.now();
-    const resp = await fetch("/api/score", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const t1 = performance.now();
-    trackNetTiming("score", Math.round(t1 - t0));
-    if (!resp.ok) return alert("Score service error");
-    const data = await resp.json();
-    window.__lastResult = data;
+    const submitBtn = qs("submit-btn");
+    const originalText = submitBtn?.textContent || "Score Now";
+    
+    // Set loading state
+    if (submitBtn) {
+      submitBtn.textContent = "Processing…";
+      submitBtn.disabled = true;
+    }
+    
+    try {
+      const fd = new FormData(form);
+      const well = qs("well").value.trim();
+      const better = qs("better").value.trim();
+      const rant = qs("rant").value.trim();
+      const stage = fd.get("stage");
+      const role = fd.get("role_family");
+      const overall = document.querySelector(
+        '.rating-group[data-field="overall"] .rating-btn.selected'
+      )?.dataset.value;
+      const fairness = document.querySelector(
+        '.rating-group[data-field="fairness"] .rating-btn.selected'
+      )?.dataset.value;
+      const attention = document.querySelector(
+        '.rating-group[data-field="attention"] .rating-btn.selected'
+      )?.dataset.value;
+      const aspects = Array.from(
+        document.querySelectorAll(".aspect-btn.selected")
+      ).map((b) => b.dataset.aspect);
+      const payload = {
+        candidate_token: window.CANDIDATE_TOKEN,
+        stage,
+        role_family: role,
+        overall: Number(overall),
+        fairness: Number(fairness),
+        attention: Number(attention),
+        aspects,
+        well,
+        better,
+        rant,
+        consent: !!qs("consent").checked,
+      };
+      window.__lastSubmission = payload;
+      const t0 = performance.now();
+      const resp = await fetch("/api/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const t1 = performance.now();
+      trackNetTiming("score", Math.round(t1 - t0));
+      if (!resp.ok) {
+        alert("Score service error");
+        return;
+      }
+      const data = await resp.json();
+      window.__lastResult = data;
 
-    displayResults(data);
+      displayResults(data);
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("An error occurred. Please try again.");
+    } finally {
+      // Restore button state
+      if (submitBtn) {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    }
   });
 }
 
@@ -394,11 +419,11 @@ function displayResults(data) {
     bands.overall,
   );
   const summaryEl = document.getElementById("response-summary");
-  if (summaryEl) typewriter(summaryEl, summaryText, { delay: 16 });
+  if (summaryEl) summaryEl.textContent = summaryText;
 
   const cueText = buildCoachingCue(submission.aspects || [], submission.stage);
   const cueEl = document.getElementById("coaching-cue");
-  if (cueEl) typewriter(cueEl, cueText, { delay: 20 });
+  if (cueEl) cueEl.textContent = cueText;
 
   renderTranscriptPlayback(
     [submission.well, submission.better, submission.rant]

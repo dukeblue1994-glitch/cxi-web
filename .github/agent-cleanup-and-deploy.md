@@ -83,6 +83,7 @@ SENTRY_DSN
 
 ### In Site Settings:
 - ✅ Build Command:
+  ```bash
   npm run build
 - ✅ Publish Directory:
   ```bash

@@ -377,3 +377,28 @@ If the AI integration stops functioning:
 4. **Update model settings** – you can reduce latency or cost by setting
    `DEFAULT_MODEL` to a smaller model (e.g. `gpt-4o-mini`). Adjust as new
    models become available.
+
+
+## Deployment / Ops (Netlify)
+
+**Environment variables (Site settings → Environment):**
+- `RESEND_API_KEY` — required for email sends in `nudge-cron`.
+- If ATS adapters are enabled:
+  - Greenhouse: `GH_API_KEY`, `GH_APPLICATION_ID`
+  - Lever: `LEVER_API_KEY`, `LEVER_OPPORTUNITY_ID`
+  - (Optional) Workday bridge: `WORKDAY_WEBHOOK_URL`
+
+**Features:**
+- Enable **Netlify Blobs** (used by `ats-dlq-stats`, `dlq-*`, `schedule-nudge`, `nudge-cron`).
+
+**Routing:**
+- `_redirects` routes `/api/*` → `/.netlify/functions/:splat`, plus explicit routes for chat/moderate & dlq-retry.
+
+**Local dev:**
+```bash
+npm ci
+npx netlify dev --dir _site --functions netlify/functions
+curl -sS -X POST http://localhost:8888/api/score -H 'content-type: application/json' -d '{}'
+```
+
+score expects POST with JSON and returns HTTP 200 JSON.

@@ -1,4 +1,5 @@
 // netlify/functions/dlq-retry.js
+
 import { getStore } from "@netlify/blobs";
 
 export default async function handler() {
@@ -18,13 +19,16 @@ export default async function handler() {
         await dlq.set(key, "");
       }
     } catch {}
-    return new Response(JSON.stringify({ ok: true, processed }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    return new Response(
+      JSON.stringify({ ok: true, processed, replayed: true }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
   } catch (e) {
     return new Response(JSON.stringify({ ok: false, error: String(e) }), {
       status: 500,

@@ -41,8 +41,14 @@
     "**/dist": true
   },
   // Terminal settings
-  "terminal.integrated.shell.osx": "/bin/zsh",
+  "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.shell.linux": "/bin/bash",
+  "terminal.integrated.shell.osx": "/bin/zsh",
+  "terminal.integrated.cwd": "/workspaces/cxi-web",
+  "terminal.integrated.env.linux": {
+    "NODE_ENV": "development"
+  },
   "terminal.integrated.env.osx": {
     "NODE_ENV": "development"
   },
@@ -51,6 +57,23 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.postCommitCommand": "none",
+  "git.openRepositoryInParentFolders": "always",
+  "git.defaultCloneDirectory": "/workspaces",
+  "git.enableCommitSigning": false,
+  // GitHub settings
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": false,
+    "plaintext": false,
+    "markdown": true,
+    "javascript": true
+  },
+  "github.copilot.advanced": {},
+  "github.gitAuthentication": true,
+  "github.gitProtocol": "https",
+  // GitLens settings
+  "gitlens.showWelcomeOnInstall": false,
+  "gitlens.showWhatsNewAfterUpgrades": false,
   // Search settings
   "search.exclude": {
     "**/node_modules": true,

@@ -1,35 +1,31 @@
-# Netlify config for static site + functions
+# Netlify config for static Eleventy site + Netlify Functions (deterministic)
 
 [build]
-  publish   = "dist"
-  functions = "netlify/functions"
+  command  = "npm run build"
+  publish  = "_site"
+
+[functions]
+  directory    = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "22"
-  NPM_VERSION = "10"
+  NPM_VERSION  = "10"
 
 [dev]
-  framework = "#static"
-  publish = "src"
-  functions = "netlify/functions"
-  port = 8888
+  framework  = "#static"
+  publish    = "_site"
+  functions  = "netlify/functions"
+  port       = 8888
   autoLaunch = false
 
+# Security/CORS headers (adjust if needed)
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
-
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
 
 [[headers]]
   for = "/api/*"
@@ -39,23 +35,9 @@
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Cache-Control = "no-store"
 
+# Example scheduled functions (cron). Keep schedules in Functions (not Edge).
 [functions."nudge-cron"]
   schedule = "*/30 * * * *"
 
 [functions."dlq-retry-cron"]
   schedule = "*/15 * * * *"
-
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "preview"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true

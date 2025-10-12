@@ -4,6 +4,14 @@ export default async () => {
   console.log("Starting nudge-cron execution");
 
   try {
+    // Never 500 when RESEND_API_KEY is absent
+    if (!process.env.RESEND_API_KEY) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ ok: false, reason: "missing_env: RESEND_API_KEY" }),
+      };
+    }
+
     const jobs = getStore("cxi-nudges");
     const list = await jobs.list();
     const now = Date.now();
@@ -55,7 +63,7 @@ export default async () => {
               to: [job.email],
               subject: "90‑second feedback for $5 coffee ☕",
               html: `<p>Quick trade: 90s of feedback → $5 coffee.</p>
-                     <p><a href="https://www.cxis.today?src=nudge&t=${encodeURIComponent(job.token)}">Start now</a></p>`,
+                         <p><a href="https://www.cxis.today?src=nudge&t=${encodeURIComponent(job.token)}">Start now</a></p>`,
             }),
           });
 
@@ -100,17 +108,14 @@ export default async () => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(result),
+      body: JSON.stringify({ ok: true }),
     };
   } catch (error) {
-    console.error("Critical error in nudge-cron:", error);
+    console.error("[nudge-cron]", error?.message || error);
+    // Fail-soft: keep scheduler healthy
     return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: "Critical failure in nudge-cron",
-        message: error.message,
-        timestamp: Date.now(),
-      }),
+      statusCode: 200,
+      body: JSON.stringify({ ok: false, reason: "runtime_error" }),
     };
   }
 };

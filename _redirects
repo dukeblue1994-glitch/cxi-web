@@ -1,0 +1,8 @@
+# API → Netlify Functions
+/api/dlq-retry   /.netlify/functions/dlq-retry-http   200
+/api/chat        /.netlify/functions/openai-chat       200
+/api/moderate    /.netlify/functions/moderate          200
+/api/*           /.netlify/functions/:splat            200
+
+# SPA fallback (uncomment only if using a client router)
+/*              /index.html                            200

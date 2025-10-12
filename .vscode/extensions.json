@@ -14,7 +14,10 @@
     "christian-kohler.path-intellisense",
     "ms-vscode.vscode-typescript-next",
     "ms-vscode.js-debug-nightly",
-    "netlify.netlify"
+    "shailen.netlify"
   ],
-  "unwantedRecommendations": []
+  "unwantedRecommendations": [
+    "denoland.vscode-deno",
+    "lightrun.lightrunplugin-saas"
+  ]
 }

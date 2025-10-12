@@ -74,6 +74,8 @@
   // GitLens settings
   "gitlens.showWelcomeOnInstall": false,
   "gitlens.showWhatsNewAfterUpgrades": false,
+  // Lightrun settings (disable if causing issues)
+  "lightrun.enable": false,
   // Search settings
   "search.exclude": {
     "**/node_modules": true,
@@ -109,11 +111,7 @@
       "other": "off"
     }
   },
-  "deno.enable": true,
-  "deno.enablePaths": [
-    "netlify/edge-functions"
-  ],
-  "deno.unstable": true,
-  "deno.importMap": ".netlify/edge-functions-import-map.json",
+  // Deno settings (disabled - no edge functions in project)
+  "deno.enable": false,
   "editor.linkedEditing": true
 }

@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "rm -rf dist .netlify || true",
     "build": "mkdir -p dist && cp -R src/* dist/ 2>/dev/null || true",
+    "postbuild": "cp _redirects dist/_redirects",
     "dev": "npx netlify dev --port 8888 --dir src --functions netlify/functions",
     "test": "node tests/scores.test.js || true",
     "test:dlq": "node test/test-dlq-retry.js",

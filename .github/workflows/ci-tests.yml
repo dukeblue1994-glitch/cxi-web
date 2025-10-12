@@ -19,7 +19,9 @@ jobs:
         run: |
           npx netlify dev --port 8888 --dir . --functions netlify/functions > netlify.log 2>&1 &
           echo $! > netlify.pid
-
+      - name: Output Netlify Startup Log
+        run: | 
+          head -40 netlify.log || true
       - name: Wait for Netlify Dev to be ready
         run: |
           set -euo pipefail

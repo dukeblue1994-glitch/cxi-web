@@ -65,6 +65,44 @@ See `netlify/functions/atsWebhook.js` for adapter implementations.
 - `npm run lint` - Lint serverless functions
 - `npm run format` - Format code with Prettier
 
+## Local Verification
+
+When testing changes locally, follow these steps:
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Build the project**
+   ```bash
+   npm run build
+   ```
+
+3. **Run linting**
+   ```bash
+   npm run lint
+   ```
+
+4. **Start local development server** (in background or separate terminal)
+   ```bash
+   npm run dev
+   ```
+   This starts Netlify Dev on `http://localhost:8888`
+
+5. **Run tests**
+   ```bash
+   # Run the main test suite
+   npm test
+   
+   # Or run specific test suites
+   npm run test:quality
+   npm run test:ats
+   npm run test:reliability
+   ```
+
+Note: This project does NOT use Playwright. All tests are Node.js-based scripts in the `/test` directory that make HTTP requests to the local Netlify Dev server.
+
 ## Security Considerations
 
 - Always sanitize user input before rendering to DOM

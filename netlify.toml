@@ -2,7 +2,7 @@
 
 [build]
   command  = "npm run build"
-  publish  = "_site"
+  publish  = "dist"
 
 [functions]
   directory    = "netlify/functions"
@@ -10,11 +10,11 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  NPM_VERSION  = "10"
+  NPM_VERSION  = "10.9.4"
 
 [dev]
   framework  = "#static"
-  publish    = "_site"
+  publish    = "src"
   functions  = "netlify/functions"
   port       = 8888
   autoLaunch = false

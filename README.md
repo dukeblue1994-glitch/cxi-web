@@ -397,7 +397,7 @@ If the AI integration stops functioning:
 **Local dev:**
 ```bash
 npm ci
-npx netlify dev --dir _site --functions netlify/functions
+npx netlify dev --dir src --functions netlify/functions
 curl -sS -X POST http://localhost:8888/api/score -H 'content-type: application/json' -d '{}'
 ```
 

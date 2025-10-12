@@ -169,19 +169,25 @@ function highlightRevealSentence(sentence = "", aspects = []) {
     .flatMap((word) => [word, word.replace(/\s+/g, "")]);
   const timer = window.setTimeout(() => {
     const tokens = cleaned.split(/(\s+)/);
-    target.innerHTML = tokens
-      .map((token) => {
-        const normalized = token
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, "");
-        const hit = keywords.some((kw) =>
-          normalized.includes(kw.replace(/[^a-z0-9]/g, "")),
-        );
-        return hit && token.trim()
-          ? `<mark>${token}</mark>`
-          : token;
-      })
-      .join("");
+    // Clear target safely
+    target.textContent = "";
+    // Build DOM nodes safely without innerHTML
+    tokens.forEach((token) => {
+      const normalized = token
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+      const hit = keywords.some((kw) =>
+        normalized.includes(kw.replace(/[^a-z0-9]/g, "")),
+      );
+      if (hit && token.trim()) {
+        const mark = document.createElement("mark");
+        mark.textContent = token;
+        target.appendChild(mark);
+      } else {
+        const textNode = document.createTextNode(token);
+        target.appendChild(textNode);
+      }
+    });
   }, 720);
   scoreRevealTimers.add(timer);
 }
@@ -235,11 +241,20 @@ function triggerScoreReveal(context) {
   const aspectsEl = scoreRevealEl.querySelector("[data-reveal-aspects]");
   if (aspectsEl) {
     const aspects = Array.isArray(context.aspects) ? context.aspects : [];
-    const chips = aspects
-      .slice(0, 4)
-      .map((aspect) => `<span>${formatAspect(aspect)}</span>`)
-      .join("");
-    aspectsEl.innerHTML = chips || '<span>Candidate Delight</span>';
+    // Clear safely
+    aspectsEl.textContent = "";
+    // Build DOM nodes safely without innerHTML
+    if (aspects.length > 0) {
+      aspects.slice(0, 4).forEach((aspect) => {
+        const span = document.createElement("span");
+        span.textContent = formatAspect(aspect);
+        aspectsEl.appendChild(span);
+      });
+    } else {
+      const span = document.createElement("span");
+      span.textContent = "Candidate Delight";
+      aspectsEl.appendChild(span);
+    }
   }
   highlightRevealSentence(context.sentence, context.aspects);
   const hideTimer = window.setTimeout(hideScoreReveal, 18000);
@@ -479,22 +494,28 @@ function renderHighlights(aspects, flags) {
   const absaEl = document.getElementById("absa-display");
   const items = Array.isArray(aspects) && aspects.length ? aspects : ["responsiveness", "clarity"];
   if (highlightEl) {
-    highlightEl.innerHTML = items
-      .slice(0, 4)
-      .map((aspect) => {
-        const tone = aspect.includes("feedback") || flags.length ? "negative" : "positive";
-        return `<span class="highlight-item highlight-${tone}">${formatAspect(aspect)}</span>`;
-      })
-      .join("");
+    // Clear safely
+    highlightEl.textContent = "";
+    // Build DOM nodes safely without innerHTML
+    items.slice(0, 4).forEach((aspect) => {
+      const tone = aspect.includes("feedback") || flags.length ? "negative" : "positive";
+      const span = document.createElement("span");
+      span.className = `highlight-item highlight-${tone}`;
+      span.textContent = formatAspect(aspect);
+      highlightEl.appendChild(span);
+    });
   }
   if (absaEl) {
-    absaEl.innerHTML = items
-      .slice(0, 5)
-      .map((aspect) => {
-        const tone = aspect.includes("feedback") ? "negative" : "positive";
-        return `<span class="absa-tag absa-${tone}">${formatAspect(aspect)}</span>`;
-      })
-      .join("");
+    // Clear safely
+    absaEl.textContent = "";
+    // Build DOM nodes safely without innerHTML
+    items.slice(0, 5).forEach((aspect) => {
+      const tone = aspect.includes("feedback") ? "negative" : "positive";
+      const span = document.createElement("span");
+      span.className = `absa-tag absa-${tone}`;
+      span.textContent = formatAspect(aspect);
+      absaEl.appendChild(span);
+    });
   }
 }
 
@@ -525,9 +546,18 @@ function renderTranscriptPlayback(text) {
     return;
   }
   const tokens = cleaned.split(/\s+/);
-  target.innerHTML = tokens
-    .map((word, idx) => `<span data-idx="${idx}">${word}</span>`)
-    .join(" ");
+  // Clear target safely
+  target.textContent = "";
+  // Build DOM nodes safely without innerHTML
+  tokens.forEach((word, idx) => {
+    const span = document.createElement("span");
+    span.dataset.idx = idx;
+    span.textContent = word;
+    target.appendChild(span);
+    if (idx < tokens.length - 1) {
+      target.appendChild(document.createTextNode(" "));
+    }
+  });
   let index = 0;
   const step = () => {
     const prev = target.querySelector("span.active");

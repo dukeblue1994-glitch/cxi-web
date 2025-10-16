@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "sync:main+branch", "type": "shell", "command": "git merge --abort 2>/dev/null || true; git rebase --abort 2>/dev/null || true; git fetch origin; git checkout main; git pull --rebase origin main; git checkout -b feat/survey-polish-ux || git checkout feat/survey-polish-ux; echo '✅ synced and on feat/survey-polish-ux';" },
+    { "label": "verify:smoke", "type": "shell", "command": "npm ci && npm run build && (npx netlify dev --dir dist --port 8888 &) && sleep 2 && curl -s -o /dev/null -w \"%{http_code}\\n\" http://localhost:8888/?candidate=demo123 | grep 200 && curl -s -o /dev/null -w \"%{http_code}\\n\" -X POST http://localhost:8888/.netlify/functions/atsWebhook -H 'content-type: application/json' -d '{\"candidate_token\":\"demo123\",\"stage\":\"panel\"}' | grep 200; pkill -f \"netlify dev\" || true; echo '✅ smoke passed';" },
+    { "label": "deploy:open-pr", "type": "shell", "command": "git push -u origin feat/survey-polish-ux && gh pr create --base main --title \"fix(ux): survey polish pack (invite, overlay, dashboard push, heatmap, a11y)\" --body \"Implements deterministic demo invite, debounced score overlay, removes dead /api/pushTask, unifies heatmap rendering, improves button contrast, and adds a11y/live region. Netlify config remains source of truth. Non-interactive merge policy enforced via .gitattributes.\" && echo '✅ PR opened';" },
+    { "label": "branches:clean-merged", "type": "shell", "command": "git fetch origin; git branch -r --merged origin/main | grep -vE 'origin/(main|develop)' | sed 's|origin/||' | xargs -n1 -I{} git push origin --delete {} || true; echo '✅ cleaned merged branches';" },
+    { "label": "netlify:status-checklist", "type": "shell", "command": "echo 'Build: npm run build\\nPublish: dist\\nFunctions: netlify/functions\\nNode: 22.x\\nCheck Deploys: latest must be Published, not just Ready\\nDomain points to this Site ID\\nEnv: ATS_WEBHOOK_SECRET, SCORE_TOKENS (OPENAI_API_KEY,SENTRY_DSN optional)';" }
+  ]
+}

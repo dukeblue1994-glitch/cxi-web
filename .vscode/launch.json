@@ -2,33 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "pwa-node",
-      "name": "vscode-jest-tests.v2",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": [
-        "--runInBand",
-        "--watchAll=false",
-        "--testNamePattern""${jest.testNamePattern}",
-        "--runTestsByPath",
-        "${jest.testFile}"
-      ],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "windows": {
-        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
-      }
-    },
-    {
       "name": "Dev: Start Netlify (background)",
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/netlify",
       "args": [
         "dev",
         "--dir",
-        "dist",
+        "src",
         "--functions",
         "netlify/functions",
         "--port",
@@ -39,43 +20,49 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Tests: All (BASE_URL=8888)",
-      "type": "pwa-node",
+      "name": "Tests: All",
+      "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/npm",
-      "args": [
-        "test"
-      ],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["test"],
       "env": {
         "BASE_URL": "http://localhost:8888"
       },
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "name": "Tests: Quality",
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/node",
-      "args": [
-        "${workspaceFolder}/test/test-reliability.js"
-      ],
+      "program": "${workspaceFolder}/test/test-quality.js",
       "env": {
         "BASE_URL": "http://localhost:8888"
       },
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Tests: Reliability",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/test-reliability.js",
+      "env": {
+        "BASE_URL": "http://localhost:8888"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "name": "Tests: ATS",
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/node",
-      "args": [
-        "${workspaceFolder}/test/test-ats.js"
-      ],
+      "program": "${workspaceFolder}/test/test-ats.js",
       "env": {
         "BASE_URL": "http://localhost:8888"
       },
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
